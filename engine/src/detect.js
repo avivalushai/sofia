@@ -1,4 +1,4 @@
-import { all, attr, hebrewRatio } from "./lib/html.js";
+import { all, attr, first, hebrewRatio, parseHtml, textOf, visibleSegments } from "./lib/html.js";
 
 /**
  * Facts used by `appliesWhen` in the catalog. Each records why it was set, true or false,
@@ -22,7 +22,9 @@ const ADS_HTML = /connect\.facebook\.net\/[^"']*fbevents|fbq\(\s*['"]init|google
  * @param {Awaited<ReturnType<import("./project.js").loadProject>>} project
  * @param {import("./crawl.js").Page[]} pages
  */
-export async function detect(project, pages) {
+export async function detect(project, pages = []) {
+  // before a target is chosen, the project's own HTML files stand in for crawled pages
+  if (!pages.length) pages = await pagesFromFiles(project);
   const source = [];
   for (const f of project.shippedSource()) {
     const text = await project.read(f);
@@ -74,7 +76,9 @@ export async function detect(project, pages) {
 
   // he
   const hePage = pages.find((p) => /^(he|iw)\b/i.test(p.lang ?? ""));
-  const allText = pages.map((p) => p.text).join(" ");
+  // pages built in JavaScript have their words in the code: count Hebrew in JSX text and strings too
+  const codeText = source.flatMap((s) => [...s.text.matchAll(/>([^<>{}]{2,})<|["'`]([^"'`\n]{2,})["'`]/g)].map((m) => m[1] ?? m[2])).join(" ");
+  const allText = `${pages.map((p) => p.text).join(" ")} ${codeText}`;
   const ratio = hebrewRatio(allText);
   facts.he = hePage ? yes(`lang="he" on ${hePage.path}`) : ratio > 0.3 ? yes(`${Math.round(ratio * 100)}% of the text is Hebrew`) : no("the pages aren't in Hebrew");
 
@@ -110,4 +114,50 @@ export async function detect(project, pages) {
   facts.ads = adsPage ? yes(`ad pixel on ${adsPage.path}`) : adsCode ? yes(`ad pixel in ${adsCode.file}`) : project.deps.has("react-facebook-pixel") ? yes("uses react-facebook-pixel") : no("no ad pixels found");
 
   return facts;
+}
+
+/** The project's HTML files, parsed like crawled pages (path = file path). */
+async function pagesFromFiles(project) {
+  const pages = [];
+  for (const f of project.shippedSource().filter((x) => /\.html?$/.test(x)).slice(0, 30)) {
+    const html = await project.read(f);
+    if (!html) continue;
+    const doc = parseHtml(html);
+    const segments = visibleSegments(doc);
+    pages.push({ path: `/${f}`, html, doc, segments, text: segments.join(" "), title: textOf(first(doc, "title")), lang: attr(first(doc, "html"), "lang") ?? null });
+  }
+  return pages;
+}
+
+/**
+ * Where the app is published, best guesses first: used to offer "the live site" before a scan.
+ * @returns {Promise<string[]>}
+ */
+export async function liveUrlCandidates(project) {
+  const found = [];
+  const add = (u, why) => {
+    try {
+      const url = new URL(u.startsWith("http") ? u : `https://${u}`);
+      if (!found.some((f) => f.url === url.origin)) found.push({ url: url.origin, why });
+    } catch {}
+  };
+  if (project.has("CNAME")) add(((await project.read("CNAME")) ?? "").trim(), "CNAME file");
+  if (project.has("public/CNAME")) add(((await project.read("public/CNAME")) ?? "").trim(), "CNAME file");
+  if (project.pkg?.homepage) add(project.pkg.homepage, "package.json homepage");
+  for (const f of project.files.filter((x) => /(^|\/)\.env(\.production)?$|(^|\/)(astro|next|nuxt|svelte|vite)\.config\.[mc]?[jt]s$|(^|\/)next-sitemap\.config\.[jt]s$/.test(x))) {
+    const text = (await project.read(f)) ?? "";
+    const m = text.match(/(?:SITE_URL|APP_URL|BASE_URL|PUBLIC_URL|siteUrl|site)\s*[:=]\s*["'`]?(https:\/\/[^"'`\s]+)/);
+    if (m) add(m[1], f);
+  }
+  for (const f of project.shippedSource()) {
+    const m = ((await project.read(f)) ?? "").match(/metadataBase\s*:\s*new URL\(\s*["'`](https:\/\/[^"'`]+)/);
+    if (m) add(m[1], f);
+  }
+  if (project.has(".vercel/project.json")) {
+    try {
+      const { projectName } = JSON.parse((await project.read(".vercel/project.json")) ?? "{}");
+      if (projectName) add(`${projectName}.vercel.app`, "Vercel project name (a guess)");
+    } catch {}
+  }
+  return found;
 }

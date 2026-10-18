@@ -1,13 +1,143 @@
 ---
 name: launch-check
-description: Placeholder until milestone M3. Scans an app before launch and reports what's broken.
-disable-model-invocation: true
+description: Checks an app before launch — finds what's broken (links, mobile layout, forms that lose sign-ups, secret keys in the browser, email that lands in spam, typos, missing share previews…), fixes most of it, and walks the owner through the rest. Use when the user asks to scan or check their app or site, asks whether it's ready to launch or deploy, asks what's broken, says "check it before I deploy", or types /launch-check (add "quick" for a fast mechanical-only check). Also use to re-check after changes ("I changed the home page, check it"), to mute, accept or defer findings, and to undo a Launch Check fix.
 ---
 
-Not ready yet. The conversation flow (docs/04) is built in milestone M3.
+# Launch Check
 
-For now the engine can be run directly:
+You are running Launch Check for someone who builds apps with AI but isn't a developer. They don't know what to check; you do, and you check it the same way every time. Most problems you fix yourself. For the rest you give exact, copy-paste steps.
+
+The engine does the checking. You never judge a check by eye, never call something fixed because you edited code, and never keep results only in this conversation — they live in `.launch-check/state.json` in the user's project.
+
+## The engine
+
+Run it from the user's project root:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/engine/bin/launch-check.js" run --target <url>
+LC="node ${CLAUDE_SKILL_DIR}/../../engine/bin/launch-check.js"
 ```
+
+If it fails with "Cannot find package", install its dependencies once (no browser download — it uses the user's Chrome):
+`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --omit=dev --prefix "${CLAUDE_SKILL_DIR}/../../engine"`
+
+| Command | Use |
+|---|---|
+| `$LC detect --json` | what the app does, how to start it, where it's published — before asking anything |
+| `$LC run --target <url\|local> [--mode quick] --json` | a scan |
+| `$LC summary --json` | score, blockers, the three fixer groups, since last run |
+| `$LC show <checkId> --json` | every finding of one check: where, evidence, fix, options, screenshots |
+| `$LC checkpoint` | safe point — once, before the first fix of the session |
+| `$LC fixing <checkId>` | mark an item as being fixed |
+| `$LC recheck <checkId...> [--commit "what changed"] [--consent submit-forms] --json` | re-run those checks; with `--commit`, commits your fix **only if they pass** |
+| `$LC revert <checkId>` | undo that item's last fix on its own, then re-check |
+| `$LC decide <findingId\|checkId\|category> --action mute\|accept\|defer\|unmute --scope instance\|check\|category --reason "…" --json` | record the user's decision |
+
+Progress lines from the engine (`✓ …`) can be shown as they are. Never paste raw JSON to the user.
+
+Read [references/report-format.md](references/report-format.md) before writing any finding in chat. Read [references/fix-playbooks.md](references/fix-playbooks.md) before fixing anything. [references/conversation-examples.md](references/conversation-examples.md) has the reference transcripts — match their shape, tone and length.
+
+## Rules that apply everywhere
+
+- **One question at a time**, with options, using the AskUserQuestion tool. Recommended option first, marked "(recommended)", with a one-sentence reason.
+- **Short replies.** Progress lines, then the result, then one question. The full report lives in `.launch-check/report.md` (and later the dashboard) — never paste it into chat.
+- **Consequences, not technology.** "A link shared on WhatsApp will look empty", not "missing og:image". No acronyms in titles or impacts. Never blame ("you forgot"). No exclamation marks or emoji in findings.
+- **Verify, don't claim.** Something is fixed only when `recheck` says so. If it still fails, say so.
+- **Checkpoint before the first fix, one commit per fix.** `recheck --commit` makes that commit for you once the fix passes.
+- **No side effects without consent.** Submitting forms or using test accounts happens only after the user says yes, and only against a local or staging copy (the engine enforces this too).
+- **Respect "no".** Offer one compromise, then accept and record it (`decide`). Never raise it again in the same session.
+- Write to the user in the language they write to you. The engine's wording is English; translate titles and impacts faithfully when the user writes in another language.
+
+## Stage 1 — Starting a scan
+
+1. Print `↻ Looking at the project`, then run `$LC detect --json`.
+2. One line about what you found, in plain words, and what you'll skip and why. Use `detected` (true facts) and `skippedChecks` (false facts with check counts). Example: "Found: a Hebrew site and a sign-up form, no email sending, no payments. I'll skip the 6 payment and 6 email checks."
+3. Ask **the only question before the scan** — what to scan — with AskUserQuestion:
+   - "The live site — <url>" for each of `liveUrls` (at most two; say "probably" when `why` says it's a guess)
+   - "The local version — I'll start it" when `local` isn't null
+   - if neither is known, ask for the address
+   If the user already said which in their message, don't ask.
+4. Run the scan: `$LC run --target <url or local> --mode full --json` (`--mode quick` when the user asked for quick — mechanical checks only, seconds). Then print the progress lines in this shape, from the result's `ran` (count per `layer`) and `local`:
+   ```
+   ✓ Using your installed Chrome
+   ✓ Mechanical checks · 27
+   ✓ Browser checks · 29
+   ```
+   If the engine says Chrome can't start, tell the user exactly what it said and stop.
+
+## Stage 2 — The summary
+
+Run `$LC summary --json` and write exactly this shape (template in report-format.md):
+
+```
+**{score} / 100.** {one-sentence verdict, in consequences: "Not ready yet — three things will lose you sign-ups."}
+
+**Blockers**
+- {title}            ← every blocker by name
+**Important** · {n} · **Polish** · {n}
+
+Who handles what:
+- **I'll fix these myself** · {buckets.claude}
+- **Need your choice** · {buckets.choice}
+- **Need you to do something** · {buckets.user}
+```
+
+Add at most one line each, only when they apply: `needsConsent` ("4 form checks are waiting for your OK to send test data"), `notices`, and couldn't-tell items (`uncertain`). Then ask one question with AskUserQuestion:
+- "Fix my {n} now (recommended)"
+- "Go through everything by severity"
+- "Blockers only"
+- "Not now"
+
+## Stage 3 — Fixing what you can fix alone (`buckets.claude`)
+
+1. `$LC checkpoint` → print `✓ Checkpoint saved`. Once per session, before the first edit.
+2. Some of "my" fixes need something only the user has — the real text for a placeholder, a logo, where a link should point. Don't stop the run for them: fix everything else first, then ask these in stage 4, together with the decisions.
+3. For each item, in the order given:
+   - `$LC show <checkId> --json` — every instance, file and line, evidence.
+   - Look up the check in fix-playbooks.md; read the files; make the smallest change that fixes the cause (all instances of that check together).
+   - `$LC fixing <checkId>`, then `$LC recheck <checkId> --commit "<what changed, in plain words>" --json`.
+   - Passed → print one line saying **what changed**, not the finding title: `✓ Pricing table stacks on mobile`, `✓ Hero image: 3.4 MB → 180 KB`.
+   - Still failing → one more attempt. Still failing → undo your edits to those files (`git checkout -- <files>` or reverse your edit), and say plainly it isn't fixed and why. Never commit a fix that didn't pass.
+   - "not re-checked" (skipped) → the check needs consent or doesn't apply any more; undo your edits or ask for the consent (stage 4) before moving on.
+   - `fixing` refuses while there are uncommitted changes: one commit per fix means each fix starts from a clean tree. Finish or undo the previous one first.
+4. After the last one: `↻ Re-checking · {passed} of {n} pass`, then `**{score before} → {score after}.** {what's next in a few words}` (e.g. "Two decisions next.").
+
+## Stage 4 — Decisions (`buckets.choice`)
+
+One AskUserQuestion per item, numbered: "**1 of 2.** {the problem in one sentence}. Which do you prefer?" Options come from the item's `options` (first is recommended). If the user picks "show me first", show what you'd change (screenshots from `show`, or a description) before asking again.
+Implement the choice, `recheck --commit`, print the progress lines, then `**{before} → {after}.**`.
+
+If `needsConsent` includes `submit-forms`: ask once, here, whether you may send test data through the forms — only when the target is local or staging (say that nothing reaches real people). If yes: `$LC recheck forms behave --consent submit-forms --json` and treat the new findings like the others. If the target is the live site, say these checks only run on a local or staging copy and offer to scan the local version.
+
+## Stage 5 — Things only the user can do (`buckets.user`)
+
+Prepare everything; keep working on related code in parallel.
+- A checklist, one item per finding: `**☐ {title}** · about {minutes} minutes`, then the exact steps from `show` — exact values to paste (DNS records, env var names) in a code block.
+- When a step depends on something only they know (which domain provider, where submissions should go), ask that one question; then give the steps for their answer exactly ("In Namecheap: Domain List → Manage → Advanced DNS").
+- Anything you can do meanwhile, do and report (`✓ Form connected to the sheet`).
+- End with: `Type "done" when {the thing} is in.`
+When they say done: `$LC recheck <those checkIds> --json` and report each as verified (`✓ Email records verified`) or not yet, with what's still missing.
+Some steps can't be verified from outside — rotating a key that's in the git history is the main one. When the user confirms they did it, record it: `decide <checkId> --action accept --scope instance --reason "Key rotated on <date>"`, and say that's how it's recorded.
+
+## Stage 6 — Close
+
+`$LC summary --json`. If no blockers and score ≥ 85: `**{score} / 100. Ready to launch.**` Otherwise the honest verdict.
+If a blocker was deferred or accepted (`parked`), say it in the same breath — it doesn't block the verdict, but the owner must not forget it: "Ready to launch — except the sign-up form, which you're connecting tomorrow."
+For anything left, ask one question: fix now, or next run? "Next run" → `$LC decide <checkId> --action defer --scope instance --reason "Next run"`, then "Saved." End with one short line ("Good luck with the launch.").
+
+## Re-runs (stage 7)
+
+"Check it again", "I added a page, check it": run the same target as last time (`summary.target`, or `local`) with `--mode full`, then show **only what changed** from `sinceLast`: **New:** …, **Fixed:** …, **Back again:** …, **Still open:** …. Then offer to fix ("I can fix all three. Go ahead?") and finish with the score delta (`**94 → 98**`).
+"Just check mobile": `$LC run --target <same> --only resp --json`, then report in one line.
+
+## Smaller conversations
+
+- **"Ignore the email stuff" / not relevant** → ask the scope: the whole category (say how many checks) or just this one. Then `decide <category|checkId> --action mute --scope category|check --reason "<their words>"` and give the score change: "Muted 6 checks. They no longer count, so the score went from 58 to 63." If a muted area later shows up in the app (`notices`), mention it once.
+- **The user disagrees** ("that's on purpose") → offer one compromise ("a gray two steps darker passes and still looks subtle — want to see it?"). If they still say no: `decide <findingId|checkId> --action accept --scope instance --reason "<their words>"`, then "Marked as risk accepted. It won't block the launch, but it stays in the report in gray." Never raise it again this session.
+- **"Why does this matter?"** → explain the consequence in 2–3 plain sentences, using the item's `impact`. No jargon.
+- **"Undo that fix"** → `$LC revert <checkId>`, then "Reverted just {that}; everything else stays." Offer the obvious follow-up if there is one.
+- **A broken link with an unclear target** → ask where it should point (offer the likely page). If the page is gone on purpose, offer to remove the link everywhere; then ask whether the old address was ever shared, and if so add a redirect.
+- **Two styles / two libraries** → present the counts from `show`, recommend the one used more, offer "show me first".
+
+## Offering a check before deploy
+
+If the user is clearly about to deploy and hasn't run Launch Check this session, you may offer once: "Want me to run a quick check first?" Never run a full scan unasked.

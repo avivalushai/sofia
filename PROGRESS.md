@@ -2,6 +2,24 @@
 
 ## Done
 
+### M3 — Skill and conversation flow (2026-10-18)
+- `skills/launch-check/SKILL.md`: triggers (natural phrasings and the command, with `quick`), the docs/04 flow stage by stage, the docs/06 wording rules, and the smaller conversations (mute, disagree, why, undo, unclear link). References: `report-format.md`, `fix-playbooks.md` (how to fix every v1 check), `conversation-examples.md`.
+- `skills/launch-fix/SKILL.md`: picks up from the saved state; command only.
+- New engine commands for the skill:
+  - `detect` with no target: facts from the project files, checks skipped per fact, live-address guesses, how to start it locally.
+  - `summary`: score, blockers by name, the three fixer groups as items (one per check), since last scan, parked items, consent needed, notices.
+  - `show`, `fixing`, `checkpoint`, `decide`.
+  - `recheck`: commits a fix only if it passes; takes check ids, finding ids or categories.
+  - `revert`: undoes one fix with `git revert`, then rechecks.
+- Safety:
+  - A checkpoint commit before the first fix.
+  - `fixing` refuses to start on top of uncommitted changes, so each fix is its own commit.
+  - A yes to test submissions lasts 12 hours.
+  - Without git, the checkpoint is a copy of the project files.
+- Walkthrough of docs/04 stages 1–7 on a copy of the fixture: `docs/walkthroughs/m3-noa-pilates.md`. Real commands, real edits, one commit per fix, 52 → 69 → 94, then 97 after the Stage 7 re-run. It found 11 gaps; all are fixed and listed there.
+- `claude plugin validate .` passes, with 2 warnings for M8: no author yet, and `CLAUDE.md` at the plugin root.
+- Tests: 118 (117 pass, 1 skipped = `shop.checkout-flow`, not v1). New: 13 session tests (checkpoint, failing fix not committed, one commit per fix, undo one fix, category mute persisting across processes, accept and defer, since-last-run, the clean-tree guard, consent per session, local 404 page, partial share-image address).
+
 ### M2 — Browser layer (2026-10-18)
 - `browser.js`: the user's installed Chrome via `playwright-core` (`channel: "chrome"`), headless; never downloads a browser; a clear "install Chrome" message if it can't start. Shared pages per URL+width for read-only checks (kept loaded, at most 10 open), isolated fresh pages for checks that click or type. Console errors, page errors, every request, failure and status are recorded per page.
 - Rendered crawl (`crawl.browserPages()`), at desktop width, same 30-page limit (now `--max-pages`).
@@ -30,7 +48,7 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
-- Nothing. Next: M3 (skill and conversation flow).
+- Nothing. Next: M4 (complete v1 catalog: the 7 judgment checks as review tasks with rubrics, and the false-positive pass over 3 of your real apps).
 
 ## Dependencies (with reasons)
 - `htmlparser2` (MIT) — real HTML parsing for the mechanical checks; regex parsing would be a steady source of false alarms.
@@ -57,6 +75,18 @@
 ## Additions to the state shape in M2 — please confirm
 - `checks[id].needs`: the consent a skipped check is waiting for (`submit-forms`, `test-accounts`).
 
+## Additions to the state shape in M3 — please confirm
+- `current`: `{ score, verdict, counts, at }`, recomputed on every change (decisions change the score without a run).
+- `checkpoints[]`: `{ kind: git|copy, ref, created, at }`.
+- `runs[]`: `kind` (`scan` | `recheck`), `targetSpec` (`local` or the URL, so a recheck can reach the same target), `consent`, `staging`, `scoreBefore`.
+- `findings[].fixCommits`: the commits that fixed it, used by `revert`. A history event `fixing`, and `fixed` events carry the `commit`.
+- `decisions[]` also records instance-level accept, defer and mute, with the finding id as `target`.
+
+## Decisions in M3
+- A deferred or accepted blocker doesn't block "Ready" (docs/03), but the skill always says it next to the verdict.
+- A key in the git history is closed by "accept" with reason "key rotated". Launch Check can't verify rotation from outside.
+- Consent to side effects lasts 12 hours (a working session), not forever.
+
 ## Deviations from the docs (M2)
 - `--target local` always starts its own copy on a free port instead of reusing a server already running on the usual port (docs/02). Reason: during M1 a different project's server was sitting on the port I tried, and the scan silently read that app. Starting our own copy means we always scan the right app.
 - `a11y.form-labels` uses its own rule instead of axe-core: axe accepts a placeholder as a label, but `expected.json` (rightly) doesn't — the placeholder vanishes once you type.
@@ -77,10 +107,14 @@
 - `launch.https-redirect`, `launch.ssl-valid` and `mail.auth` skip or don't apply on the local fixture, so only their logic is tested, not a live target. The M4 pass over real apps covers that.
 
 ## Open questions
+- The walkthrough was done by me (Claude) following the skill inside this session, not by a fresh Claude Code session with the plugin installed. A fresh-session run would also test the skill's triggers. It runs a separate Claude session on your account, so I'd like your OK first.
 - **Hebrew dictionary licence.** The only good Hebrew dictionary (Hspell) is AGPL-3.0. Fine for development; before distributing (M8) decide between: ship it as-is (AGPL obligations may extend to the plugin), download it on first use, or drop Hebrew spell-checking.
 - `--target local` (start the dev server): proposed for M2.
 - From docs/07: final product name; whether `decisions` get committed by default; crawl page limit; whether quick mode runs automatically after UI edits.
 
 ## Notes from the current Claude Code docs
+- Plugin skills are namespaced: the commands will show up as `/launch-check:launch-check` and `/launch-check:launch-fix`. Choose the final names in M8.
+- In a skill, the engine is reached through `${CLAUDE_SKILL_DIR}/../../engine`. The docs say `${CLAUDE_PLUGIN_ROOT}` isn't substituted inside skills.
+- For M6: plugins can declare **monitors** (`monitors/monitors.json`) whose output reaches the running session. That's the supported way for the page to wake Claude; the `UserPromptSubmit` hook stays as the fallback.
 - `commands/` is deprecated; `/launch-check` and `/launch-fix` will be skills.
 - `${CLAUDE_PLUGIN_ROOT}` = plugin install folder; `${CLAUDE_PLUGIN_DATA}` survives plugin updates (a candidate for `node_modules`).

@@ -11,6 +11,8 @@ import { loadProject } from "./project.js";
 import { writeReport } from "./report.js";
 import { summarize } from "./score.js";
 import { mergeRun, readState, STATE_DIR, writeState } from "./state.js";
+import { lastScan, refreshCurrent } from "./summary.js";
+import { commitAll, isGitRepo, revertCommit } from "./git.js";
 import { mkdir } from "node:fs/promises";
 
 export class UsageError extends Error {}
@@ -174,13 +176,23 @@ async function saveAfterShots(root, state, fixedIds, browser, base) {
   }
 }
 
-/** A page path is only "verified" if the page loaded this run; other resources (files) always are. */
-function verifiablePaths(pages) {
-  const ok = new Set(pages.map((p) => p.path));
+/**
+ * Can this run vouch for a finding's location? Not when its page failed to load this run, and not
+ * when the crawl stopped at its page limit before reaching it. Everything else (files, /robots.txt,
+ * /.env…) was requested directly by its check, so the check's answer stands.
+ */
+function verifiablePaths(pages, visited, limitReached) {
+  const loaded = new Set(pages.map((p) => p.path));
+  const failed = new Set();
+  for (const [u, v] of visited) {
+    if (v.error || v.status >= 500) failed.add(new URL(u).pathname + new URL(u).search);
+  }
   return {
     has(url) {
-      const isResource = /\.[a-z0-9]+$/i.test(url.split("?")[0]) && !/\.(html?|php|aspx?)$/i.test(url.split("?")[0]);
-      return isResource || ok.has(url);
+      if (loaded.has(url)) return true;
+      if (failed.has(url)) return false;
+      const looksLikePage = !/\.[a-z0-9]+$/i.test(url.split("?")[0]) || /\.(html?|php|aspx?)$/i.test(url.split("?")[0]);
+      return !(limitReached && looksLikePage);
     },
   };
 }
@@ -190,7 +202,7 @@ function verifiablePaths(pages) {
  * @param {{ root: string, target: string, mode: "full"|"quick", only?: string, consent?: string[], staging?: boolean, maxPages?: number,
  *   catalog: any, checks: { implemented: any[], notImplemented: string[] }, now?: () => Date, onProgress?: (msg: string) => void }} opts
  */
-export async function run({ root, target, mode, only, consent = [], staging = false, maxPages = 30, catalog, checks, now = () => new Date(), onProgress = () => {} }) {
+export async function run({ root, target, mode, only, consent = [], staging = false, maxPages = 30, kind = "scan", catalog, checks, now = () => new Date(), onProgress = () => {} }) {
   const selected = selectChecks(checks.implemented, only, catalog).filter((c) => MODE_LAYERS[mode].has(c.entry.layer));
   const startedAt = now();
   const { url, http, project, crawl, pages, detected, local } = await prepare({ root, target, maxPages });
@@ -207,6 +219,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
 
     const state = await readState(root);
     const runId = makeRunId(startedAt, new Set(state.runs.map((r) => r.id)));
+    const scoreBefore = state.current?.score ?? null;
 
     const runLayer = (layer, limit) =>
       mapLimit(selected.filter((c) => c.entry.layer === layer), limit, async (c) => {
@@ -226,17 +239,23 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     await saveShots(root, state, results);
     const at = now().toISOString();
     const rendered = browser ? await crawl.browserPages().catch(() => []) : [];
-    const changes = mergeRun(state, { runId, at, results, scannedPaths: verifiablePaths([...pages, ...rendered]) });
+    const changes = mergeRun(state, { runId, at, results, scannedPaths: verifiablePaths([...pages, ...rendered], await crawl.visited(), Math.max(pages.length, rendered.length) >= maxPages) });
     await saveAfterShots(root, state, changes.fixed, browser, url);
     const { score, verdict, counts } = summarize(catalog, state);
 
     const record = {
       id: runId,
+      kind,
       mode,
       target: url,
+      // how to reach the same target again for a recheck ("local" means: start it again)
+      targetSpec: target === "local" ? "local" : url,
+      ...(consent.length ? { consent } : {}),
+      ...(staging ? { staging } : {}),
       ...(only ? { only } : {}),
       startedAt: startedAt.toISOString(),
       finishedAt: now().toISOString(),
+      scoreBefore,
       score,
       verdict,
       counts: { ...counts, notImplemented: checks.notImplemented.length },
@@ -244,6 +263,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       changes,
     };
     state.runs.push(record);
+    refreshCurrent(catalog, state, record.finishedAt);
     await writeState(root, state);
     await writeReport(root, catalog, state);
     const gitignored = await ensureGitignore(root, project);
@@ -262,6 +282,92 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     await browser?.close();
     await local?.stop();
   }
+}
+
+/**
+ * Re-runs specific checks against the same target as the last scan, after a fix (docs/02).
+ * With a commit message, the fix is committed only if the recheck passes — a fix that didn't work
+ * never becomes a commit — and the commit is recorded on every finding it fixed, so that one fix
+ * can later be undone on its own.
+ * @param {{ root: string, refs: string[], commitMessage?: string, consent?: string[], catalog: any, checks: any, onProgress?: (m: string) => void }} o
+ */
+export async function recheck({ root, refs, commitMessage, consent, catalog, checks, onProgress = () => {} }) {
+  const state = await readState(root);
+  const scan = lastScan(state);
+  if (!scan) throw new UsageError("There's no scan to re-check yet. Run a scan first.");
+  const implemented = new Set(checks.implemented.map((c) => c.id));
+  // a finding id → its check; a category → its built checks
+  const checkIds = [...new Set(refs.flatMap((r) => {
+    if (state.findings[r]) return [state.findings[r].checkId];
+    if (catalog.byId.has(r)) return [r];
+    const inCategory = catalog.checks.filter((c) => c.category === r && implemented.has(c.id)).map((c) => c.id);
+    if (inCategory.length) return inCategory;
+    throw new UsageError(`"${r}" is not a check, finding or category`);
+  }))];
+  const missing = checkIds.filter((id) => !implemented.has(id));
+  if (missing.length) throw new UsageError(`Can't re-check ${missing.join(", ")}: not built yet`);
+
+  const scoreBefore = state.current?.score ?? scan.score;
+  const mode = checkIds.some((id) => catalog.byId.get(id).layer === "browser") ? "full" : "quick";
+  const result = await run({
+    root, target: scan.targetSpec ?? scan.target, mode, only: checkIds.join(","), consent: [...new Set([...sessionConsent(state), ...(consent ?? [])])], staging: scan.staging ?? false,
+    kind: "recheck", catalog, checks, onProgress,
+  });
+
+  const after = await readState(root);
+  const passed = checkIds.every((id) => after.checks[id]?.status === "pass");
+  let commit = null;
+  if (commitMessage && passed && (await isGitRepo(root))) {
+    commit = await commitAll(root, `Launch Check: ${commitMessage}\n\nChecks: ${checkIds.join(", ")}`);
+    if (commit) onProgress(`Committed the fix as ${commit}`);
+  }
+  if (commit) {
+    for (const id of result.run.changes.fixed) {
+      const f = after.findings[id];
+      f.fixCommits = [...(f.fixCommits ?? []), commit];
+      f.history.at(-1).commit = commit;
+    }
+    await writeState(root, after);
+  }
+  const skipped = checkIds.filter((id) => after.checks[id]?.status === "skip").map((id) => ({ id, reason: after.checks[id].reason, ...(after.checks[id].needs ? { needs: after.checks[id].needs } : {}) }));
+  const findingsOf = (status) => Object.entries(after.findings).filter(([, f]) => checkIds.includes(f.checkId) && f.status === status).map(([id, f]) => ({ id, title: f.title }));
+  return {
+    checks: checkIds.map((id) => ({ id, status: after.checks[id]?.status })),
+    fixed: result.run.changes.fixed.map((id) => ({ id, title: after.findings[id].title })),
+    stillOpen: findingsOf("open"),
+    reopened: result.run.changes.reopened.map((id) => ({ id, title: after.findings[id].title })),
+    scoreBefore,
+    scoreAfter: after.current.score,
+    verdict: after.current.verdict,
+    commit,
+    passed,
+    skipped,
+    shots: result.run.changes.fixed.map((id) => ({ id, ...after.findings[id].shots })),
+    errors: result.errors,
+  };
+}
+
+/** A yes to side effects lasts for the working session (12 hours), not forever: next week's scan asks again. */
+const CONSENT_HOURS = 12;
+function sessionConsent(state, now = Date.now()) {
+  return [...new Set(state.runs.filter((r) => r.consent && now - Date.parse(r.finishedAt) < CONSENT_HOURS * 3600_000).flatMap((r) => r.consent))];
+}
+
+/**
+ * Undoes the most recent fix for a check (or a finding's check) with git revert, then re-checks
+ * it so the state shows the problem is back.
+ */
+export async function revert({ root, ref, catalog, checks, onProgress = () => {} }) {
+  const state = await readState(root);
+  const checkId = state.findings[ref]?.checkId ?? ref;
+  const commits = Object.values(state.findings).filter((f) => f.checkId === checkId).flatMap((f) => f.fixCommits ?? []);
+  const sha = commits.at(-1);
+  if (!sha) throw new UsageError(`No recorded fix commit for ${checkId}, so there's nothing to undo on its own.`);
+  if (!(await isGitRepo(root))) throw new UsageError("Undoing one fix needs git; the project isn't a git repository.");
+  const revertSha = await revertCommit(root, sha);
+  onProgress(`Undid ${sha} with ${revertSha}`);
+  const result = await recheck({ root, refs: [checkId], catalog, checks, onProgress });
+  return { reverted: sha, revertCommit: revertSha, ...result };
 }
 
 export { BrowserMissing };

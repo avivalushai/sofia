@@ -23,6 +23,7 @@ export function emptyState() {
     checks: {},
     findings: {},
     decisions: [],
+    checkpoints: [],
     pending: { fix: [], decide: [], updatedAt: null, source: null },
     reviewTasks: [],
   };
@@ -39,6 +40,7 @@ export async function readState(root) {
   }
   const state = JSON.parse(text);
   state.checks ??= {}; // M0 state files had no checks map
+  state.checkpoints ??= [];
   const problems = validateState(state);
   if (problems.length) throw new Error(`${statePath(root)} is invalid:\n  - ${problems.join("\n  - ")}`);
   return state;

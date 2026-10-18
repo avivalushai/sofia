@@ -12,6 +12,19 @@ export default {
     const results = [];
     for (const page of await ctx.crawl.pages()) {
       const missing = TAGS.filter(([og, tw]) => !page.meta(og)?.trim() && !page.meta(tw)?.trim());
+      const image = (page.meta("og:image") || page.meta("twitter:image") || "").trim();
+      if (!missing.length && image && !/^https?:\/\//i.test(image)) {
+        // WhatsApp, Facebook and LinkedIn fetch the image from outside the site: they need the full address
+        results.push(ctx.fail({
+          key: page.path,
+          title: "A shared link to this page shows no picture",
+          impact: "WhatsApp, Facebook and LinkedIn can't find the preview image, so the link shows up without a picture and fewer people tap it",
+          location: { url: page.path, file: await ctx.pageSource(page) },
+          evidence: `The share image is "${image}" — a partial address; it must start with https:// and the site's domain`,
+          fix: "Use the full address of the image, for example https://your-domain/assets/share.png",
+        }));
+        continue;
+      }
       if (!missing.length) continue;
       const noImage = missing.some(([og]) => og === "og:image");
       results.push(ctx.fail({

@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 6,
-  "nextNoteNum": 7,
+  "nextNum": 7,
+  "nextNoteNum": 9,
   "features": [
     {
       "key": "ALL-1",
@@ -176,21 +176,31 @@
       "key": "ALL-4",
       "title": "Hebrew dictionary is AGPL-3.0 — ship it, download on first use, or drop Hebrew spelling?",
       "type": "question",
-      "status": "idea",
-      "note": "Decide before M8 packaging",
+      "status": "done",
+      "note": "Owner approved: download dictionary-he on first use into the plugin's data folder (M8); skip Hebrew spelling with a note if offline.",
       "doneWhen": [],
       "steps": [],
       "files": [],
       "links": [],
       "area": "",
       "createdAt": "2026-10-18T13:30:11Z",
-      "updatedAt": "2026-10-18T13:30:11Z",
+      "updatedAt": "2026-10-18T15:03:22Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-18T13:30:11Z",
           "by": "claude",
           "text": "Created"
+        },
+        {
+          "at": "2026-10-18T15:00:20Z",
+          "by": "claude",
+          "text": "Moved to review — Recommend: download dictionary-he on first use into the plugin's data folder instead of bundling it; skip Hebrew spelling with a note if offline. Decide by M8. Not legal advice."
+        },
+        {
+          "at": "2026-10-18T15:03:22Z",
+          "by": "claude",
+          "text": "Done"
         }
       ]
     },
@@ -198,8 +208,8 @@
       "key": "ALL-5",
       "title": "Browser layer + browser checks (M2)",
       "type": "feature",
-      "status": "active",
-      "note": "browser.js with installed Chrome, rendered crawl, screenshots, axe-core, 29 checks",
+      "status": "done",
+      "note": "cd engine && npm test — 104 pass; node test/helpers/run-fixture.js -- --consent submit-forms, then look at .launch-check/shots",
       "doneWhen": [
         "All browser rows in expected.json match",
         "Each visual failure has a before.png with the element highlighted",
@@ -242,14 +252,62 @@
         "engine/src/checks/behave/double-submit.js",
         "engine/src/checks/qa/loading-states.js"
       ],
-      "links": [],
+      "links": [
+        "dadd3b3"
+      ],
       "area": "",
       "createdAt": "2026-10-18T14:19:29Z",
-      "updatedAt": "2026-10-18T14:30:05Z",
+      "updatedAt": "2026-10-18T15:03:22Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-18T14:19:29Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-18T14:41:18Z",
+          "by": "claude",
+          "text": "Moved to review — cd engine && npm test — 104 pass; node test/helpers/run-fixture.js -- --consent submit-forms, then look at .launch-check/shots"
+        },
+        {
+          "at": "2026-10-18T14:41:18Z",
+          "by": "claude",
+          "text": "Proof: dadd3b3"
+        },
+        {
+          "at": "2026-10-18T15:03:22Z",
+          "by": "claude",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-6",
+      "title": "Skill and chat flow (M3)",
+      "type": "feature",
+      "status": "active",
+      "note": "engine: detect without target, summary, decide, checkpoint, recheck, revert; then SKILL.md",
+      "doneWhen": [
+        "docs/04 stages 1-6 reproduced end to end on a fixture copy",
+        "Reverting a single fix works",
+        "Muting a category changes the score and persists across sessions"
+      ],
+      "steps": [],
+      "files": [
+        "engine/src/summary.js",
+        "engine/src/actions.js",
+        "engine/src/git.js",
+        "engine/src/cli.js"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-18T15:03:22Z",
+      "updatedAt": "2026-10-18T15:06:10Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T15:03:22Z",
           "by": "claude",
           "text": "Created — active"
         }
@@ -270,7 +328,8 @@
       "cards": [
         "ALL-1",
         "ALL-3",
-        "ALL-5"
+        "ALL-5",
+        "ALL-6"
       ],
       "steps": [
         {
@@ -291,7 +350,7 @@
         {
           "text": "M3 — Skill and conversation flow",
           "done": false,
-          "card": ""
+          "card": "ALL-6"
         },
         {
           "text": "M4 — Complete v1 catalog",
@@ -325,7 +384,7 @@
         }
       ],
       "createdAt": "2026-10-18T13:04:30Z",
-      "updatedAt": "2026-10-18T14:19:29Z",
+      "updatedAt": "2026-10-18T15:03:22Z",
       "updatedBy": "claude"
     },
     {
@@ -416,6 +475,42 @@
       "steps": [],
       "createdAt": "2026-10-18T13:30:11Z",
       "updatedAt": "2026-10-18T13:30:11Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N7",
+      "kind": "decision",
+      "title": "Local scans always start their own copy on a free port",
+      "body": "Never reuse a server already on the usual port: in M1 another project's server sat on the port and the scan read the wrong app.",
+      "considered": "Reuse a running server (docs/02): risks scanning a different app.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-5"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T14:41:22Z",
+      "updatedAt": "2026-10-18T14:41:22Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N8",
+      "kind": "decision",
+      "title": "Form checks need consent and a local or staging target",
+      "body": "Flag: --consent submit-forms. Skipped checks record needs: submit-forms so the skill knows what to ask. Writes are answered by Launch Check itself where possible.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-5"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T14:41:22Z",
+      "updatedAt": "2026-10-18T14:41:22Z",
       "updatedBy": "claude"
     }
   ],

@@ -41,6 +41,8 @@ async function waitFor(url, ms, isDead) {
 async function serveStatic(dir) {
   const server = createServer(async (req, res) => {
     let rel = decodeURIComponent(new URL(req.url, "http://x").pathname);
+    // like real static hosts: never serve hidden files (.git, .env, .launch-check)
+    if (rel.split("/").some((part) => part.startsWith(".") && part !== ".well-known")) return res.writeHead(404, { "content-type": "text/plain" }).end("Not Found");
     if (rel.endsWith("/")) rel += "index.html";
     const file = path.join(dir, rel);
     if (!file.startsWith(dir + path.sep) && file !== dir) return res.writeHead(403).end();
@@ -48,7 +50,10 @@ async function serveStatic(dir) {
       const body = await readFile(file);
       res.writeHead(200, { "content-type": TYPES[path.extname(file).toLowerCase()] ?? "application/octet-stream" }).end(body);
     } catch {
-      res.writeHead(404, { "content-type": "text/plain" }).end("Not Found");
+      // like Netlify, GitHub Pages and Vercel: a 404.html at the root is the not-found page
+      const custom = await readFile(path.join(dir, "404.html")).catch(() => null);
+      if (custom) res.writeHead(404, { "content-type": TYPES[".html"] }).end(custom);
+      else res.writeHead(404, { "content-type": "text/plain" }).end("Not Found");
     }
   });
   await new Promise((r) => server.listen(0, "127.0.0.1", r));
