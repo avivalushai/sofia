@@ -1,17 +1,21 @@
 import { parseArgs } from "node:util";
 import { CatalogError, loadCatalog, loadChecks } from "./catalog.js";
-import { detectOnly, run, UsageError } from "./runner.js";
+import { BrowserMissing, detectOnly, run, UsageError } from "./runner.js";
 import { statePath } from "./state.js";
 
 const USAGE = `Usage: launch-check <command> [options]
 
 Commands:
-  run --target <url> [--mode full|quick] [--only <ids|categories>]
-  detect --target <url>                 print detected project facts
+  run --target <url|local> [--mode full|quick] [--only <ids|categories>]
+      [--consent submit-forms,test-accounts] [--staging] [--max-pages 30]
+  detect --target <url|local>           print detected project facts
   recheck | review-tasks | add-findings | decide | serve | export   (not implemented yet)
 
 Options:
-  --json   machine-readable output`;
+  --target local   start the app on this machine (its dev script, or a plain HTML folder) and stop it afterwards
+  --consent        side effects the user agreed to; they only ever run against local or staging
+  --staging        the target is a staging copy, not the live site
+  --json           machine-readable output`;
 
 const LATER = new Set(["recheck", "review-tasks", "add-findings", "decide", "serve", "export"]);
 const LAYER_TITLE = { mechanical: "Mechanical checks", browser: "Browser checks", judgment: "Judgment checks" };
@@ -30,6 +34,9 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
         target: { type: "string" },
         mode: { type: "string", default: "full" },
         only: { type: "string" },
+        consent: { type: "string" },
+        staging: { type: "boolean", default: false },
+        "max-pages": { type: "string", default: "30" },
         json: { type: "boolean", default: false },
         help: { type: "boolean", short: "h", default: false },
       },
@@ -57,6 +64,17 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
     err(`--mode must be full or quick, not "${opts.mode}"`);
     return 2;
   }
+  const maxPages = Number(opts["max-pages"]);
+  if (!Number.isInteger(maxPages) || maxPages < 1) {
+    err(`--max-pages must be a whole number, not "${opts["max-pages"]}"`);
+    return 2;
+  }
+  const consent = (opts.consent ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const unknownConsent = consent.filter((c) => !["submit-forms", "test-accounts"].includes(c));
+  if (unknownConsent.length) {
+    err(`--consent: unknown "${unknownConsent.join(", ")}" (use submit-forms, test-accounts)`);
+    return 2;
+  }
 
   try {
     // Validated on every start: a broken catalog or a stray check file stops everything.
@@ -73,7 +91,10 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
       return 0;
     }
 
-    const result = await run({ root: cwd, target: opts.target, mode: opts.mode, only: opts.only, catalog, checks });
+    const result = await run({
+      root: cwd, target: opts.target, mode: opts.mode, only: opts.only, consent, staging: opts.staging, maxPages, catalog, checks,
+      onProgress: opts.json ? () => {} : (m) => out(`✓ ${m}`),
+    });
     for (const e of result.errors) err(`! ${e}`);
 
     if (opts.json) {
@@ -85,6 +106,8 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
       const { run: r } = result;
       out(`✓ ${r.pages} pages scanned · ${result.notImplemented.length} of ${result.catalogSize} checks not built yet`);
       if (result.gitignored) out("✓ Added .launch-check/ to .gitignore");
+      const waiting = result.ran.filter((r) => r.needs);
+      if (waiting.length) out(`· ${waiting.length} checks need your OK first (${[...new Set(waiting.map((r) => r.needs))].join(", ")})`);
       out(`${r.score ?? "—"} / 100 · ${r.verdict} · blockers ${r.counts.blocker} · important ${r.counts.important} · polish ${r.counts.polish} · passed ${r.counts.passed} · skipped ${r.counts.skipped}`);
       out(`Saved ${statePath(cwd)}`);
     }
@@ -94,7 +117,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
       err(e.message);
       return 2;
     }
-    err(e instanceof CatalogError ? e.message : `Launch Check stopped: ${e.message}`);
+    err(e instanceof CatalogError || e instanceof BrowserMissing ? e.message : `Launch Check stopped: ${e.message}`);
     return 1;
   }
 }

@@ -24,6 +24,8 @@ const PAGE_EXT = /(\/|\.html?|\.php|\.aspx?|\/[^./]+)$/i;
  */
 export function createCrawler({ target, http, limit = 30 }) {
   let result;
+  let rendered;
+  let browser = null;
   const origin = new URL(target).origin;
 
   async function crawl() {
@@ -65,8 +67,62 @@ export function createCrawler({ target, http, limit = 30 }) {
     return { pages, visited };
   }
 
+  /** Breadth-first crawl in Chrome at desktop width: finds pages that only exist once JavaScript runs. */
+  async function renderedCrawl() {
+    const pages = [];
+    const texts = new Set();
+    const queue = [normalize(target)];
+    const seen = new Set(queue);
+    while (queue.length && pages.length < limit) {
+      const url = queue.shift();
+      let p;
+      try {
+        p = await browser.open(url, { width: 1280 });
+      } catch {
+        continue;
+      }
+      if (p.status !== 200) continue;
+      const { text, links, finalUrl } = await p.evaluate(() => ({
+        text: window.__lc.visibleText(),
+        links: [...document.querySelectorAll("a[href]")].map((a) => a.href),
+        finalUrl: location.href,
+      }));
+      const fingerprint = createHash("sha1").update(text).digest("hex");
+      if (texts.has(fingerprint)) continue;
+      texts.add(fingerprint);
+      const u = new URL(finalUrl);
+      pages.push({ url: finalUrl, path: u.pathname + u.search, links });
+      for (const href of links) {
+        let next;
+        try {
+          next = normalize(href);
+        } catch {
+          continue;
+        }
+        const nu = new URL(next);
+        if (nu.origin !== origin || seen.has(next) || !/^https?:$/.test(nu.protocol) || !PAGE_EXT.test(nu.pathname)) continue;
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+    return pages;
+  }
+
   return {
     origin,
+    limit,
+    attachBrowser(b) {
+      browser = b;
+    },
+    /**
+     * Pages as Chrome renders them (url, path, links). Browser checks iterate these.
+     * @returns {Promise<{ url: string, path: string, links: string[] }[]>}
+     */
+    async browserPages() {
+      if (!browser) throw new Error("browserPages() needs the browser (full mode)");
+      rendered ??= renderedCrawl();
+      return rendered;
+    },
     /** @returns {Promise<Page[]>} */
     async pages() {
       result ??= crawl();

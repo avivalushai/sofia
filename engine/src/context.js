@@ -49,8 +49,9 @@ export const dns = {
  * The object every check's run(ctx) receives (docs/03).
  * @param {{ entry: any, project: any, crawl: any, http: any, target: string, detected: any, now: Date }} o
  */
-export function makeContext({ entry, project, crawl, http, target, detected, now }) {
+export function makeContext({ entry, project, crawl, http, browser = null, target, detected, now, consent = [], staging = false }) {
   const targetUrl = new URL(target);
+  const local = isLocalHost(targetUrl.hostname);
   const base = { checkId: entry.id };
 
   const need = (r, fields) => {
@@ -68,12 +69,25 @@ export function makeContext({ entry, project, crawl, http, target, detected, now
     target,
     targetUrl,
     /** true when the scanned address only exists on this machine or a private network */
-    isLocalTarget: isLocalHost(targetUrl.hostname),
+    isLocalTarget: local,
+    /** the user's Chrome (null in quick mode) */
+    browser,
     detected,
     now,
     viewports: VIEWPORTS,
     files: project,
-    consent: { has: async () => false },
+    /**
+     * Side effects (submitting forms, test accounts) need the user's yes, and only ever run
+     * against a local or staging copy (docs/03).
+     */
+    consent: {
+      has: async (name) => consent.includes(name) && (local || staging),
+      why(name) {
+        const what = { "submit-forms": "submit the forms with test data", "test-accounts": "sign in with two test accounts" }[name] ?? name;
+        if (!consent.includes(name)) return `needs your OK to ${what}`;
+        return `only runs against a local or staging copy — it would ${what} on the live site`;
+      },
+    },
     /**
      * Best-effort map from text a visitor sees to the file and line to edit.
      * With a page, that page's own file is searched first.
@@ -115,8 +129,9 @@ export function makeContext({ entry, project, crawl, http, target, detected, now
       need(r, ["key", "title", "evidence"]);
       return { ...base, status: "uncertain", impact: "", fix: "", location: {}, shot: null, ...r };
     },
-    skip(reason) {
-      return { ...base, status: "skip", reason };
+    /** @param {string} reason @param {{ needs?: string }} [o] needs: the consent that would let it run */
+    skip(reason, o = {}) {
+      return { ...base, status: "skip", reason, ...(o.needs ? { needs: o.needs } : {}) };
     },
   };
 }

@@ -69,8 +69,8 @@ export async function writeState(root, state) {
 export function mergeRun(state, { runId, at, results, scannedPaths }) {
   const changes = { new: [], fixed: [], reopened: [] };
 
-  for (const { entry, status, reason, items } of results) {
-    state.checks[entry.id] = { status, ...(reason ? { reason } : {}), lastRun: runId };
+  for (const { entry, status, reason, needs, items } of results) {
+    state.checks[entry.id] = { status, ...(reason ? { reason } : {}), ...(needs ? { needs } : {}), lastRun: runId };
     const reported = new Set();
 
     for (const r of items.filter((i) => i.status === "fail" || i.status === "uncertain")) {
@@ -97,6 +97,7 @@ export function mergeRun(state, { runId, at, results, scannedPaths }) {
       let status = prev.status;
       if (prev.status === "fixed") {
         status = nextStatus;
+        prev.shots = { before: prev.shots?.before ?? r.shot ?? null, after: null };
         prev.history.push({ at, event: "reopened", run: runId });
         changes.reopened.push(id);
       } else if (prev.status === "open" || prev.status === "fixing" || prev.status === "uncertain") {

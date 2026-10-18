@@ -1,14 +1,17 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { BrowserMissing, launchBrowser } from "./browser.js";
 import { CheckBug, makeContext } from "./context.js";
 import { createCrawler } from "./crawl.js";
 import { detect } from "./detect.js";
 import { createHttp, HttpError } from "./http.js";
-import { mapLimit } from "./lib/text.js";
+import { findingId, mapLimit } from "./lib/text.js";
+import { startLocal } from "./local.js";
 import { loadProject } from "./project.js";
 import { writeReport } from "./report.js";
 import { summarize } from "./score.js";
-import { mergeRun, readState, writeState } from "./state.js";
+import { mergeRun, readState, STATE_DIR, writeState } from "./state.js";
+import { mkdir } from "node:fs/promises";
 
 export class UsageError extends Error {}
 
@@ -25,8 +28,8 @@ export function makeRunId(date, existingIds) {
  * @param {string} target
  */
 export function parseTarget(target) {
-  if (!target) throw new UsageError("Missing --target. Give the address to scan, for example --target https://my-app.com");
-  if (target === "local") throw new UsageError('Scanning the local version ("--target local") is not supported yet. Start the app and pass its address instead.');
+  if (!target) throw new UsageError("Missing --target. Give the address to scan (--target https://my-app.com) or --target local");
+  if (target === "local") return "local";
   let url;
   try {
     url = new URL(target);
@@ -41,7 +44,7 @@ export function parseTarget(target) {
 
 /** Which layers each mode runs. Judgment checks are never run by the engine (docs/02). */
 const MODE_LAYERS = { quick: new Set(["mechanical"]), full: new Set(["mechanical", "browser"]) };
-const CHECK_TIMEOUT_MS = 60_000;
+const CHECK_TIMEOUT_MS = { mechanical: 60_000, browser: 240_000 };
 
 /** --only "seo,sec.client-secrets" → the selected check ids. */
 export function selectChecks(implemented, only, catalog) {
@@ -55,16 +58,30 @@ export function selectChecks(implemented, only, catalog) {
 }
 
 /** Prepare everything a run or `detect` needs. */
-async function prepare({ root, target }) {
-  const url = parseTarget(target);
+async function prepare({ root, target, maxPages = 30 }) {
+  let url = parseTarget(target);
+  const project = await loadProject(root);
+  let local = null;
+  if (url === "local") {
+    local = await startLocal(project);
+    url = local.url;
+  }
+  try {
+    return { ...(await reach({ url, project, maxPages })), local };
+  } catch (err) {
+    await local?.stop();
+    throw err;
+  }
+}
+
+async function reach({ url, project, maxPages }) {
   const http = createHttp();
   try {
     await http.request(url, { as: "none" });
   } catch (err) {
     throw new Error(`Couldn't reach ${url} (${err.code ?? err.message}). Is the site running?`);
   }
-  const project = await loadProject(root);
-  const crawl = createCrawler({ target: url, http });
+  const crawl = createCrawler({ target: url, http, limit: maxPages });
   const pages = await crawl.pages();
   if (!pages.length) {
     const home = (await crawl.visited()).get(new URL(url).href);
@@ -75,7 +92,8 @@ async function prepare({ root, target }) {
 }
 
 export async function detectOnly({ root, target }) {
-  const { detected, pages } = await prepare({ root, target });
+  const { detected, pages, local } = await prepare({ root, target });
+  await local?.stop();
   return { detected, pages: pages.map((p) => p.path) };
 }
 
@@ -86,11 +104,11 @@ export async function detectOnly({ root, target }) {
 async function runOne(c, ctx) {
   try {
     let timer;
-    const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS)));
+    const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000)));
     const items = await Promise.race([c.check.run(ctx), timeout]).finally(() => clearTimeout(timer));
     if (!Array.isArray(items)) throw new CheckBug(`${c.id}: run() must return an array`);
     const skip = items.find((i) => i.status === "skip");
-    if (skip) return { entry: c.entry, status: "skip", reason: skip.reason, items: [] };
+    if (skip) return { entry: c.entry, status: "skip", reason: skip.reason, ...(skip.needs ? { needs: skip.needs } : {}), items: [] };
     const status = items.some((i) => i.status === "fail") ? "fail" : items.some((i) => i.status === "uncertain") ? "uncertain" : "pass";
     return { entry: c.entry, status, items };
   } catch (err) {
@@ -119,6 +137,43 @@ async function ensureGitignore(root, project) {
   return true;
 }
 
+/** Saves a check's screenshot as the finding's before.png — unless it already has one. */
+async function saveShots(root, state, results) {
+  for (const r of results) {
+    for (const item of r.items) {
+      if (!Buffer.isBuffer(item.shot)) continue;
+      const id = findingId(r.entry.id, item.key);
+      const existing = state.findings[id]?.shots?.before;
+      if (existing) {
+        item.shot = existing;
+        continue;
+      }
+      const rel = `shots/${id}/before.png`;
+      await mkdir(path.join(root, STATE_DIR, "shots", id), { recursive: true });
+      await writeFile(path.join(root, STATE_DIR, rel), item.shot);
+      item.shot = rel;
+    }
+  }
+}
+
+/** A finding fixed this run that had a before.png gets an after.png from the same page and width. */
+async function saveAfterShots(root, state, fixedIds, browser, base) {
+  if (!browser) return;
+  for (const id of fixedIds) {
+    const f = state.findings[id];
+    if (!f.shots?.before || !f.location?.url) continue;
+    try {
+      const p = await browser.open(new URL(f.location.url, base).href, { width: f.location.viewport ?? 1280 });
+      const rel = `shots/${id}/after.png`;
+      await mkdir(path.join(root, STATE_DIR, "shots", id), { recursive: true });
+      await writeFile(path.join(root, STATE_DIR, rel), await p.screenshot());
+      f.shots.after = rel;
+    } catch {
+      // no after shot is better than a failed run
+    }
+  }
+}
+
 /** A page path is only "verified" if the page loaded this run; other resources (files) always are. */
 function verifiablePaths(pages) {
   const ok = new Set(pages.map((p) => p.path));
@@ -132,55 +187,81 @@ function verifiablePaths(pages) {
 
 /**
  * Runs the applicable, implemented checks and records the run in state.json.
- * @param {{ root: string, target: string, mode: "full"|"quick", only?: string, catalog: any, checks: { implemented: any[], notImplemented: string[] }, now?: () => Date }} opts
+ * @param {{ root: string, target: string, mode: "full"|"quick", only?: string, consent?: string[], staging?: boolean, maxPages?: number,
+ *   catalog: any, checks: { implemented: any[], notImplemented: string[] }, now?: () => Date, onProgress?: (msg: string) => void }} opts
  */
-export async function run({ root, target, mode, only, catalog, checks, now = () => new Date() }) {
+export async function run({ root, target, mode, only, consent = [], staging = false, maxPages = 30, catalog, checks, now = () => new Date(), onProgress = () => {} }) {
   const selected = selectChecks(checks.implemented, only, catalog).filter((c) => MODE_LAYERS[mode].has(c.entry.layer));
   const startedAt = now();
-  const { url, http, project, crawl, pages, detected } = await prepare({ root, target });
+  const { url, http, project, crawl, pages, detected, local } = await prepare({ root, target, maxPages });
+  if (local) onProgress(`Started the app locally (${local.how}) at ${url}`);
 
-  const state = await readState(root);
-  const runId = makeRunId(startedAt, new Set(state.runs.map((r) => r.id)));
-
-  const results = await mapLimit(selected, 8, async (c) => {
-    const fact = c.entry.appliesWhen;
-    if (fact !== "always" && !detected[fact]?.value) {
-      return { entry: c.entry, status: "skip", reason: detected[fact]?.why ?? `not relevant (${fact})`, items: [] };
+  let browser = null;
+  try {
+    const applicable = (c) => c.entry.appliesWhen === "always" || detected[c.entry.appliesWhen]?.value;
+    if (selected.some((c) => c.entry.layer === "browser" && applicable(c))) {
+      browser = await launchBrowser();
+      crawl.attachBrowser(browser);
+      onProgress(`Using your installed Chrome (${browser.version})`);
     }
-    const ctx = makeContext({ entry: c.entry, project, crawl, http, target: url, detected, now: startedAt });
-    return runOne(c, ctx);
-  });
 
-  state.project.detected = detected;
-  const at = now().toISOString();
-  const changes = mergeRun(state, { runId, at, results, scannedPaths: verifiablePaths(pages) });
-  const { score, verdict, counts } = summarize(catalog, state);
+    const state = await readState(root);
+    const runId = makeRunId(startedAt, new Set(state.runs.map((r) => r.id)));
 
-  const record = {
-    id: runId,
-    mode,
-    target: url,
-    ...(only ? { only } : {}),
-    startedAt: startedAt.toISOString(),
-    finishedAt: now().toISOString(),
-    score,
-    verdict,
-    counts: { ...counts, notImplemented: checks.notImplemented.length },
-    pages: pages.length,
-    changes,
-  };
-  state.runs.push(record);
-  await writeState(root, state);
-  await writeReport(root, catalog, state);
-  const gitignored = await ensureGitignore(root, project);
+    const runLayer = (layer, limit) =>
+      mapLimit(selected.filter((c) => c.entry.layer === layer), limit, async (c) => {
+        const fact = c.entry.appliesWhen;
+        if (fact !== "always" && !detected[fact]?.value) {
+          return { entry: c.entry, status: "skip", reason: detected[fact]?.why ?? `not relevant (${fact})`, items: [] };
+        }
+        const ctx = makeContext({ entry: c.entry, project, crawl, http, browser, target: url, detected, now: startedAt, consent, staging });
+        return runOne(c, ctx);
+      });
+    const results = [...(await runLayer("mechanical", 8)), ...(browser ? await runLayer("browser", 3) : [])];
+    // keep catalog order so state and report don't depend on which check finished first
+    const order = new Map(catalog.checks.map((c, i) => [c.id, i]));
+    results.sort((a, b) => order.get(a.entry.id) - order.get(b.entry.id));
 
-  return {
-    run: record,
-    gitignored,
-    ran: results.map((r) => ({ id: r.entry.id, layer: r.entry.layer, status: r.status, ...(r.reason ? { reason: r.reason } : {}) })),
-    errors: results.filter((r) => r.error).map((r) => r.error),
-    implemented: checks.implemented.map((c) => c.id),
-    notImplemented: checks.notImplemented,
-    catalogSize: catalog.checks.length,
-  };
+    state.project.detected = detected;
+    await saveShots(root, state, results);
+    const at = now().toISOString();
+    const rendered = browser ? await crawl.browserPages().catch(() => []) : [];
+    const changes = mergeRun(state, { runId, at, results, scannedPaths: verifiablePaths([...pages, ...rendered]) });
+    await saveAfterShots(root, state, changes.fixed, browser, url);
+    const { score, verdict, counts } = summarize(catalog, state);
+
+    const record = {
+      id: runId,
+      mode,
+      target: url,
+      ...(only ? { only } : {}),
+      startedAt: startedAt.toISOString(),
+      finishedAt: now().toISOString(),
+      score,
+      verdict,
+      counts: { ...counts, notImplemented: checks.notImplemented.length },
+      pages: Math.max(pages.length, rendered.length),
+      changes,
+    };
+    state.runs.push(record);
+    await writeState(root, state);
+    await writeReport(root, catalog, state);
+    const gitignored = await ensureGitignore(root, project);
+
+    return {
+      run: record,
+      gitignored,
+      local: local ? { how: local.how, url } : null,
+      ran: results.map((r) => ({ id: r.entry.id, layer: r.entry.layer, status: r.status, ...(r.reason ? { reason: r.reason } : {}), ...(r.needs ? { needs: r.needs } : {}) })),
+      errors: results.filter((r) => r.error).map((r) => r.error),
+      implemented: checks.implemented.map((c) => c.id),
+      notImplemented: checks.notImplemented,
+      catalogSize: catalog.checks.length,
+    };
+  } finally {
+    await browser?.close();
+    await local?.stop();
+  }
 }
+
+export { BrowserMissing };

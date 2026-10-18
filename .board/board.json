@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 4,
-  "nextNoteNum": 5,
+  "nextNum": 6,
+  "nextNoteNum": 7,
   "features": [
     {
       "key": "ALL-1",
@@ -62,21 +62,26 @@
       "key": "ALL-2",
       "title": "Which milestone gets --target local (start the dev server)?",
       "type": "question",
-      "status": "idea",
-      "note": "Proposed M2 with the browser layer; waiting on owner",
+      "status": "done",
+      "note": "M2, together with the browser layer (owner approved the plan)",
       "doneWhen": [],
       "steps": [],
       "files": [],
       "links": [],
       "area": "",
       "createdAt": "2026-10-18T13:04:41Z",
-      "updatedAt": "2026-10-18T13:04:41Z",
+      "updatedAt": "2026-10-18T14:19:28Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-18T13:04:41Z",
           "by": "claude",
           "text": "Created"
+        },
+        {
+          "at": "2026-10-18T14:19:28Z",
+          "by": "claude",
+          "text": "Done"
         }
       ]
     },
@@ -84,8 +89,8 @@
       "key": "ALL-3",
       "title": "Engine core + mechanical checks (M1)",
       "type": "feature",
-      "status": "active",
-      "note": "detect.js, runner, state merge, score, report.md, then the 27 checks",
+      "status": "done",
+      "note": "cd engine && npm test — 69 pass, 13 browser rows skipped; node test/helpers/run-fixture.js shows the report",
       "doneWhen": [
         "All mechanical rows in expected.json match",
         "Two consecutive runs produce identical findings",
@@ -137,14 +142,114 @@
         "engine/src/checks/qa/error-boundary.js",
         "engine/src/checks/design/ui-libraries.js"
       ],
-      "links": [],
+      "links": [
+        "a099133"
+      ],
       "area": "",
       "createdAt": "2026-10-18T13:12:07Z",
-      "updatedAt": "2026-10-18T13:25:34Z",
+      "updatedAt": "2026-10-18T14:19:28Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-18T13:12:07Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-18T13:30:11Z",
+          "by": "claude",
+          "text": "Moved to review — cd engine && npm test — 69 pass, 13 browser rows skipped; node test/helpers/run-fixture.js shows the report"
+        },
+        {
+          "at": "2026-10-18T13:30:11Z",
+          "by": "claude",
+          "text": "Proof: a099133"
+        },
+        {
+          "at": "2026-10-18T14:19:28Z",
+          "by": "claude",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-4",
+      "title": "Hebrew dictionary is AGPL-3.0 — ship it, download on first use, or drop Hebrew spelling?",
+      "type": "question",
+      "status": "idea",
+      "note": "Decide before M8 packaging",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-18T13:30:11Z",
+      "updatedAt": "2026-10-18T13:30:11Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T13:30:11Z",
+          "by": "claude",
+          "text": "Created"
+        }
+      ]
+    },
+    {
+      "key": "ALL-5",
+      "title": "Browser layer + browser checks (M2)",
+      "type": "feature",
+      "status": "active",
+      "note": "browser.js with installed Chrome, rendered crawl, screenshots, axe-core, 29 checks",
+      "doneWhen": [
+        "All browser rows in expected.json match",
+        "Each visual failure has a before.png with the element highlighted",
+        "Full mode on the fixture under 2 minutes"
+      ],
+      "steps": [],
+      "files": [
+        "engine/src/browser.js",
+        "engine/src/lib/page-helpers.js",
+        "engine/src/local.js",
+        "engine/src/lib/browser-checks.js",
+        "engine/src/checks/qa/broken-links.js",
+        "engine/src/checks/qa/missing-assets.js",
+        "engine/src/checks/qa/failed-requests.js",
+        "engine/src/checks/qa/console-errors.js",
+        "engine/src/checks/qa/dead-buttons.js",
+        "engine/src/checks/qa/custom-404.js",
+        "engine/src/checks/resp/no-horizontal-scroll.js",
+        "engine/src/checks/resp/input-zoom.js",
+        "engine/src/checks/resp/touch-targets.js",
+        "engine/src/checks/resp/mobile-menu.js",
+        "engine/src/checks/perf/lcp.js",
+        "engine/src/lib/color.js",
+        "engine/src/checks/design/palette.js",
+        "engine/src/checks/design/font-families.js",
+        "engine/src/checks/design/button-families.js",
+        "engine/src/lib/axe-check.js",
+        "engine/src/checks/a11y/contrast.js",
+        "engine/src/checks/a11y/form-labels.js",
+        "engine/src/checks/a11y/button-names.js",
+        "engine/src/checks/rtl/components.js",
+        "engine/src/checks/rtl/font.js",
+        "engine/src/checks/privacy/cookie-blocks.js",
+        "engine/src/checks/data/local-only.js",
+        "engine/src/checks/sec/exposed-paths.js",
+        "engine/src/checks/sec/idor.js",
+        "engine/src/checks/forms/success-truth.js",
+        "engine/src/checks/forms/validation.js",
+        "engine/src/checks/forms/destination.js",
+        "engine/src/checks/behave/double-submit.js",
+        "engine/src/checks/qa/loading-states.js"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-18T14:19:29Z",
+      "updatedAt": "2026-10-18T14:30:05Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T14:19:29Z",
           "by": "claude",
           "text": "Created — active"
         }
@@ -164,7 +269,8 @@
       "file": "docs/07-milestones.md",
       "cards": [
         "ALL-1",
-        "ALL-3"
+        "ALL-3",
+        "ALL-5"
       ],
       "steps": [
         {
@@ -180,7 +286,7 @@
         {
           "text": "M2 — Browser layer",
           "done": false,
-          "card": ""
+          "card": "ALL-5"
         },
         {
           "text": "M3 — Skill and conversation flow",
@@ -219,7 +325,7 @@
         }
       ],
       "createdAt": "2026-10-18T13:04:30Z",
-      "updatedAt": "2026-10-18T13:12:07Z",
+      "updatedAt": "2026-10-18T14:19:29Z",
       "updatedBy": "claude"
     },
     {
@@ -274,6 +380,42 @@
       "steps": [],
       "createdAt": "2026-10-18T13:04:37Z",
       "updatedAt": "2026-10-18T13:04:37Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N5",
+      "kind": "decision",
+      "title": "Spell checking uses Hunspell (WASM) with Hspell's Hebrew dictionary",
+      "body": "hunspell-asm loads Hebrew in 0.3s; flags a word only if unknown, used once, and one edit from a known word.",
+      "considered": "nspell: over 2 minutes to load Hebrew. A plain word list: Hebrew prefixes make it useless.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-3"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T13:30:11Z",
+      "updatedAt": "2026-10-18T13:30:11Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N6",
+      "kind": "decision",
+      "title": "Severity counts are per check, not per finding",
+      "body": "A check failing on 3 pages is one blocker, matching passed/skipped which were already per check. Also added top-level checks map and runs[].changes to state.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-3"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T13:30:11Z",
+      "updatedAt": "2026-10-18T13:30:11Z",
       "updatedBy": "claude"
     }
   ],

@@ -2,6 +2,17 @@
 
 ## Done
 
+### M2 — Browser layer (2026-10-18)
+- `browser.js`: the user's installed Chrome via `playwright-core` (`channel: "chrome"`), headless; never downloads a browser; a clear "install Chrome" message if it can't start. Shared pages per URL+width for read-only checks (kept loaded, at most 10 open), isolated fresh pages for checks that click or type. Console errors, page errors, every request, failure and status are recorded per page.
+- Rendered crawl (`crawl.browserPages()`), at desktop width, same 30-page limit (now `--max-pages`).
+- Viewports 375 / 390 / 768 / 1280.
+- Screenshots: `.launch-check/shots/<findingId>/before.png`, with the element outlined in red. A finding fixed in a later run gets `after.png` from the same page and width; one that comes back loses its after shot.
+- axe-core for contrast and button names.
+- All 29 v1 browser checks, each with an `expected.json` row (17 rows added, none changed).
+- `--target local`: runs the project's dev script on a free port (or serves a plain HTML folder) and stops it afterwards.
+- Consent: `--consent submit-forms[,test-accounts]`. Effective only against a local target, or with `--staging`. A check waiting for consent is skipped with `needs` set, so the skill knows what to ask.
+- Tests: 105 (104 pass, 1 skipped = `shop.checkout-flow`, not v1). Full mode on the fixture ~21 s, quick mode ~0.5 s.
+
 ### M1 — Engine core + mechanical checks (2026-10-18)
 - `detect.js`: the 10 facts, each with a reason whether true or false. Reads `package.json`, source files and the crawled pages.
 - `crawl.js`: plain-HTTP crawler (no JavaScript), same origin, breadth-first, deterministic order, 30-page limit, identical pages de-duplicated. The browser crawl in M2 sits next to it.
@@ -19,13 +30,16 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
-- Nothing. Next: M2 (browser layer).
+- Nothing. Next: M3 (skill and conversation flow).
 
 ## Dependencies (with reasons)
 - `htmlparser2` (MIT) — real HTML parsing for the mechanical checks; regex parsing would be a steady source of false alarms.
 - `hunspell-asm` (MIT) — Hunspell compiled to WebAssembly. Hebrew loads in 0.3 s and checks are instant. `nspell` (pure JS) was tried first and took over 2 minutes just to load the Hebrew dictionary.
 - `dictionary-en` (MIT AND BSD) — English dictionary.
 - `dictionary-he` (**AGPL-3.0**) — Hebrew dictionary (from Hspell). See open questions.
+- `playwright-core` (Apache-2.0) — drives the installed Chrome. Doesn't download browsers.
+- `axe-core` (MPL-2.0) — accessibility rules.
+- Not added: `lighthouse`. `perf.lcp` measures the same thing directly through Chrome (throttled CPU + "Slow 4G"), without Lighthouse's ~30 MB of dependencies.
 
 ## Decisions taken (owner OK'd 2026-10-18)
 - Score with nothing to count is `null`, verdict `"No checks yet"`.
@@ -39,6 +53,21 @@
 - `runs[].pages` (pages scanned) and `runs[].only` (when `--only` was used).
 - `runs[].counts` now also has `uncertain`, `muted`, `accepted`, `deferred`. Severity counts are **per check**, not per finding: a check failing on 3 pages is one blocker (matches passed/skipped, which were already per check).
 - Finding ids: `f_<checkId>_<key>`. Page findings use the page path ("/" → `home`); code findings use file + a hash of the line text, so editing other lines doesn't change the id.
+
+## Additions to the state shape in M2 — please confirm
+- `checks[id].needs`: the consent a skipped check is waiting for (`submit-forms`, `test-accounts`).
+
+## Deviations from the docs (M2)
+- `--target local` always starts its own copy on a free port instead of reusing a server already running on the usual port (docs/02). Reason: during M1 a different project's server was sitting on the port I tried, and the scan silently read that app. Starting our own copy means we always scan the right app.
+- `a11y.form-labels` uses its own rule instead of axe-core: axe accepts a placeholder as a label, but `expected.json` (rightly) doesn't — the placeholder vanishes once you type.
+
+## Known limits of the browser checks
+- `sec.idor` needs two test accounts and the app's sign-in flow; until the skill collects them (M3) it answers "couldn't tell" (or is skipped without consent).
+- `perf.lcp` is a timing: median of 3 runs on the first 3 pages, failing above 4 s. Near the threshold it can flip between runs.
+- `qa.loading-states` and `qa.error-states` only look at pages that fetch data after loading, and fail only when 200+ characters of content are missing with nothing said — deliberately conservative.
+- `qa.dead-buttons` clicks at most 15 buttons per page; every request that would change something is answered by Launch Check itself, so clicks can't change real data.
+- The form checks never send test data to a different address on the developer's machine than the site itself.
+- The "Chrome not found" message isn't covered by an automated test (it would need a machine without Chrome).
 
 ## Known limits of the mechanical checks
 - The HTTP crawl doesn't run JavaScript: pages that build their content in the browser look empty to it. The M2 browser crawl covers those.

@@ -1,12 +1,12 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { serveFixture } from "./helpers/serve.js";
+import { copyFixture, serveFixture } from "./helpers/serve.js";
 import { validateState } from "../src/state.js";
 
 const BIN = fileURLToPath(new URL("../bin/launch-check.js", import.meta.url));
@@ -86,5 +86,35 @@ test("bad usage exits 2 with a plain message", async () => {
   assert.equal((await cli(project, "run")).code, 2);
   assert.equal((await cli(project, "run", "--target", "ftp://x")).code, 2);
   assert.equal((await cli(project, "run", "--target", site.url, "--mode", "slow")).code, 2);
-  assert.match((await cli(project, "run", "--target", "local")).stderr, /not supported yet/);
+  assert.equal((await cli(project, "run", "--target", site.url, "--consent", "buy-things")).code, 2);
+});
+
+test("--target local serves a plain HTML project itself and stops afterwards", async () => {
+  const dir = await copyFixture("broken-landing");
+  try {
+    const { code, stdout, stderr } = await cli(dir, "run", "--target", "local", "--mode", "quick", "--json");
+    assert.equal(code, 0, stderr);
+    const out = JSON.parse(stdout);
+    assert.equal(out.local.how, "served the project folder");
+    assert.equal(out.run.pages, 2);
+    await assert.rejects(fetch(out.local.url), "the local server is stopped after the run");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("--target local runs the project's dev script on a free port and stops it afterwards", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "lc-devscript-"));
+  try {
+    await writeFile(path.join(dir, "package.json"), JSON.stringify({ name: "x", private: true, scripts: { dev: "node server.js" } }));
+    await writeFile(path.join(dir, "server.js"), `require("http").createServer((q, s) => s.writeHead(200, {"content-type":"text/html"}).end("<!doctype html><html lang=en><title>Dev</title><body><p>Hello from the dev server</p></body></html>")).listen(process.env.PORT, () => console.log("ready on http://localhost:" + process.env.PORT));`);
+    const { code, stdout, stderr } = await cli(dir, "run", "--target", "local", "--mode", "quick", "--json");
+    assert.equal(code, 0, stderr);
+    const out = JSON.parse(stdout);
+    assert.equal(out.local.how, "npm run dev");
+    await new Promise((r) => setTimeout(r, 500));
+    await assert.rejects(fetch(out.local.url), "the dev server is stopped after the run");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

@@ -20,16 +20,23 @@
     { "checkId": "qa.dead-buttons",            "status": "fail", "note": "hero button .cta has no handler" },
     { "checkId": "qa.custom-404",              "status": "fail", "note": "no custom 404 page; assumes the harness serves its default 404" },
     { "checkId": "qa.error-boundary",           "status": "skip", "note": "plain HTML, no component framework" },
+    { "checkId": "qa.loading-states",           "status": "pass", "note": "no data is loaded after the page; nothing to wait for" },
+    { "checkId": "qa.error-states",             "status": "pass", "note": "no data requests to fail" },
 
     { "checkId": "resp.viewport",              "status": "pass" },
     { "checkId": "resp.no-horizontal-scroll",  "status": "fail", "note": ".pricing is 420px wide; fails at 375 and 390 on index only" },
     { "checkId": "resp.input-zoom",            "status": "fail", "note": "inputs are 14px" },
     { "checkId": "resp.touch-targets",         "status": "fail", "note": ".cta is about 26px tall" },
+    { "checkId": "resp.mobile-menu",            "status": "pass", "note": "the nav links stay visible at 375px; no menu button needed" },
     
     { "checkId": "perf.images-weight",          "status": "pass", "note": "no image over the limit; team.jpg 404s and is qa.missing-assets' business" },
+    { "checkId": "perf.lcp",                    "status": "pass", "note": "two tiny local pages" },
 
     { "checkId": "design.favicon",             "status": "fail", "note": "no favicon" },
     { "checkId": "design.ui-libraries",         "status": "pass", "note": "no package.json, no component libraries" },
+    { "checkId": "design.palette",              "status": "pass", "note": "two near-duplicate groups (#767676≈#777777, #efefef≈#f4f4f4≈#ffffff); 3 groups or more than 8 grays fail" },
+    { "checkId": "design.font-families",        "status": "pass", "note": "Arial for text, the system font in form controls" },
+    { "checkId": "design.button-families",      "status": "pass", "note": "only one filled button (.cta)" },
 
     { "checkId": "content.placeholders",       "status": "fail", "note": "Lorem ipsum in the hero" },
     { "checkId": "content.copyright-year",     "status": "fail", "note": "© 2024 on both pages" },
@@ -39,14 +46,20 @@
     { "checkId": "a11y.contrast",              "status": "fail", "note": "#999 on white in .hero p" },
     { "checkId": "a11y.form-labels",           "status": "fail", "note": "#email has only a placeholder" },
     { "checkId": "a11y.lang",                  "status": "fail", "note": "index.html has no lang; pricing.html is fine" },
+    { "checkId": "a11y.button-names",           "status": "pass", "note": "every button and link has text" },
 
     { "checkId": "forms.success-truth",        "status": "fail", "note": "requires consent; success message shown although the request fails" },
+    { "checkId": "forms.destination",           "status": "fail", "note": "requires consent; submits to http://localhost:3000/api, not the site" },
+    { "checkId": "forms.validation",            "status": "fail", "note": "requires consent; no required fields, an empty email is sent" },
+    { "checkId": "behave.double-submit",        "status": "fail", "note": "requires consent; two clicks send two requests" },
 
     { "checkId": "sec.client-secrets",         "status": "fail", "note": "sk_live_ pattern in assets/app.js (fake value)" },
     { "checkId": "sec.debug-logs",             "status": "fail", "note": "console.log of form data" },
     { "checkId": "sec.repo-secrets",            "status": "skip", "note": "the test copy of the fixture is not a git repository" },
     { "checkId": "sec.env-files",               "status": "pass", "note": "harness returns 404 for /.env and /.git/*" },
     { "checkId": "sec.open-db",                 "status": "skip", "note": "no database detected" },
+    { "checkId": "sec.exposed-paths",           "status": "pass", "note": "harness returns 404 for /admin and friends" },
+    { "checkId": "sec.idor",                    "status": "skip", "note": "no login detected" },
 
     { "checkId": "seo.title",                  "status": "fail", "note": "both pages share the same title" },
     { "checkId": "seo.share-tags",             "status": "fail", "note": "no share tags" },
@@ -54,8 +67,13 @@
     { "checkId": "seo.noindex",                "status": "pass" },
 
     { "checkId": "rtl.dir",                    "status": "pass" },
+    { "checkId": "rtl.components",              "status": "pass", "note": "text follows the page direction" },
+    { "checkId": "rtl.font",                    "status": "pass", "note": "system font stack (Arial); no web font to fall back from" },
     
     { "checkId": "privacy.policy",              "status": "fail", "note": "no privacy policy link on either page" },
+    { "checkId": "privacy.cookie-blocks",       "status": "pass", "note": "no tracking at all" },
+    
+    { "checkId": "data.local-only",             "status": "pass", "note": "nothing saved in the browser" },
 
     { "checkId": "env.localhost-urls",         "status": "fail", "note": "http://localhost:3000/api in assets/app.js" },
     { "checkId": "env.missing-vars",            "status": "pass", "note": "no environment variables used" },
