@@ -4,9 +4,19 @@
   "private": true,
   "description": "Runs Launch Check's deterministic checks and writes .launch-check/state.json",
   "type": "module",
-  "bin": { "launch-check": "bin/launch-check.js" },
-  "engines": { "node": ">=20.1" },
+  "bin": {
+    "launch-check": "bin/launch-check.js"
+  },
+  "engines": {
+    "node": ">=20.1"
+  },
   "scripts": {
     "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "dictionary-en": "^4.0.0",
+    "dictionary-he": "^2.0.0",
+    "htmlparser2": "^12.0.0",
+    "hunspell-asm": "^4.0.2"
   }
 }

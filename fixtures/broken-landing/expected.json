@@ -19,16 +19,22 @@
     { "checkId": "qa.console-errors",          "status": "fail", "note": ".testimonials doesn't exist; app.js throws on load (index only)" },
     { "checkId": "qa.dead-buttons",            "status": "fail", "note": "hero button .cta has no handler" },
     { "checkId": "qa.custom-404",              "status": "fail", "note": "no custom 404 page; assumes the harness serves its default 404" },
+    { "checkId": "qa.error-boundary",           "status": "skip", "note": "plain HTML, no component framework" },
 
     { "checkId": "resp.viewport",              "status": "pass" },
     { "checkId": "resp.no-horizontal-scroll",  "status": "fail", "note": ".pricing is 420px wide; fails at 375 and 390 on index only" },
     { "checkId": "resp.input-zoom",            "status": "fail", "note": "inputs are 14px" },
     { "checkId": "resp.touch-targets",         "status": "fail", "note": ".cta is about 26px tall" },
+    
+    { "checkId": "perf.images-weight",          "status": "pass", "note": "no image over the limit; team.jpg 404s and is qa.missing-assets' business" },
 
     { "checkId": "design.favicon",             "status": "fail", "note": "no favicon" },
+    { "checkId": "design.ui-libraries",         "status": "pass", "note": "no package.json, no component libraries" },
 
     { "checkId": "content.placeholders",       "status": "fail", "note": "Lorem ipsum in the hero" },
     { "checkId": "content.copyright-year",     "status": "fail", "note": "© 2024 on both pages" },
+    { "checkId": "content.spelling",            "status": "pass", "note": "repeated names (פילאטיס, נועה) are not typos; Lorem ipsum is left to content.placeholders" },
+    { "checkId": "content.alt-text",            "status": "pass", "note": "team.jpg has alt=\"\", the standard decorative marker; only a missing alt fails" },
 
     { "checkId": "a11y.contrast",              "status": "fail", "note": "#999 on white in .hero p" },
     { "checkId": "a11y.form-labels",           "status": "fail", "note": "#email has only a placeholder" },
@@ -38,6 +44,9 @@
 
     { "checkId": "sec.client-secrets",         "status": "fail", "note": "sk_live_ pattern in assets/app.js (fake value)" },
     { "checkId": "sec.debug-logs",             "status": "fail", "note": "console.log of form data" },
+    { "checkId": "sec.repo-secrets",            "status": "skip", "note": "the test copy of the fixture is not a git repository" },
+    { "checkId": "sec.env-files",               "status": "pass", "note": "harness returns 404 for /.env and /.git/*" },
+    { "checkId": "sec.open-db",                 "status": "skip", "note": "no database detected" },
 
     { "checkId": "seo.title",                  "status": "fail", "note": "both pages share the same title" },
     { "checkId": "seo.share-tags",             "status": "fail", "note": "no share tags" },
@@ -45,8 +54,15 @@
     { "checkId": "seo.noindex",                "status": "pass" },
 
     { "checkId": "rtl.dir",                    "status": "pass" },
+    
+    { "checkId": "privacy.policy",              "status": "fail", "note": "no privacy policy link on either page" },
 
     { "checkId": "env.localhost-urls",         "status": "fail", "note": "http://localhost:3000/api in assets/app.js" },
+    { "checkId": "env.missing-vars",            "status": "pass", "note": "no environment variables used" },
+    
+    { "checkId": "launch.https-redirect",       "status": "skip", "note": "local target" },
+    { "checkId": "launch.ssl-valid",            "status": "skip", "note": "local target" },
+    { "checkId": "launch.staging-urls",         "status": "pass" },
 
     { "checkId": "mail.auth",                  "status": "skip", "note": "no email sending detected" },
     { "checkId": "shop.checkout-flow",         "status": "skip", "note": "no payments detected" }

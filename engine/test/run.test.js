@@ -42,13 +42,12 @@ test("harness serves the fixture, with a default 404", async () => {
   assert.equal((await fetch(new URL("about.html", site.url))).status, 404);
 });
 
-test("run against the fixture writes a valid state.json with zero checks implemented", async () => {
+test("run against the fixture writes a valid state.json", async () => {
   const { code, stdout, stderr } = await cli(project, "run", "--target", site.url, "--json");
   assert.equal(code, 0, stderr);
 
   const out = JSON.parse(stdout);
-  assert.deepEqual(out.implemented, []);
-  assert.equal(out.notImplemented.length, 175);
+  assert.equal(out.implemented.length + out.notImplemented.length, 175);
   assert.equal(out.catalogSize, 175);
 
   const state = JSON.parse(await readFile(path.join(project, ".launch-check", "state.json"), "utf8"));
@@ -57,9 +56,8 @@ test("run against the fixture writes a valid state.json with zero checks impleme
   const [run] = state.runs;
   assert.equal(run.target, site.url);
   assert.equal(run.mode, "full");
-  assert.equal(run.score, null);
-  assert.equal(run.counts.notImplemented, 175);
-  assert.deepEqual(state.findings, {});
+  assert.equal(run.counts.notImplemented, out.notImplemented.length);
+  assert.ok(Object.keys(state.findings).length > 0);
 });
 
 test("a second run appends with a distinct id", async () => {

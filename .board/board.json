@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 6,
+  "project": {
+    "name": "All In One Checks",
+    "key": "ALL"
+  },
+  "settings": {
+    "granularity": "normal"
+  },
+  "nextNum": 4,
+  "nextNoteNum": 5,
+  "features": [
+    {
+      "key": "ALL-1",
+      "title": "Engine scaffold: CLI, catalog check, state file, test harness",
+      "type": "feature",
+      "status": "done",
+      "note": "cd engine && npm test — 13 pass; run against the fixture writes .launch-check/state.json",
+      "doneWhen": [
+        "launch-check run --target <fixture> runs, 0 implemented, valid state.json, harness passes"
+      ],
+      "steps": [],
+      "files": [
+        "engine/src/cli.js"
+      ],
+      "links": [
+        "521b2fb"
+      ],
+      "area": "Engine",
+      "createdAt": "2026-10-18T13:04:30Z",
+      "updatedAt": "2026-10-18T13:09:20Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T13:04:30Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-18T13:04:30Z",
+          "by": "claude",
+          "text": "Area: Engine"
+        },
+        {
+          "at": "2026-10-18T13:04:30Z",
+          "by": "claude",
+          "text": "Moved to review — cd engine && npm test — 13 pass; run against the fixture writes .launch-check/state.json"
+        },
+        {
+          "at": "2026-10-18T13:04:30Z",
+          "by": "claude",
+          "text": "Proof: 521b2fb"
+        },
+        {
+          "at": "2026-10-18T13:09:20Z",
+          "by": "claude",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-2",
+      "title": "Which milestone gets --target local (start the dev server)?",
+      "type": "question",
+      "status": "idea",
+      "note": "Proposed M2 with the browser layer; waiting on owner",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-18T13:04:41Z",
+      "updatedAt": "2026-10-18T13:04:41Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T13:04:41Z",
+          "by": "claude",
+          "text": "Created"
+        }
+      ]
+    },
+    {
+      "key": "ALL-3",
+      "title": "Engine core + mechanical checks (M1)",
+      "type": "feature",
+      "status": "active",
+      "note": "detect.js, runner, state merge, score, report.md, then the 27 checks",
+      "doneWhen": [
+        "All mechanical rows in expected.json match",
+        "Two consecutive runs produce identical findings",
+        "Quick mode under 10 seconds on the fixture"
+      ],
+      "steps": [],
+      "files": [
+        "engine/src/runner.js",
+        "engine/src/lib/text.js",
+        "engine/src/lib/html.js",
+        "engine/src/lib/net.js",
+        "engine/src/http.js",
+        "engine/src/crawl.js",
+        "engine/src/project.js",
+        "engine/src/detect.js",
+        "engine/src/context.js",
+        "engine/src/score.js",
+        "engine/src/state.js",
+        "engine/src/report.js",
+        "engine/src/cli.js",
+        "engine/src/lib/secrets.js",
+        "engine/src/lib/code.js",
+        "engine/src/lib/spell.js",
+        "engine/src/checks/resp/viewport.js",
+        "engine/src/checks/a11y/lang.js",
+        "engine/src/checks/rtl/dir.js",
+        "engine/src/checks/seo/title.js",
+        "engine/src/checks/seo/share-tags.js",
+        "engine/src/checks/seo/robots.js",
+        "engine/src/checks/seo/noindex.js",
+        "engine/src/checks/design/favicon.js",
+        "engine/src/checks/content/placeholders.js",
+        "engine/src/checks/content/copyright-year.js",
+        "engine/src/checks/content/alt-text.js",
+        "engine/src/checks/content/spelling.js",
+        "engine/src/checks/privacy/policy.js",
+        "engine/src/checks/perf/images-weight.js",
+        "engine/src/checks/sec/client-secrets.js",
+        "engine/src/checks/sec/repo-secrets.js",
+        "engine/src/checks/sec/env-files.js",
+        "engine/src/checks/sec/debug-logs.js",
+        "engine/src/checks/env/localhost-urls.js",
+        "engine/src/checks/launch/staging-urls.js",
+        "engine/src/checks/launch/https-redirect.js",
+        "engine/src/checks/launch/ssl-valid.js",
+        "engine/src/checks/mail/auth.js",
+        "engine/src/checks/sec/open-db.js",
+        "engine/src/checks/env/missing-vars.js",
+        "engine/src/checks/qa/error-boundary.js",
+        "engine/src/checks/design/ui-libraries.js"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-18T13:12:07Z",
+      "updatedAt": "2026-10-18T13:25:34Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T13:12:07Z",
+          "by": "claude",
+          "text": "Created — active"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "id": "ALL-N1",
+      "kind": "plan",
+      "title": "Launch Check v1 build",
+      "body": "Claude Code plugin that scans an app before launch and helps fix it. From docs/07-milestones.md.",
+      "considered": "",
+      "decidedBy": "",
+      "confirmedAt": "",
+      "url": "",
+      "file": "docs/07-milestones.md",
+      "cards": [
+        "ALL-1",
+        "ALL-3"
+      ],
+      "steps": [
+        {
+          "text": "M0 — Scaffold",
+          "done": false,
+          "card": "ALL-1"
+        },
+        {
+          "text": "M1 — Engine core + mechanical checks",
+          "done": false,
+          "card": "ALL-3"
+        },
+        {
+          "text": "M2 — Browser layer",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M3 — Skill and conversation flow",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M4 — Complete v1 catalog",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M5 — Dashboard, read-only",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M6 — Dashboard actions + hook",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M7 — Judgment layer",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M8 — Plugin packaging",
+          "done": false,
+          "card": ""
+        },
+        {
+          "text": "M9 — Rest of the catalog",
+          "done": false,
+          "card": ""
+        }
+      ],
+      "createdAt": "2026-10-18T13:04:30Z",
+      "updatedAt": "2026-10-18T13:12:07Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N2",
+      "kind": "decision",
+      "title": "Empty score is null, verdict \"No checks yet\"",
+      "body": "When no applicable checks ran, score is null instead of 0 or 100; runs also store verdict and counts.notImplemented.",
+      "considered": "0: reads as a failing app. 100: reads as ready.",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-1"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T13:04:37Z",
+      "updatedAt": "2026-10-18T13:04:37Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N3",
+      "kind": "decision",
+      "title": "Repo root is the plugin root",
+      "body": "plugin.json, skills/, engine/, catalog/ at the root; docs/ and fixtures/ are dev-only.",
+      "considered": "A launch-check/ subfolder: catalog would need copying or a ../ path.",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-1"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T13:04:37Z",
+      "updatedAt": "2026-10-18T13:04:37Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N4",
+      "kind": "decision",
+      "title": "Slash commands are built as skills, no commands/ folder",
+      "body": "Current Claude Code docs mark commands/ as deprecated.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "https://code.claude.com/docs/en/plugins/components.md",
+      "file": "",
+      "cards": [
+        "ALL-1"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T13:04:37Z",
+      "updatedAt": "2026-10-18T13:04:37Z",
+      "updatedBy": "claude"
+    }
+  ],
+  "areas": [
+    {
+      "name": "Engine",
+      "paths": []
+    }
+  ]
+}

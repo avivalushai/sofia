@@ -40,10 +40,11 @@ async function checksDir(files) {
   return dir;
 }
 
-test("the shipped checks folder loads: everything is not implemented", async () => {
+test("the shipped checks folder loads and matches the catalog", async () => {
   const { implemented, notImplemented } = await loadChecks(catalog);
-  assert.equal(implemented.length, 0);
-  assert.equal(notImplemented.length, 175);
+  assert.equal(implemented.length + notImplemented.length, 175);
+  const mechanicalV1 = catalog.checks.filter((c) => c.v1 && c.layer === "mechanical").map((c) => c.id).sort();
+  assert.deepEqual(implemented.filter((c) => c.entry.layer === "mechanical").map((c) => c.id).sort(), mechanicalV1, "M1: every v1 mechanical check");
 });
 
 test("a check file is matched to its catalog entry", async () => {

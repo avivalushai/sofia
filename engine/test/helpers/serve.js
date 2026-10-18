@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,13 +19,13 @@ const TYPES = {
 };
 
 /**
- * Serves a fixture folder on a free port on 127.0.0.1.
+ * Serves a folder on a free port on 127.0.0.1.
  * Missing files get a plain default 404 — expected.json's qa.custom-404 row relies on that.
- * @param {string} name folder under fixtures/
+ * @param {string} nameOrDir folder under fixtures/, or an absolute path
  * @returns {Promise<{ url: string, close: () => Promise<void> }>}
  */
-export async function serveFixture(name) {
-  const root = path.join(FIXTURES, name);
+export async function serveFixture(nameOrDir) {
+  const root = path.isAbsolute(nameOrDir) ? nameOrDir : path.join(FIXTURES, nameOrDir);
   const server = createServer(async (req, res) => {
     const { pathname } = new URL(req.url, "http://x");
     let rel = decodeURIComponent(pathname);
@@ -48,4 +49,15 @@ export async function serveFixture(name) {
     url: `http://127.0.0.1:${port}/`,
     close: () => new Promise((resolve) => server.close(() => resolve())),
   };
+}
+
+/**
+ * Copies a fixture into a fresh temp folder that plays the user's project, without the test metadata
+ * (expected.json would otherwise be scanned as part of the "project").
+ * @returns {Promise<string>} the folder
+ */
+export async function copyFixture(name) {
+  const dir = await mkdtemp(path.join(tmpdir(), `lc-${name}-`));
+  await cp(path.join(FIXTURES, name), dir, { recursive: true, filter: (src) => path.basename(src) !== "expected.json" });
+  return dir;
 }

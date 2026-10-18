@@ -1,10 +1,14 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { findingId } from "./lib/text.js";
 
 export const STATE_VERSION = 1;
 export const STATE_DIR = ".launch-check";
 
 const FINDING_STATUSES = ["open", "fixing", "fixed", "muted", "accepted", "deferred", "uncertain"];
+const CHECK_STATUSES = ["pass", "fail", "skip", "uncertain"];
+/** statuses a re-run may resolve: the user's own decisions (muted) are kept */
+const RESOLVABLE = new Set(["open", "fixing", "accepted", "deferred", "uncertain"]);
 
 /** @param {string} root project folder */
 export function statePath(root) {
@@ -16,6 +20,7 @@ export function emptyState() {
     version: STATE_VERSION,
     project: { root: ".", detected: {} },
     runs: [],
+    checks: {},
     findings: {},
     decisions: [],
     pending: { fix: [], decide: [], updatedAt: null, source: null },
@@ -33,6 +38,7 @@ export async function readState(root) {
     throw err;
   }
   const state = JSON.parse(text);
+  state.checks ??= {}; // M0 state files had no checks map
   const problems = validateState(state);
   if (problems.length) throw new Error(`${statePath(root)} is invalid:\n  - ${problems.join("\n  - ")}`);
   return state;
@@ -47,6 +53,69 @@ export async function writeState(root, state) {
   const tmp = `${file}.${process.pid}.tmp`;
   await writeFile(tmp, JSON.stringify(state, null, 2) + "\n");
   await rename(tmp, file);
+}
+
+/**
+ * Folds one run's check results into the state (docs/02).
+ * - a finding seen for the first time opens; seen again it updates and keeps the user's decision
+ * - a previously fixed finding that fails again reopens
+ * - a finding whose check ran and didn't report it is fixed — but only if its page was scanned
+ *   this run, so a page that failed to load never counts as a fix
+ * Checks that didn't run (not selected, not implemented) are left untouched.
+ * @param {any} state
+ * @param {{ runId: string, at: string, results: { entry: any, status: string, reason?: string, items: any[] }[], scannedPaths: Set<string> }} run
+ * @returns {{ new: string[], fixed: string[], reopened: string[] }}
+ */
+export function mergeRun(state, { runId, at, results, scannedPaths }) {
+  const changes = { new: [], fixed: [], reopened: [] };
+
+  for (const { entry, status, reason, items } of results) {
+    state.checks[entry.id] = { status, ...(reason ? { reason } : {}), lastRun: runId };
+    const reported = new Set();
+
+    for (const r of items.filter((i) => i.status === "fail" || i.status === "uncertain")) {
+      const id = findingId(entry.id, r.key);
+      reported.add(id);
+      const nextStatus = r.status === "fail" ? "open" : "uncertain";
+      const body = {
+        checkId: entry.id,
+        severity: entry.severity,
+        fixer: entry.fixer,
+        title: r.title,
+        impact: r.impact,
+        location: r.location ?? {},
+        evidence: r.evidence,
+        fix: r.fix,
+        ...(r.options ? { options: r.options } : {}),
+      };
+      const prev = state.findings[id];
+      if (!prev) {
+        state.findings[id] = { ...body, status: nextStatus, shots: { before: r.shot ?? null, after: null }, firstSeenRun: runId, lastSeenRun: runId, history: [{ at, event: "opened", run: runId }] };
+        changes.new.push(id);
+        continue;
+      }
+      let status = prev.status;
+      if (prev.status === "fixed") {
+        status = nextStatus;
+        prev.history.push({ at, event: "reopened", run: runId });
+        changes.reopened.push(id);
+      } else if (prev.status === "open" || prev.status === "fixing" || prev.status === "uncertain") {
+        status = nextStatus;
+      }
+      state.findings[id] = { ...prev, ...body, status, shots: { ...prev.shots, before: prev.shots?.before ?? r.shot ?? null }, lastSeenRun: runId };
+    }
+
+    // only a check that finished with a real answer can prove something is gone
+    if (status !== "pass" && status !== "fail") continue;
+    for (const [id, f] of Object.entries(state.findings)) {
+      if (f.checkId !== entry.id || reported.has(id) || !RESOLVABLE.has(f.status)) continue;
+      if (f.location?.url && !scannedPaths.has(f.location.url)) continue;
+      f.status = "fixed";
+      f.history.push({ at, event: "fixed", run: runId });
+      changes.fixed.push(id);
+    }
+  }
+  return changes;
 }
 
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -85,11 +154,18 @@ export function validateState(s) {
       }
     });
   }
+  if (!isObject(s.checks)) p.push("checks must be an object");
+  else {
+    for (const [id, c] of Object.entries(s.checks)) {
+      if (!CHECK_STATUSES.includes(c?.status)) p.push(`checks.${id}: unknown status "${c?.status}"`);
+    }
+  }
   if (!isObject(s.findings)) p.push("findings must be an object");
   else {
     for (const [id, f] of Object.entries(s.findings)) {
       if (typeof f?.checkId !== "string") p.push(`findings.${id}: missing checkId`);
       if (!FINDING_STATUSES.includes(f?.status)) p.push(`findings.${id}: unknown status "${f?.status}"`);
+      if (!Array.isArray(f?.history)) p.push(`findings.${id}: missing history`);
     }
   }
   if (!Array.isArray(s.decisions)) p.push("decisions must be an array");
