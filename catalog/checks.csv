@@ -1,0 +1,176 @@
+id,category,title,layer,severity,fixer,v1,appliesWhen,how
+qa.broken-links,Correctness & errors,Broken internal links,browser,blocker,claude,yes,always,Crawl from the home page and check the status of every internal link
+qa.external-links,Correctness & errors,Dead external links,browser,important,claude,,always,Request every external link; sites that block bots are marked uncertain
+qa.anchors,Correctness & errors,Links to page sections that don't exist,browser,polish,claude,,always,Compare in-page anchor links with ids present on the page
+qa.missing-assets,Correctness & errors,Images and files that don't load,browser,blocker,claude,yes,always,"Track every image, font, script and stylesheet request"
+qa.console-errors,Correctness & errors,Console errors,browser,important,claude,yes,always,Collect console errors on every page at every viewport
+qa.failed-requests,Correctness & errors,Failed network requests,browser,blocker,claude,yes,always,Collect requests that returned an error or never finished
+qa.dead-buttons,Correctness & errors,Buttons that do nothing,browser,blocker,claude,yes,always,"Click every button and check that something changed: navigation, a request, or the DOM"
+qa.custom-404,Correctness & errors,Custom not-found page,browser,important,claude,yes,always,Open a non-existent URL and check what's shown
+qa.error-boundary,Correctness & errors,White screen when a component crashes,mechanical,blocker,claude,yes,always,Check the code has a fallback screen for component crashes
+qa.empty-states,Correctness & errors,Empty states,judgment,important,claude,yes,always,Reviewer checks every list and result handles having no data
+qa.loading-states,Correctness & errors,Loading states,browser,important,claude,yes,always,Throttle the network and check a loading indicator appears
+qa.error-states,Correctness & errors,"Error states, including third-party failures",browser,blocker,claude,yes,always,Block outgoing requests and check a message and a retry are shown
+qa.orphan-pages,Correctness & errors,Orphan pages,mechanical,polish,choice,,always,Compare routes in the code with pages the crawler reached
+perf.lcp,Performance,Time until the main content shows,browser,important,claude,yes,always,Measure on emulated mobile with a cellular network profile
+perf.cls,Performance,Content jumping while loading,browser,important,claude,,always,Measure layout shift during load
+perf.inp,Performance,Delay after a tap or click,browser,important,claude,,always,Measure delay between interaction and response
+perf.images-weight,Performance,Heavy images,mechanical,important,claude,yes,always,Compare each image's file size against a threshold
+perf.images-format,Performance,Image format and dimensions,browser,polish,claude,,always,Compare file dimensions with the size the image is displayed at
+perf.lazy-load,Performance,Lazy loading below the fold,browser,polish,claude,,always,Check images not visible on load aren't downloaded immediately
+perf.bundle-size,Performance,Code weight on first load,mechanical,important,claude,,always,Measure total JavaScript shipped on the first page
+perf.fonts,Performance,Font loading,browser,polish,claude,,always,Count font files and weight; check text isn't hidden until fonts load
+perf.cache,Performance,Server caching and compression,mechanical,polish,claude,,always,Check cache and compression headers on responses
+perf.third-party,Performance,Heavy third-party scripts,browser,important,choice,,always,Measure weight and time of scripts from other domains
+resp.no-horizontal-scroll,Mobile,Page scrolls sideways,browser,blocker,claude,yes,always,"At 375, 390 and 768px check no element is wider than the screen"
+resp.viewport,Mobile,Mobile viewport setting,mechanical,blocker,claude,yes,always,Check a correct viewport meta tag exists
+resp.input-zoom,Mobile,iPhone zooms into form fields,browser,important,claude,yes,always,Check input font size is at least 16px
+resp.touch-targets,Mobile,Tap targets too small,browser,important,claude,yes,always,Measure every button and link against a 44px minimum
+resp.text-size,Mobile,Text too small to read,browser,polish,claude,,always,Measure the smallest text size on mobile
+resp.orientation,Mobile,Landscape orientation,browser,polish,claude,,always,Check layout in landscape
+resp.safari-ios,Mobile,iPhone full-height bugs,browser,important,claude,,always,Check full-height elements aren't cut off under the browser bar
+resp.mobile-menu,Mobile,"Mobile menu opens, works and closes",browser,blocker,claude,yes,always,"Tap the menu button and check it opens, navigates and closes"
+resp.fixed-overlap,Mobile,Floating elements covering content,browser,important,claude,,always,Check floating buttons or banners don't cover content or controls
+resp.tablet,Mobile,Tablet layout,browser,polish,claude,,always,Check at 768 and 1024px
+design.palette,Design consistency,Too many near-identical colors,browser,polish,choice,yes,always,Collect every rendered color and cluster near-duplicates
+design.font-families,Design consistency,More than two font families,browser,polish,choice,yes,always,Collect font families actually rendered
+design.type-scale,Design consistency,Text sizes off the scale,browser,polish,choice,,always,Collect all text sizes and flag outliers
+design.spacing-scale,Design consistency,Spacing values off the scale,browser,polish,choice,,always,"Collect margins, paddings and gaps and flag outliers"
+design.radius-shadow,Design consistency,Inconsistent corners and shadows,browser,polish,choice,,always,Collect border-radius and shadow values
+design.button-families,Design consistency,Several primary button styles,browser,important,choice,yes,always,Build a visual signature per button and cluster into families
+design.input-families,Design consistency,Several input field styles,browser,polish,choice,,always,Build a visual signature per input and cluster into families
+design.ui-libraries,Design consistency,Two component libraries side by side,mechanical,important,choice,yes,always,Check installed UI libraries and where each is used
+design.icon-sets,Design consistency,Two icon libraries,mechanical,polish,choice,,always,Check installed icon libraries
+design.favicon,Design consistency,Browser tab icon,mechanical,important,claude,yes,always,Check a favicon exists and isn't the framework default
+design.dark-mode,Design consistency,Broken dark mode,browser,important,claude,,dark,Switch to dark mode and check contrast and colors that didn't switch
+design.focus-hover,Design consistency,Hover and focus states,browser,polish,claude,,always,Check buttons and links visibly change on hover and focus
+content.spelling,Content & copy,Spelling mistakes,mechanical,important,claude,yes,always,English and Hebrew dictionaries over all visible text
+content.placeholders,Content & copy,Placeholder text left in,mechanical,blocker,claude,yes,always,"Search for lorem ipsum, TODOs, example emails and dummy URLs"
+content.terms,Content & copy,Inconsistent wording,judgment,polish,choice,yes,always,Reviewer compares names for the same action across screens
+content.button-labels,Content & copy,Unclear button labels,judgment,polish,choice,,always,Reviewer checks every button says what will happen
+content.error-copy,Content & copy,Unhelpful error messages,judgment,important,choice,,always,Reviewer checks every error says what happened and what to do
+content.copyright-year,Content & copy,Outdated copyright year,mechanical,polish,claude,yes,always,Compare the footer year with the current year
+content.alt-text,Content & copy,Images without descriptions,mechanical,important,choice,yes,always,Check every content image has alt text
+content.file-names,Content & copy,Meaningless file names,mechanical,polish,claude,,always,Look for names like 'Screenshot 2026…' or random hashes in public assets
+content.404-copy,Content & copy,Not-found page copy,judgment,polish,choice,,always,Reviewer checks the not-found page offers a way forward
+a11y.contrast,Accessibility,Color contrast,browser,important,claude,yes,always,Automated contrast ratio check on all text
+a11y.form-labels,Accessibility,Fields without labels,browser,important,claude,yes,always,Check every field has an associated label
+a11y.button-names,Accessibility,Buttons and icons without names,browser,important,claude,yes,always,Check every button has a name a screen reader can announce
+a11y.keyboard,Accessibility,Keyboard navigation,browser,important,claude,,always,Tab through every control and check there are no traps
+a11y.focus-visible,Accessibility,Visible focus,browser,important,claude,,always,Check the focused element is clearly marked
+a11y.headings,Accessibility,Heading structure,mechanical,polish,claude,,always,Check headings are hierarchical without skips
+a11y.lang,Accessibility,Page language declared,mechanical,important,claude,yes,always,Check the page declares its language
+a11y.zoom,Accessibility,Zoom blocked,mechanical,important,claude,,always,Check the page doesn't block pinch zoom
+a11y.motion,Accessibility,Reduced-motion respected,mechanical,polish,claude,,always,Check animations stop when the user prefers reduced motion
+a11y.statement,Accessibility,Accessibility statement,mechanical,important,user,,he,Look for an accessibility statement page (required for most sites in Israel)
+forms.destination,Forms,Where the form actually sends,browser,blocker,user,yes,forms,Submit in a test environment and follow the request to its destination
+forms.success-truth,Forms,Success shown only after a real save,browser,blocker,claude,yes,forms,Block the destination and check success is not shown
+forms.validation,Forms,Input validation and error messages,browser,important,claude,yes,forms,Submit invalid values and check the response
+forms.spam,Forms,Spam protection,mechanical,important,choice,,forms,Check for protection such as a honeypot field or challenge
+forms.autocomplete,Forms,Autofill support,mechanical,polish,claude,,forms,"Check name, email and phone fields have autocomplete set"
+forms.input-types,Forms,Right keyboard for each field,mechanical,polish,claude,,forms,"Check email, phone and number fields use the right input type"
+forms.enterkey,Forms,Enter key label on mobile keyboards,mechanical,polish,claude,,forms,Check the key says Next or Send as appropriate
+forms.backup,Forms,Submissions backed up,mechanical,important,choice,,forms,Check a submission is kept even if the notification email fails
+forms.thank-you,Forms,Thank-you page with a next step,judgment,polish,choice,,forms,Reviewer checks there's guidance after submitting
+sec.client-secrets,Security,Secret keys in browser code,mechanical,blocker,user,yes,always,Scan the client bundle for secret-key patterns
+sec.repo-secrets,Security,Secrets in code history,mechanical,blocker,user,yes,always,Scan the full git history for secret-key patterns
+sec.env-files,Security,Exposed config files,mechanical,blocker,claude,yes,always,"Request common config file paths (.env, .git/config…)"
+sec.exposed-paths,Security,Admin and test pages open to anyone,browser,blocker,choice,yes,always,Request common paths and routes from the code without logging in
+sec.source-maps,Security,Source maps exposed,mechanical,important,claude,,always,Check source map files aren't publicly accessible
+sec.server-authz,Security,Permissions checked only in the UI,judgment,blocker,claude,yes,auth,Reviewer reads every endpoint and checks there's server-side auth
+sec.idor,Security,One user can see another user's data,browser,blocker,claude,yes,auth,Two test users; change an id in the URL or request
+sec.open-db,Security,Database open to anyone,mechanical,blocker,choice,yes,db,Check access rules and try reading without logging in
+sec.rate-limit,Security,No rate limit on expensive endpoints,judgment,blocker,choice,yes,always,Reviewer finds endpoints that cost money and checks they're limited
+sec.login-limit,Security,No limit on login attempts,judgment,important,claude,,auth,Reviewer checks there's a lockout after failed attempts
+sec.headers,Security,Security headers,mechanical,important,claude,,always,Check security headers on responses
+sec.mixed-content,Security,Insecure content on a secure page,browser,important,claude,,always,Check all resources load over HTTPS
+sec.debug-logs,Security,Debug logs with sensitive data,mechanical,important,claude,yes,always,"Search for console logs of users, tokens and server responses"
+sec.xss-output,Security,User input rendered as code,judgment,blocker,claude,,always,Reviewer finds places user content is rendered unsanitized
+sec.cookies,Security,Unprotected login cookies,mechanical,important,claude,,auth,Check security flags on session cookies
+sec.cors,Security,API readable from any site,mechanical,important,claude,,always,Check which origins are allowed to call the API
+mail.auth,Email,Domain email records,mechanical,blocker,user,yes,mail,"Query the domain's sending records (SPF, DKIM, DMARC)"
+mail.real-sender,Email,Sending through a real email service,mechanical,blocker,choice,,mail,Check email isn't sent from the web server itself
+mail.spam-score,Email,Spam score,browser,important,claude,,mail,Send a test email to a scoring service
+mail.system-emails,Email,System emails tested,browser,important,claude,,mail,Trigger each system email and check content and links
+mail.reply-to,Email,Reply address someone reads,mechanical,polish,user,,mail,Check the reply-to address isn't a dead mailbox
+mail.unsubscribe,Email,Unsubscribe link works,mechanical,important,claude,,mail,Check every marketing email has a working unsubscribe link
+seo.title,Sharing & search,Unique page titles,mechanical,important,claude,yes,always,Check each page has its own title
+seo.description,Sharing & search,Page descriptions,mechanical,polish,claude,,always,Check each page has a description of reasonable length
+seo.share-tags,Sharing & search,Share preview,mechanical,important,claude,yes,always,"Check share title, description and image tags"
+seo.share-image,Sharing & search,Share image size,mechanical,polish,claude,,always,Check the share image dimensions and that it loads
+seo.single-h1,Sharing & search,One main heading,mechanical,polish,claude,,always,Count main headings per page
+seo.robots,Sharing & search,Crawler file doesn't block the site,mechanical,blocker,claude,yes,always,Read robots.txt and check it doesn't block everything
+seo.noindex,Sharing & search,Tag that hides pages from search,mechanical,blocker,claude,yes,always,Check live pages have no noindex instruction
+seo.sitemap,Sharing & search,Sitemap,mechanical,polish,claude,,always,Check a sitemap exists and every URL in it works
+seo.canonical,Sharing & search,Canonical address,mechanical,polish,claude,,always,Check each page declares its official address
+seo.ssr,Sharing & search,Content visible without running scripts,mechanical,important,choice,,always,Load pages without JavaScript and check main content exists
+agent.semantic,Agent readiness,Semantic page structure,mechanical,polish,claude,,always,"Check use of nav, main and footer landmarks"
+agent.schema,Agent readiness,Structured data,mechanical,polish,claude,,always,"Check for a structured description of the business, product or article"
+agent.llms-txt,Agent readiness,Guide file for AI agents,mechanical,polish,claude,,always,Check for a file explaining the site to agents
+agent.crawler-policy,Agent readiness,AI crawler policy,mechanical,polish,choice,,always,Read crawler rules for AI agents
+agent.prices-text,Agent readiness,Prices as text,browser,important,claude,,always,Check prices aren't shown only as images
+agent.forms-fillable,Agent readiness,Forms an agent can complete,browser,polish,claude,,forms,Check fields are identifiable and submit without special gestures
+agent.bot-wall,Agent readiness,Bot protection that also blocks agents,browser,polish,choice,,always,Request the site as a known agent and check whether it's blocked
+rtl.dir,Hebrew & Israel,Page direction set,mechanical,blocker,claude,yes,he,Check the page is set right-to-left
+rtl.components,Hebrew & Israel,Components mirror correctly,browser,important,claude,yes,he,"Compare layout against page direction: spacing, alignment, icon position"
+rtl.icons,Hebrew & Israel,Directional icons mirrored,browser,polish,claude,,he,Check arrows and directional icons in RTL pages
+rtl.mixed-text,Hebrew & Israel,Mixed Hebrew and English text,browser,polish,claude,,he,Check punctuation and numbers that jump to the wrong side
+rtl.switcher,Hebrew & Israel,Language switcher,browser,important,claude,,i18n,Switch languages and check you stay on the same page
+rtl.hreflang,Hebrew & Israel,Language alternates declared,mechanical,polish,claude,,i18n,Check each language version points to the others
+rtl.font,Hebrew & Israel,Hebrew font loads,browser,important,claude,yes,he,"Check Hebrew text renders in the intended font, not a fallback"
+rtl.dates,Hebrew & Israel,Dates in Israeli format,mechanical,polish,claude,,he,Look for month-before-day dates
+rtl.currency,Hebrew & Israel,Currency and numbers,mechanical,polish,claude,,he,Check the shekel sign and its position
+rtl.phone,Hebrew & Israel,Israeli phone format,mechanical,polish,claude,,he,Check format and that phone fields accept Israeli numbers
+privacy.policy,Privacy & legal,Privacy policy exists,mechanical,important,user,yes,always,Look for a privacy policy page linked from the footer
+privacy.policy-matches,Privacy & legal,Policy matches what's collected,judgment,important,choice,,always,Reviewer compares the policy with loaded tools and collected fields
+privacy.cookie-blocks,Privacy & legal,Cookie banner actually blocks before consent,browser,important,claude,yes,always,Check analytics don't load before consent
+privacy.cookie-reject,Privacy & legal,Reject button as prominent as accept,browser,important,choice,,always,Compare size and prominence of accept and reject
+privacy.terms,Privacy & legal,Terms of use,mechanical,polish,user,,always,Look for a terms of use page
+privacy.licenses,Privacy & legal,Font and image licenses,judgment,polish,user,,always,Reviewer identifies fonts and images that need a license
+privacy.session-replay,Privacy & legal,Session replay hides sensitive fields,mechanical,important,claude,,always,Check replay tools are set to mask input fields
+privacy.third-party-data,Privacy & legal,User data sent to third parties,judgment,important,choice,,always,Reviewer maps which user data goes to which services
+analytics.installed,Analytics,Analytics installed and working,browser,polish,user,,always,Check a page-view event is sent
+analytics.conversions,Analytics,Conversion events defined,judgment,important,choice,,always,Reviewer checks the main action on the site is measured
+analytics.double-fire,Analytics,Events sent twice,browser,important,claude,,always,Count events per action
+analytics.internal,Analytics,Internal traffic filtered,mechanical,polish,user,,always,Check there's a way to filter the builder's own visits
+analytics.pixels,Analytics,Ad pixels working,browser,polish,user,,ads,Check pixels load and send events
+launch.https-redirect,Domain & launch,Redirect to HTTPS,mechanical,blocker,claude,yes,always,Request the HTTP version and check the redirect
+launch.ssl-valid,Domain & launch,Valid certificate,mechanical,blocker,user,yes,always,Check the certificate and its validity
+launch.canonical-host,Domain & launch,"One address, with or without www",mechanical,important,claude,,always,Check both versions redirect to the same address
+launch.dns,Domain & launch,Domain records correct,mechanical,important,user,,always,Query the main domain records
+launch.staging-urls,Domain & launch,Staging addresses in the code,mechanical,important,claude,yes,always,Search for preview and staging URLs
+launch.staging-noindex,Domain & launch,Staging hidden from search,mechanical,polish,claude,,always,Check preview deployments aren't indexable
+launch.redirects-old,Domain & launch,Redirects from old addresses,mechanical,important,choice,,always,Compare with a previous URL list and check redirects
+launch.custom-domain,Domain & launch,"Own domain, not a temporary address",mechanical,polish,user,,always,Check the site isn't served on the hosting platform's address
+launch.sitemap-submitted,Domain & launch,Sitemap submitted to search engines,mechanical,polish,user,,always,Reminder with steps; can't be verified from outside
+run.uptime,Maintenance & monitoring,Uptime monitoring,mechanical,important,user,,always,Check a service alerts when the site goes down
+run.ssl-expiry,Maintenance & monitoring,Certificate expiry,mechanical,important,user,,always,Warn if the certificate expires soon
+run.domain-expiry,Maintenance & monitoring,Domain renewal,mechanical,important,user,,always,Check the domain's expiry date
+run.error-tracking,Maintenance & monitoring,Error tracking in production,mechanical,important,choice,,always,Check a tool collecting errors from real users is installed
+run.backup,Maintenance & monitoring,Backup and restore,mechanical,important,user,,db,Check automatic database backups are configured
+shop.checkout-flow,Payments,Checkout end to end,browser,blocker,choice,,shop,Walk through every purchase step in test mode
+shop.test-purchase,Payments,A real test purchase,browser,blocker,user,,shop,Reminder with steps for a real purchase and refund
+shop.vat,Payments,VAT and shipping calculated correctly,judgment,important,choice,,shop,Reviewer checks the calculation in code and in the cart
+shop.invoices,Payments,Automatic invoices,mechanical,important,user,,shop,Check an invoicing service is connected
+shop.order-emails,Payments,Order emails,browser,important,claude,,shop,Place a test order and check the confirmation email
+shop.israeli-payment,Payments,Payment provider supports Israeli cards,mechanical,important,user,,shop,Check the configured payment provider
+leftover.mock-data,Claude leftovers,Mock data shown as real,judgment,blocker,choice,yes,always,"Reviewer finds invented names, reviews and numbers in code and pages"
+leftover.unwired-ui,Claude leftovers,UI that looks wired but isn't,judgment,blocker,claude,yes,always,"Reviewer finds empty handlers, TODOs and toggles that don't save"
+leftover.duplicate-files,Claude leftovers,Duplicate files and components,mechanical,polish,choice,,always,Find files with similar names and near-identical content
+leftover.dead-code,Claude leftovers,Unused code and files,mechanical,polish,claude,,always,Map imports and find files and images nothing uses
+data.local-only,Data persistence,Data saved only in the browser,browser,blocker,choice,yes,always,"Create an item, open a clean browser, check it's still there"
+data.delete-export,Data persistence,Account deletion and data export,judgment,important,choice,,auth,Reviewer checks users can delete or export their data
+env.localhost-urls,Local vs production,Localhost addresses in the code,mechanical,blocker,claude,yes,always,Search for local machine URLs in code that ships
+env.missing-vars,Local vs production,Environment variables missing in production,mechanical,blocker,user,yes,always,Compare variables the code needs with those set on the host
+behave.double-submit,Real-world behavior,Double click creates duplicates,browser,blocker,claude,yes,always,"Two quick clicks on submit, count the results"
+behave.refresh,Real-world behavior,Refresh mid-process,browser,important,claude,,always,"Partially fill, refresh, check what's kept"
+behave.back-button,Real-world behavior,Back button,browser,important,claude,,always,Navigate forward and back and check state is kept
+behave.slow-network,Real-world behavior,Slow network,browser,important,claude,,always,Emulate a weak cellular connection and check what users see
+behave.extreme-input,Real-world behavior,Extreme input,browser,important,claude,,always,"Long names, empty lists, a thousand items, emoji"
+ai.output-as-code,AI inside the app,Model output rendered as code,judgment,blocker,claude,yes,ai,Reviewer checks model responses are sanitized before display
+ai.prompt-injection,AI inside the app,Prompt injection,judgment,important,choice,,ai,Send input that tries to override instructions and check the response
+ai.limits,AI inside the app,Limits on response length and wait time,mechanical,important,choice,,ai,Check max length and timeout are set on every call
+cost.per-load,Costs,Expensive calls on every page load,judgment,important,claude,,always,Reviewer finds model or image calls that run on every visit
+cost.free-tier,Costs,Free-tier limits,judgment,important,user,,always,Reviewer identifies services and explains when the free quota runs out
+deps.vulnerable,Dependencies,Libraries with known vulnerabilities,mechanical,important,claude,,always,Check installed packages against a vulnerability database
+deps.heavy,Dependencies,Heavy libraries for small use,mechanical,polish,choice,,always,Compare a library's weight with how much it's used

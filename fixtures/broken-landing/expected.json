@@ -1,0 +1,54 @@
+{
+  "about": "Expected results when the engine scans this fixture served on a local static server. Used by engine tests. Add a row whenever a check is implemented.",
+  "detected": {
+    "forms": true,
+    "he": true,
+    "mail": false,
+    "auth": false,
+    "db": false,
+    "shop": false,
+    "ai": false,
+    "i18n": false,
+    "dark": false,
+    "ads": false
+  },
+  "expect": [
+    { "checkId": "qa.broken-links",            "status": "fail", "note": "about.html is linked from both pages and doesn't exist" },
+    { "checkId": "qa.missing-assets",          "status": "fail", "note": "assets/team.jpg doesn't exist" },
+    { "checkId": "qa.failed-requests",         "status": "fail", "note": "team.jpg and favicon 404" },
+    { "checkId": "qa.console-errors",          "status": "fail", "note": ".testimonials doesn't exist; app.js throws on load (index only)" },
+    { "checkId": "qa.dead-buttons",            "status": "fail", "note": "hero button .cta has no handler" },
+    { "checkId": "qa.custom-404",              "status": "fail", "note": "no custom 404 page; assumes the harness serves its default 404" },
+
+    { "checkId": "resp.viewport",              "status": "pass" },
+    { "checkId": "resp.no-horizontal-scroll",  "status": "fail", "note": ".pricing is 420px wide; fails at 375 and 390 on index only" },
+    { "checkId": "resp.input-zoom",            "status": "fail", "note": "inputs are 14px" },
+    { "checkId": "resp.touch-targets",         "status": "fail", "note": ".cta is about 26px tall" },
+
+    { "checkId": "design.favicon",             "status": "fail", "note": "no favicon" },
+
+    { "checkId": "content.placeholders",       "status": "fail", "note": "Lorem ipsum in the hero" },
+    { "checkId": "content.copyright-year",     "status": "fail", "note": "© 2024 on both pages" },
+
+    { "checkId": "a11y.contrast",              "status": "fail", "note": "#999 on white in .hero p" },
+    { "checkId": "a11y.form-labels",           "status": "fail", "note": "#email has only a placeholder" },
+    { "checkId": "a11y.lang",                  "status": "fail", "note": "index.html has no lang; pricing.html is fine" },
+
+    { "checkId": "forms.success-truth",        "status": "fail", "note": "requires consent; success message shown although the request fails" },
+
+    { "checkId": "sec.client-secrets",         "status": "fail", "note": "sk_live_ pattern in assets/app.js (fake value)" },
+    { "checkId": "sec.debug-logs",             "status": "fail", "note": "console.log of form data" },
+
+    { "checkId": "seo.title",                  "status": "fail", "note": "both pages share the same title" },
+    { "checkId": "seo.share-tags",             "status": "fail", "note": "no share tags" },
+    { "checkId": "seo.robots",                 "status": "pass" },
+    { "checkId": "seo.noindex",                "status": "pass" },
+
+    { "checkId": "rtl.dir",                    "status": "pass" },
+
+    { "checkId": "env.localhost-urls",         "status": "fail", "note": "http://localhost:3000/api in assets/app.js" },
+
+    { "checkId": "mail.auth",                  "status": "skip", "note": "no email sending detected" },
+    { "checkId": "shop.checkout-flow",         "status": "skip", "note": "no payments detected" }
+  ]
+}

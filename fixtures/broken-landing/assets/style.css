@@ -1,0 +1,15 @@
+body { margin: 0; font-family: Arial, sans-serif; color: #333; }
+.top { display: flex; justify-content: space-between; padding: 12px 16px; background: #f4f4f4; }
+.top nav a { margin-inline-start: 12px; color: #444; }
+.hero { padding: 32px 16px; }
+.hero p { color: #999; }               /* low contrast on white */
+.cta { background: #6a4; color: #fff; border: 0; padding: 6px 10px; font-size: 12px; } /* small tap target */
+
+/* Seeded bug: fixed width wider than a 375px phone */
+.pricing { display: flex; gap: 12px; width: 420px; padding: 16px; }
+.card { flex: 1; border: 1px solid #ddd; padding: 12px; }
+
+/* Seeded bug: 14px inputs trigger iPhone zoom */
+input { font-size: 14px; padding: 6px; display: block; margin-bottom: 8px; }
+
+footer { padding: 16px; color: #777; }
