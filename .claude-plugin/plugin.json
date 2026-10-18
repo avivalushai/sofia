@@ -1,0 +1,5 @@
+{
+  "name": "launch-check",
+  "version": "0.0.1",
+  "description": "Scans an app before launch, finds what's broken, and helps fix it."
+}

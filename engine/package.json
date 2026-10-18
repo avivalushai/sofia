@@ -1,0 +1,12 @@
+{
+  "name": "launch-check-engine",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Runs Launch Check's deterministic checks and writes .launch-check/state.json",
+  "type": "module",
+  "bin": { "launch-check": "bin/launch-check.js" },
+  "engines": { "node": ">=20.1" },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
