@@ -99,6 +99,13 @@
 - `findings[].fixCommits`: the commits that fixed it, used by `revert`. A history event `fixing`, and `fixed` events carry the `commit`.
 - `decisions[]` also records instance-level accept, defer and mute, with the finding id as `target`.
 
+## Owner decision 2026-10-19: the tool is called Sofia
+- **Plugin and commands:** the plugin is `sofia`. The commands are `/sofia:check` (scan) and `/sofia:fix` (the approved fixes).
+- **Triggers:** the skill triggers on the name ("Sofia, check my app" / "סופיה"), so it isn't confused with other checker skills installed alongside (the owner has `secute`).
+- **User-facing text:** chat, report title, commit messages ("Sofia: …") and the git fallback identity all say Sofia.
+- **Still internal:** the engine (`launch-check.js`), check ids and the `.launch-check/` folder in the user's project. Renaming them is open.
+- **Installed locally for the desktop app:** `.claude-plugin/marketplace.json`, `claude plugin marketplace add <this folder>`, then `claude plugin install sofia@sofia-local`. After code changes: `claude plugin marketplace update sofia-local && claude plugin update sofia@sofia-local` (bump the version if the update doesn't pick it up).
+
 ## Owner decision 2026-10-19: no automatic fixing
 **The flow is scan → report → discussion with Claude about what to handle → the user's go → fix,** and only what the user approved.
 - **Skill:** the report asks what to go through, never "fix my N". Each item is discussed and the user picks: fix (with the exact change), intentional, not now, or not relevant. Fixing starts only on the user's go.
