@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 12,
-  "nextNoteNum": 14,
+  "nextNum": 16,
+  "nextNoteNum": 15,
   "features": [
     {
       "key": "ALL-1",
@@ -441,21 +441,129 @@
       "key": "ALL-11",
       "title": "Should spelling and placeholder findings always ask, one at a time, instead of being fixed in bulk?",
       "type": "question",
-      "status": "idea",
-      "note": "Owner flagged that שלחח is intentional slang; proposal: move content.spelling and content.placeholders to choice with an 'it's intentional' option",
+      "status": "done",
+      "note": "Superseded by the owner's decision: nothing is fixed automatically; every finding is discussed, and spelling/wording changes need the exact replacement approved.",
       "doneWhen": [],
       "steps": [],
       "files": [],
       "links": [],
       "area": "",
       "createdAt": "2026-10-19T11:59:02Z",
-      "updatedAt": "2026-10-19T11:59:02Z",
+      "updatedAt": "2026-10-19T12:12:57Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-19T11:59:02Z",
           "by": "claude",
           "text": "Created"
+        },
+        {
+          "at": "2026-10-19T12:12:57Z",
+          "by": "claude",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-12",
+      "title": "No automatic fixing: discussion first, fix only on the user's go",
+      "type": "feature",
+      "status": "review",
+      "note": "Read skills/launch-check/SKILL.md stages 2–4; cd engine && npm test (124 pass)",
+      "doneWhen": [],
+      "steps": [],
+      "files": [
+        "skills/launch-check/SKILL.md",
+        "engine/src/actions.js"
+      ],
+      "links": [
+        "c30df63"
+      ],
+      "area": "",
+      "createdAt": "2026-10-19T12:13:26Z",
+      "updatedAt": "2026-10-19T12:13:26Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T12:13:26Z",
+          "by": "claude",
+          "text": "Created — review"
+        }
+      ]
+    },
+    {
+      "key": "ALL-13",
+      "title": "Make the skill's triggers distinct from other checker skills (e.g. secute)",
+      "type": "chore",
+      "status": "idea",
+      "note": "",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T12:42:53Z",
+      "updatedAt": "2026-10-19T12:42:53Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T12:42:53Z",
+          "by": "claude",
+          "text": "Created"
+        }
+      ]
+    },
+    {
+      "key": "ALL-14",
+      "title": "What should the tool be called, the name you'll say to Claude (\"<name>, check my app\")?",
+      "type": "question",
+      "status": "done",
+      "note": "Sofia. (their own answer). Other options: Launch Check · Preflight · Ready Check",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T12:55:38Z",
+      "updatedAt": "2026-10-19T12:55:38Z",
+      "updatedBy": "user",
+      "log": [
+        {
+          "at": "2026-10-19T12:55:38Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-19T12:55:38Z",
+          "by": "user",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-15",
+      "title": "Should I set it up so it also runs inside the desktop app (installed locally from this folder)?",
+      "type": "question",
+      "status": "done",
+      "note": "Yes, set it up (recommended) — I add a marketplace file to the repo and run two commands that install the plugin into your Claude settings. After each change to the code you run update.. Other options: Terminal only for now",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T12:55:38Z",
+      "updatedAt": "2026-10-19T12:55:38Z",
+      "updatedBy": "user",
+      "log": [
+        {
+          "at": "2026-10-19T12:55:38Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-19T12:55:38Z",
+          "by": "user",
+          "text": "Done"
         }
       ]
     }
@@ -747,6 +855,22 @@
       "steps": [],
       "createdAt": "2026-10-19T11:08:32Z",
       "updatedAt": "2026-10-19T11:08:32Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N14",
+      "kind": "decision",
+      "title": "No automatic fixing: scan, report, discussion, user's go, fix",
+      "body": "Claude never fixes on its own initiative. Each finding is discussed; approved fixes go on pending.fix; fixing starts only on the user's explicit go and the engine refuses anything not approved.",
+      "considered": "Bulk 'Fix my N now' (docs/04 original): fixes things that may be intentional, like slang the owner chose.",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-10-19T12:12:57Z",
+      "updatedAt": "2026-10-19T12:12:57Z",
       "updatedBy": "claude"
     }
   ],

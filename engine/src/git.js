@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 import { STATE_DIR } from "./state.js";
 
 const exec = promisify(execFile);
-const FALLBACK_IDENTITY = ["-c", "user.name=Launch Check", "-c", "user.email=launch-check@localhost"];
+const FALLBACK_IDENTITY = ["-c", "user.name=Sofia", "-c", "user.email=sofia@localhost"];
 
 async function git(root, args) {
   const { stdout } = await exec("git", ["-C", root, ...args], { maxBuffer: 32 * 1024 * 1024 });
@@ -37,7 +37,7 @@ export async function dirtyFiles(root) {
 
 /**
  * Commits everything (tracked and new files, respecting .gitignore) if anything changed.
- * Uses the user's git identity; if none is set up, commits as "Launch Check" rather than fail.
+ * Uses the user's git identity; if none is set up, commits as "Sofia" rather than fail.
  * @returns {Promise<string|null>} the new commit's short sha, or null when there was nothing to commit
  */
 export async function commitAll(root, message) {
@@ -55,7 +55,7 @@ export async function commitAll(root, message) {
  */
 export async function checkpoint(root, project, at = new Date().toISOString()) {
   if (await isGitRepo(root)) {
-    const created = await commitAll(root, "Launch Check: checkpoint before fixes");
+    const created = await commitAll(root, "Sofia: checkpoint before fixes");
     const ref = created ?? (await git(root, ["rev-parse", "--short", "HEAD"]).catch(() => null));
     if (!ref) {
       // a repository with no commits yet and nothing to commit

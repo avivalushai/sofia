@@ -8,13 +8,13 @@ Formatting in transcripts: lines in *italics* starting with ✓ or ↻ are progr
 
 User pastes one line they found online:
 
-> **User:** Install the Launch Check plugin from github.com/<owner>/launch-check
+> **User:** Install Sofia from github.com/<owner>/sofia
 
-> **Claude:** *✓ Installed.* To run it, say "check my app", or type `/launch-check`.
+> **Claude:** *✓ Installed.* To run it, say "Sofia, check my app", or type `/sofia:check`.
 
 ## Stage 1 — First run
 
-> **User:** Check my app before I launch
+> **User:** Sofia, check my app before I launch
 
 > **Claude:**
 > *↻ Looking at the project*

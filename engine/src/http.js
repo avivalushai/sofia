@@ -8,7 +8,7 @@ export class HttpError extends Error {
   }
 }
 
-const UA = "Mozilla/5.0 (compatible; LaunchCheck/0.1; +https://github.com/launch-check)";
+const UA = "Mozilla/5.0 (compatible; Sofia/0.1)";
 
 /**
  * fetch with a timeout, no cookies, one retry on network failure, and a record of every redirect hop.

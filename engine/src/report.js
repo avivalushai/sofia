@@ -45,7 +45,7 @@ export function renderReport(catalog, state) {
   const muted = (f) => f.status === "muted" || isCheckMuted(catalog.byId.get(f.checkId) ?? {}, state.decisions);
 
   const out = [
-    "# Launch Check report",
+    "# Sofia report",
     "",
     `Target: ${run.target} · ${run.mode} scan · ${run.finishedAt.replace("T", " ").slice(0, 16)} UTC`,
     "",

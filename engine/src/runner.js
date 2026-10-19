@@ -86,7 +86,7 @@ async function reach({ url, project, maxPages }) {
     throw new Error(`Couldn't reach ${url} (${err.code ?? err.message}). Is the site running?`);
   }
   if (isChallenge(home)) {
-    throw new Error(`The site's bot protection is answering automated visits with a challenge page, so it can't be checked from here right now. Scan the local version instead (--target local), or allow automated visits in the host's firewall settings for a moment. Launch Check never tries to get past it.`);
+    throw new Error(`The site's bot protection is answering automated visits with a challenge page, so it can't be checked from here right now. Scan the local version instead (--target local), or allow automated visits in the host's firewall settings for a moment. Sofia never tries to get past it.`);
   }
   const crawl = createCrawler({ target: url, http, limit: maxPages });
   const pages = await crawl.pages();
@@ -346,7 +346,7 @@ export async function recheck({ root, refs, commitMessage, consent, catalog, che
   const passed = checkIds.every((id) => after.checks[id]?.status === "pass");
   let commit = null;
   if (commitMessage && passed && (await isGitRepo(root))) {
-    commit = await commitAll(root, `Launch Check: ${commitMessage}\n\nChecks: ${checkIds.join(", ")}`);
+    commit = await commitAll(root, `Sofia: ${commitMessage}\n\nChecks: ${checkIds.join(", ")}`);
     if (commit) onProgress(`Committed the fix as ${commit}`);
   }
   // a verified fix leaves the approved list

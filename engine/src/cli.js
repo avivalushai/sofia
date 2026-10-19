@@ -229,7 +229,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
       err(e.message);
       return 2;
     }
-    err(e instanceof CatalogError || e instanceof BrowserMissing ? e.message : `Launch Check stopped: ${e.message}`);
+    err(e instanceof CatalogError || e instanceof BrowserMissing ? e.message : `Sofia stopped: ${e.message}`);
     return 1;
   }
 }

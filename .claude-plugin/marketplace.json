@@ -1,0 +1,14 @@
+{
+  "name": "sofia-local",
+  "owner": {
+    "name": "Aviv Alush"
+  },
+  "plugins": [
+    {
+      "name": "sofia",
+      "source": "./",
+      "description": "Sofia — checks your app before launch (development copy from this folder)."
+    }
+  ],
+  "description": "Local development copy of Sofia, straight from this folder."
+}

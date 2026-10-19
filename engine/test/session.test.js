@@ -93,7 +93,7 @@ test("a passing fix gets its own commit, recorded on the finding", async () => {
   assert.equal(out.passed, true);
   assert.ok(out.commit);
   assert.ok(out.scoreAfter > out.scoreBefore, `${out.scoreBefore} → ${out.scoreAfter}`);
-  assert.match(await git("log", "-1", "--format=%s"), /Launch Check: Page language set to Hebrew/);
+  assert.match(await git("log", "-1", "--format=%s"), /Sofia: Page language set to Hebrew/);
   const f = (await state()).findings["f_a11y.lang_home"];
   assert.equal(f.status, "fixed");
   assert.deepEqual(f.fixCommits, [out.commit]);

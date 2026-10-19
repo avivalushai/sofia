@@ -28,7 +28,7 @@ export async function launchBrowser({ maxOpen = 10 } = {}) {
     browser = await chromium.launch({ channel: "chrome", headless: true });
   } catch (err) {
     throw new BrowserMissing(
-      "Launch Check uses your installed Google Chrome and couldn't start it. " +
+      "Sofia uses your installed Google Chrome and couldn't start it. " +
       "Install Chrome from https://www.google.com/chrome and run the scan again." +
       (process.env.LAUNCH_CHECK_DEBUG ? `\n${err.message}` : ""),
     );

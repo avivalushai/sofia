@@ -1,5 +1,8 @@
 {
-  "name": "launch-check",
-  "version": "0.0.1",
-  "description": "Scans an app before launch, finds what's broken, and helps fix it."
+  "name": "sofia",
+  "version": "0.1.0",
+  "description": "Sofia checks your app before launch, reports what's broken in plain words, talks it through with you, and fixes only what you approve.",
+  "author": {
+    "name": "Aviv Alush"
+  }
 }

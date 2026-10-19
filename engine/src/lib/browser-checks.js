@@ -14,8 +14,8 @@ const VALUES = {
   number: "1",
   date: "2030-01-01",
   password: "LaunchCheck-test-1",
-  text: "Launch Check test",
-  textarea: "Test message from Launch Check. Please ignore.",
+  text: "Sofia test",
+  textarea: "Test message from Sofia. Please ignore.",
 };
 
 /**
@@ -104,7 +104,7 @@ export async function interceptWrites(page, answer = "ok") {
     if (["GET", "HEAD", "OPTIONS"].includes(req.method())) return route.continue();
     writes.push({ url: req.url(), method: req.method() });
     if (answer === "abort") return route.abort("connectionrefused");
-    if (answer === "fail") return route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"blocked by Launch Check"}' });
+    if (answer === "fail") return route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"blocked by Sofia"}' });
     return route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
   });
   return writes;
