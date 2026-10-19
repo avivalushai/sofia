@@ -1,5 +1,7 @@
 # 04 — Conversation flow
 
+> **Updated 2026-10-19 (owner decision):** nothing is fixed automatically. The flow is scan → report → discussion → the user's go → fix, and only what the user approved. The working version is `skills/launch-check/references/conversation-examples.md`; where this file differs, that one wins.
+
 This is the experience in chat. The SKILL.md must produce it. Transcripts below are the reference; match their shape, tone and length.
 
 Formatting in transcripts: lines in *italics* starting with ✓ or ↻ are progress lines Claude prints while working.

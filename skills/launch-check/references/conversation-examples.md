@@ -1,6 +1,6 @@
 # Conversation examples
 
-Reference transcripts (from the product brief, docs/04). Match their shape, tone and length; the app and numbers in them are examples. The report page mentioned in some lines arrives with the dashboard.
+Reference transcripts (from the product brief, docs/04), **updated 2026-10-19 by the owner's decision: nothing is fixed automatically.** The flow is scan → report → discussion → the user's go → fix, and only what the user approved. Match the shape, tone and length; the app and numbers are examples. The report page mentioned in some lines arrives with the dashboard.
 
 Formatting in transcripts: lines in *italics* starting with ✓ or ↻ are progress lines Claude prints while working.
 
@@ -36,7 +36,7 @@ Use the AskUserQuestion tool for this. It is the **only** question before the sc
 > *✓ Judgment checks · 6*
 > *✓ Report open at localhost:4319*
 
-## Stage 2 — Summary
+## Stage 2 — Report
 
 > **Claude:** **58 / 100.** Not ready yet — three things will lose you sign-ups.
 >
@@ -47,62 +47,70 @@ Use the AskUserQuestion tool for this. It is the **only** question before the sc
 >
 > **Important** · 4 · **Polish** · 2
 >
-> Who handles what:
-> - **I'll fix these myself** · 5
+> Who can handle what:
+> - **I can fix these** · 5
 > - **Need your choice** · 2
 > - **Need you to do something** · 2
 >
-> The full report is open in your browser. What now?
-> - Fix my 5 now (recommended)
-> - Go through everything by severity
-> - Blockers only
+> The full report is open in your browser. What would you like to go through?
+> - The blockers with me (recommended)
+> - Everything, by severity
+> - I'll read the report first
 > - Not now
 
-Rules: blockers listed by name, the rest as counts. Always the three fixer buckets. One question with options.
+Rules: blockers listed by name, the rest as counts. Always the three groups. One question — about what to go through, never about fixing.
 
-## Stage 3 — Auto fixes
+## Stage 3 — Discussion
 
-> **User:** Fix your 5
+One item at a time. Explain, recommend, let the user decide.
 
+> **User:** The blockers
+>
+> **Claude:** **1 of 3. The page scrolls sideways on iPhone.** The pricing table is 38px wider than the screen, so the page drags left and right and the sign-up button is cut off. I'd stack the three cards in one column on narrow screens.
+> - Fix it (recommended)
+> - It's intentional
+> - Not now
+>
+> **User:** Fix it
+>
+> **Claude:** Added to the list. **2 of 3. Confirmation emails will land in spam.** …
+>
+> *(…)*
+>
+> **Claude:** **Important · 1 of 4. A word looks misspelled: "שלחח" on the home page.** Change it to "שלח"?
+> - Change to "שלח"
+> - It's intentional
+> - Not now
+>
+> **User:** It's intentional, it's slang
+>
+> **Claude:** Got it — marked as intentional, I won't raise it again.
+>
+> *(…)*
+>
+> **Claude:** **Approved to fix · 4:** pricing table on mobile, hero image size, share preview, 16px form fields. Say when you want me to start.
+
+Rules: one item at a time, the user's answer is final, wording is never "corrected" without their OK. Nothing is touched yet.
+
+## Stage 4 — Fixing, on the user's go
+
+> **User:** Go
+>
 > **Claude:**
 > *✓ Checkpoint saved*
 > *✓ Pricing table stacks on mobile*
 > *✓ Hero image: 3.4 MB → 180 KB*
 > *✓ Share preview for WhatsApp*
 > *✓ 16px text in form fields*
-> *✓ Footer year updates itself*
-> *↻ Re-checking · 5 of 5 pass*
+> *↻ Re-checking · 4 of 4 pass*
 >
-> **58 → 71.** Two decisions next.
+> **58 → 69.**
 
-Rules: checkpoint first, one commit per fix, re-run each fixed check, show the score delta.
-
-## Stage 4 — Decisions
-
-One question per decision, numbered "1 of 2". Recommended option first.
-
-> **Claude:** **1 of 2.** The cookie banner only lets people accept. Which do you prefer?
-> - Add a "No thanks" button (recommended)
-> - Remove the analytics tool and the banner
->
-> **User:** Add the button
->
-> **Claude:** **2 of 2.** There are 9 shades of gray. Merge them into 3:
-> - Warm, close to the home page
-> - Cool, close to the pricing page
-> - Show me first
->
-> **User:** Warm
->
-> **Claude:**
-> *✓ Reject button added, analytics loads only after consent*
-> *✓ 9 grays → 3*
->
-> **71 → 78.** Two things left that only you can do.
+Rules: only the approved list, checkpoint first, one commit per fix, re-run each fixed check, show the score delta.
 
 ## Stage 5 — User actions
 
-Claude prepares everything and keeps working in parallel.
+Part of the discussion: Claude prepares the exact steps; the user does them.
 
 > **Claude:**
 > **☐ Verify your domain for email** · about 5 minutes
@@ -121,9 +129,7 @@ Claude prepares everything and keeps working in parallel.
 > TXT    _dmarc              v=DMARC1; p=none
 > CNAME  resend._domainkey   resend._domainkey.example.cdn
 > ```
-> Meanwhile I'm connecting the form to the sheet.
-> *✓ Form connected to the sheet*
-> *✓ Success message only after a real save*
+> For the sheet: want me to connect the form to it, and show success only after a real save? (Those two would go on the approved list.)
 >
 > Type "done" when the records are in.
 
@@ -158,11 +164,15 @@ The test sign-up is a side-effect action. It happens only because the user conne
 > - **New:** a 2.1 MB image
 > - **Still open:** same title on every page
 >
-> I can fix all three. Go ahead?
+> Want to go through them?
 >
-> **User:** Yes
+> **User:** Yes — fix the button and the image, the title can wait
 >
-> **Claude:** *✓ 3 fixed and re-checked* · **94 → 98**
+> **Claude:** Approved: the button and the image. Say when.
+>
+> **User:** Go
+>
+> **Claude:** *✓ 2 fixed and re-checked* · **94 → 97**
 
 Re-runs show only what changed, not the whole report again.
 
@@ -177,7 +187,7 @@ Re-runs show only what changed, not the whole report again.
 > **User:** All of it
 > **Claude:** Muted 6 checks. They no longer count, so the score went from 58 to 63. If email sending shows up in the code later, I'll mention that the category is muted.
 
-### Two design systems
+### Two design systems (inside the discussion)
 
 > **Claude:** I found two styles of primary button: 14 fully rounded on marketing pages, 6 with sharp corners and a shadow on settings pages. They come from two component libraries. Which one stays?
 > - Rounded — used in more places
@@ -186,7 +196,7 @@ Re-runs show only what changed, not the whole report again.
 > **User:** Show me
 > **Claude:** *(side-by-side screenshot)* Also: the two libraries together add about 140 KB. If we merge, one can go.
 > **User:** Rounded
-> **Claude:** *✓ 6 buttons replaced* *✓ Second library removed* *✓ Re-check: one button family*
+> **Claude:** Added to the list: replace the 6 sharp buttons and remove the second library.
 
 ### Broken link, unclear target
 
@@ -194,9 +204,9 @@ Re-runs show only what changed, not the whole report again.
 > **User:** No, I deleted that page on purpose
 > **Claude:** Remove the link? It's in the menu, the footer and the home page.
 > **User:** Yes, everywhere
-> **Claude:** Removed from all three. Did you ever share that address? If so, people will hit an error page.
+> **Claude:** Added to the list. Did you ever share that address? If so, people will hit an error page.
 > **User:** I posted it on Instagram
-> **Claude:** Added a redirect from the old address to the home page.
+> **Claude:** Then I'll also add a redirect from the old address to the home page — on the list too.
 
 ### User disagrees
 
@@ -216,7 +226,7 @@ One compromise, then accept. Never raise it again in the same session.
 ### Focused re-check
 
 > **User:** I changed the home page, just check mobile
-> **Claude:** *↻ 10 mobile checks on the home page* — 9 pass. New: the top image is 12px too wide on iPhone. Fix it?
+> **Claude:** *↻ 10 mobile checks on the home page* — 9 pass. New: the top image is 12px too wide on iPhone. Want me to add it to the list?
 
 ### Undo one fix
 
@@ -228,7 +238,7 @@ One compromise, then accept. Never raise it again in the same session.
 When the hook injects pending selections:
 
 > **User:** go
-> **Claude:** You picked 5 fixes on the report page. Starting.
+> **Claude:** You approved 5 fixes on the report page. Starting.
 > *✓ ...*
 
 If the user writes something unrelated while selections are pending, mention them once: "You also have 5 fixes queued on the report page — do them now?"
@@ -239,6 +249,7 @@ If the user writes something unrelated while selections are pending, mention the
 
 - One question at a time, with options (AskUserQuestion when available).
 - Recommend a default and say why in one sentence.
+- Nothing is fixed without the user's approval of that item and their go.
 - After every fix: re-run the check. Never "I fixed it" without a pass.
 - Plain language: what happens to a visitor, not what the tag is called.
 - Don't paste the full report into chat. The page holds the detail; chat holds the decisions.

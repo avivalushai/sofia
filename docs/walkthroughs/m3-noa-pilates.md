@@ -1,5 +1,7 @@
 # M3 walkthrough — docs/04 stages 1–7 on a copy of the fixture
 
+> **Superseded flow.** This shows the M3 flow, where Claude offered "Fix my 19 now" and fixed in bulk. Since 2026-10-19 (owner decision) nothing is fixed automatically: scan → report → discussion → the user's go → fix, and only approved items. See `skills/launch-check/SKILL.md`.
+
 **Date:** 2026-10-18.
 **Project:** `fixtures/broken-landing`, copied into a scratch folder, with git and one commit ("My pilates site").
 **Target:** local. There's no live site, so `--target local` serves the folder.

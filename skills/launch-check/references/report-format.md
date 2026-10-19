@@ -34,7 +34,7 @@ Always the same six parts, in this order:
 
 ## Fixer wording
 
-- **I'll fix this** (Claude)
+- **I can fix this** (Claude — only when the user approves it and says go)
 - **Your choice** (choice)
 - **Your action** (user)
 
@@ -57,12 +57,12 @@ Always the same six parts, in this order:
 
 **Important** · {n} · **Polish** · {n}
 
-Who handles what:
-- **I'll fix these myself** · {n}
+Who can handle what:
+- **I can fix these** · {n}
 - **Need your choice** · {n}
 - **Need you to do something** · {n}
 
-{one question with options}
+{one question with options — about what to go through, never "should I fix"}
 ```
 
 ## report.md

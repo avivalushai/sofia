@@ -74,6 +74,17 @@ test("a fix that doesn't pass is never committed", async () => {
   await git("checkout", "--", "index.html");
 });
 
+test("nothing can be fixed unless the user approved it", async () => {
+  const refused = await lc("fixing", "a11y.lang");
+  assert.equal(refused.code, 2);
+  assert.match(refused.err, /Not approved for fixing/);
+  assert.equal((await state()).findings["f_a11y.lang_home"].status, "open");
+  const { out } = await lc("queue", "add", "a11y.lang");
+  assert.deepEqual(out.approved, ["f_a11y.lang_home"]);
+  assert.deepEqual((await state()).pending.fix, ["f_a11y.lang_home"]);
+  assert.deepEqual((await lc("summary")).out.approved, ["a11y.lang"]);
+});
+
 test("a passing fix gets its own commit, recorded on the finding", async () => {
   assert.deepEqual((await lc("fixing", "a11y.lang")).out.fixing, ["f_a11y.lang_home"]);
   assert.equal((await state()).findings["f_a11y.lang_home"].status, "fixing");
@@ -86,6 +97,7 @@ test("a passing fix gets its own commit, recorded on the finding", async () => {
   const f = (await state()).findings["f_a11y.lang_home"];
   assert.equal(f.status, "fixed");
   assert.deepEqual(f.fixCommits, [out.commit]);
+  assert.deepEqual((await state()).pending.fix, [], "a verified fix leaves the approved list");
 });
 
 test("a second fix, then undoing only the first one", async () => {

@@ -157,7 +157,7 @@ test("report.md is written with the six parts", async () => {
   assert.match(report, /## \d+ \/ 100 · Not ready/);
   assert.match(report, /\*\*Where:\*\* `assets\/app\.js` line 7/);
   assert.match(report, /\*\*Found:\*\*/);
-  assert.match(report, /\*\*Fix \(I'll fix this\):\*\*/);
+  assert.match(report, /\*\*Fix \(I can fix this\):\*\*/);
   assert.match(report, /`sec\.client-secrets`/);
   assert.match(report, /## Skipped/);
 });

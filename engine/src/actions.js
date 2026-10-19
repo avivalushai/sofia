@@ -61,13 +61,39 @@ export function decide(catalog, state, { ref, action, scope, reason = "", at = n
   return { scope, target: decisionTarget, action, changed, scoreBefore: before, scoreAfter: after.score, verdict: after.verdict };
 }
 
-/** Marks findings as being worked on, so the page can say "Claude is fixing 3 items". */
+/**
+ * The list of fixes the user approved — in the chat or on the page. Nothing is fixed unless it's on
+ * this list: Launch Check reports and discusses, the user decides and says when.
+ * @param {"add"|"remove"|"clear"|"list"} op
+ */
+export function queue(catalog, state, op, refs = [], { source = "chat", at = new Date().toISOString() } = {}) {
+  const list = new Set(state.pending.fix);
+  if (op === "clear") list.clear();
+  for (const ref of refs) {
+    const ids = resolve(catalog, state, ref).findingIds.filter((id) => op === "remove" || ["open", "fixing"].includes(state.findings[id].status));
+    if (op === "add" && !ids.length) throw new ActionError(`Nothing open to fix for "${ref}"`);
+    for (const id of ids) (op === "remove" ? list.delete(id) : list.add(id));
+  }
+  if (op !== "list") {
+    state.pending.fix = [...list].sort();
+    state.pending.updatedAt = at;
+    state.pending.source = source;
+  }
+  return state.pending.fix;
+}
+
+/** Marks findings as being worked on, so the page can say "Claude is fixing 3 items". Only approved ones. */
 export function markFixing(catalog, state, refs, at = new Date().toISOString()) {
+  const approved = new Set(state.pending.fix);
   const changed = [];
   for (const ref of refs) {
-    for (const id of resolve(catalog, state, ref).findingIds) {
+    const ids = resolve(catalog, state, ref).findingIds.filter((id) => state.findings[id].status === "open");
+    const notApproved = ids.filter((id) => !approved.has(id));
+    if (notApproved.length) {
+      throw new ActionError(`Not approved for fixing: ${notApproved.join(", ")}. Only fix what the user asked for — add it with "queue add" once they have.`);
+    }
+    for (const id of ids) {
       const f = state.findings[id];
-      if (f.status !== "open") continue;
       f.status = "fixing";
       f.history.push({ at, event: "fixing" });
       changed.push(id);

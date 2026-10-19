@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { ActionError, decide, markFixing } from "./actions.js";
+import { ActionError, decide, markFixing, queue } from "./actions.js";
 import { CatalogError, loadCatalog, loadChecks } from "./catalog.js";
 import { detect, liveUrlCandidates } from "./detect.js";
 import { checkpoint, dirtyFiles } from "./git.js";
@@ -17,7 +17,9 @@ Commands:
       [--consent submit-forms,test-accounts] [--staging] [--max-pages 30]
   summary                                 score, blockers, the three fixer groups, since last run
   show <checkId|findingId>                every detail of one item
-  fixing <checkId|findingId...>           mark items as being fixed now
+  queue add|remove|clear|list [checkId|findingId...]
+                                          the fixes the user approved; nothing else can be fixed
+  fixing <checkId|findingId...>           mark approved items as being fixed now
   checkpoint                              a safe point before the first fix of a session
   recheck <checkId|findingId|category...> [--commit "what was fixed"] [--consent ...]
                                           re-run just those checks; with --commit, commit the fix if they pass
@@ -33,7 +35,7 @@ Options:
   --json           machine-readable output`;
 
 const LATER = new Set(["review-tasks", "add-findings", "serve", "export"]);
-const COMMANDS = new Set(["detect", "run", "summary", "show", "fixing", "checkpoint", "recheck", "revert", "decide"]);
+const COMMANDS = new Set(["detect", "run", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide"]);
 const LAYER_TITLE = { mechanical: "Mechanical checks", browser: "Browser checks", judgment: "Judgment checks" };
 
 /**
@@ -162,6 +164,17 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
         return 0;
       }
 
+      case "queue": {
+        const [op, ...refs] = rest;
+        if (!["add", "remove", "clear", "list"].includes(op)) throw new UsageError("queue add|remove|clear|list [ids...]");
+        if ((op === "add" || op === "remove") && !refs.length) throw new UsageError(`queue ${op} needs at least one check or finding id`);
+        const state = await readState(cwd);
+        const list = queue(catalog, state, op, refs);
+        if (op !== "list") await writeState(cwd, state);
+        print({ approved: list }, list.length ? `Approved to fix: ${list.length} findings\n${list.map((id) => `- ${state.findings[id].title} (${id})`).join("\n")}` : "Nothing approved to fix");
+        return 0;
+      }
+
       case "fixing": {
         if (!rest.length) throw new UsageError("fixing needs at least one check or finding id");
         // one commit per fix: a fix starts from a clean tree, or leftovers end up in its commit
@@ -229,7 +242,7 @@ function summaryText(s) {
   const lines = [`${s.score ?? "—"} / 100 · ${s.verdict}`];
   if (s.blockers.length) lines.push("Blockers:", ...s.blockers.map((b) => `- ${b.title}`));
   lines.push(`Important · ${s.counts.important} · Polish · ${s.counts.polish}`);
-  lines.push(`I'll fix these myself · ${s.buckets.claude.length} · Need your choice · ${s.buckets.choice.length} · Need you to do something · ${s.buckets.user.length}`);
+  lines.push(`I can fix these · ${s.buckets.claude.length} · Need your choice · ${s.buckets.choice.length} · Need you to do something · ${s.buckets.user.length}`);
   if (s.needsConsent.length) lines.push(`Waiting for your OK: ${s.needsConsent.join(", ")}`);
   for (const n of s.notices) lines.push(`Note: ${n}`);
   return lines.join("\n");

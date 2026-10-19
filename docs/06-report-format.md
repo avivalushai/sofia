@@ -1,5 +1,7 @@
 # 06 — Report format
 
+> **Updated 2026-10-19 (owner decision):** nothing is fixed automatically. The flow is scan → report → discussion → the user's go → fix, and only what the user approved. The working version is `skills/launch-check/references/report-format.md`; where this file differs, that one wins.
+
 ## Saved files
 
 ```

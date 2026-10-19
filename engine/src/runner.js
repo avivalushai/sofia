@@ -349,6 +349,13 @@ export async function recheck({ root, refs, commitMessage, consent, catalog, che
     commit = await commitAll(root, `Launch Check: ${commitMessage}\n\nChecks: ${checkIds.join(", ")}`);
     if (commit) onProgress(`Committed the fix as ${commit}`);
   }
+  // a verified fix leaves the approved list
+  const fixedNow = new Set(result.run.changes.fixed);
+  if (after.pending.fix.some((id) => fixedNow.has(id))) {
+    after.pending.fix = after.pending.fix.filter((id) => !fixedNow.has(id));
+    after.pending.updatedAt = new Date().toISOString();
+    await writeState(root, after);
+  }
   if (commit) {
     for (const id of result.run.changes.fixed) {
       const f = after.findings[id];

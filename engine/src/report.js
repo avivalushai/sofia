@@ -8,7 +8,7 @@ const SEVERITY = {
   important: ["Important", "visitors will notice"],
   polish: ["Polish", "makes it look finished"],
 };
-const FIXER = { claude: "I'll fix this", choice: "Your choice", user: "Your action" };
+const FIXER = { claude: "I can fix this", choice: "Your choice", user: "Your action" };
 const ACTIVE = new Set(["open", "fixing"]);
 
 function where(loc = {}) {

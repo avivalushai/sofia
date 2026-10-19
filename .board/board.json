@@ -7,7 +7,7 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 11,
+  "nextNum": 12,
   "nextNoteNum": 14,
   "features": [
     {
@@ -434,6 +434,28 @@
           "at": "2026-10-19T11:08:32Z",
           "by": "claude",
           "text": "Note: Re-scan both live sites when Vercel stops challenging this machine; then a third app with form/login/db"
+        }
+      ]
+    },
+    {
+      "key": "ALL-11",
+      "title": "Should spelling and placeholder findings always ask, one at a time, instead of being fixed in bulk?",
+      "type": "question",
+      "status": "idea",
+      "note": "Owner flagged that שלחח is intentional slang; proposal: move content.spelling and content.placeholders to choice with an 'it's intentional' option",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T11:59:02Z",
+      "updatedAt": "2026-10-19T11:59:02Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T11:59:02Z",
+          "by": "claude",
+          "text": "Created"
         }
       ]
     }

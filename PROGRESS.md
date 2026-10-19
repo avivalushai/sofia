@@ -99,6 +99,13 @@
 - `findings[].fixCommits`: the commits that fixed it, used by `revert`. A history event `fixing`, and `fixed` events carry the `commit`.
 - `decisions[]` also records instance-level accept, defer and mute, with the finding id as `target`.
 
+## Owner decision 2026-10-19: no automatic fixing
+**The flow is scan → report → discussion with Claude about what to handle → the user's go → fix,** and only what the user approved.
+- **Skill:** the report asks what to go through, never "fix my N". Each item is discussed and the user picks: fix (with the exact change), intentional, not now, or not relevant. Fixing starts only on the user's go.
+- **Engine:** approved fixes live in `pending.fix` in `state.json`, the same list the dashboard will use. `queue add|remove|clear|list` manages it. `fixing` refuses anything not on the list, and a verified fix leaves it.
+- **Wording:** "I'll fix this" became "I can fix this".
+- **Docs:** docs/04 and docs/06 carry a note that the skill references win where they differ. The M3 walkthrough shows the earlier flow.
+
 ## Decisions in M3
 - A deferred or accepted blocker doesn't block "Ready" (docs/03), but the skill always says it next to the verdict.
 - A key in the git history is closed by "accept" with reason "key rotated". Launch Check can't verify rotation from outside.
