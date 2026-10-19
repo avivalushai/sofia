@@ -1,4 +1,5 @@
 import { dataRequests, ERROR_WORDS, shortUrl } from "../../lib/browser-checks.js";
+import { skippedNote } from "../../lib/browser-checks.js";
 
 /** @type {import("../../types.js").Check} */
 export default {
@@ -7,8 +8,14 @@ export default {
   async run(ctx) {
     const origin = new URL(ctx.target).origin;
     const results = [];
+    const skipped = new Map();
     for (const page of (await ctx.crawl.browserPages()).slice(0, 10)) {
       const shared = await ctx.browser.open(page.url, { width: 1280 });
+      const { urls: blockedUrls } = ctx.blockedOn(shared);
+      if (blockedUrls.size) {
+        for (const u of blockedUrls) skipped.set(u, ctx.browser.blocked.get(u));
+        continue;
+      }
       const data = dataRequests(shared.log, origin);
       if (!data.length) continue;
       const urls = new Set(data.map((r) => r.url));
@@ -36,6 +43,7 @@ export default {
         shot: broken.shot,
       }));
     }
+    results.push(...skippedNote(ctx, skipped));
     return results.length ? results : [ctx.pass()];
   },
 };

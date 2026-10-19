@@ -33,14 +33,17 @@ test("spelling: Hebrew and English typos with a near match are flagged; names an
     "שיעורי פילאטיס בקבוצות קטנות",
     "פילאטיס עם נועה",
     "פילאטיס עם נועה",
-    "הרשמה לשיעור פלאטיס", // typo of a word used elsewhere on the site
-    "מחיר לחודש בקבצות", // typo of a dictionary word
+    "הרשמה לשיעור פלאטיס", // spelled differently from a word the site repeats
+    "שלחח לחבר", // a doubled letter
+    "מחיר לחודש בקבצות", // with or without ו: a spelling variant, not flagged
+    "מירוץ בפארק", "למירוץ", "הנהוראים", "נהוראי", "נהוראי", // prefixes, variants and forms of a repeated name
     "We recieve your message within a day",
     "Contact Noa at Studio Zen", // capitalised: treated as names
     "Lorem ipsum dolor sit amet", // left to content.placeholders
     'כל המחירים כוללים מע"מ',
   ]);
-  assert.deepEqual(typos.map((t) => t.word).sort(), ["בקבצות", "פלאטיס", "recieve"].sort());
+  assert.deepEqual(typos.map((t) => t.word).sort(), ["פלאטיס", "שלחח", "recieve"].sort());
+  assert.equal(typos.find((t) => t.word === "שלחח").suggestion, "שלח");
   assert.equal(typos.find((t) => t.word === "פלאטיס").suggestion, "פילאטיס");
   assert.equal(typos.find((t) => t.word === "recieve").suggestion, "receive");
 });

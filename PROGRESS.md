@@ -2,6 +2,23 @@
 
 ## Done
 
+### M4 so far — false-positive pass, part 1 (2026-10-19)
+- NehoRace: 13 findings on the first scan, 9 of them false. After the fixes, 3 findings, all real, plus 5 "couldn't tell" with reasons.
+- Blockout: 2 false alarms and 1 missed finding (Amplitude before consent), all fixed.
+- Engine changes:
+  - Bot-protection detection.
+  - Probes trimmed, spaced out and run last.
+  - A blocked page is told apart from a blocked sub-request.
+  - Server functions and other local services that can't run in a local copy.
+  - Hebrew spelling relies only on strong signals.
+  - `.env` files are read even when git ignores them.
+  - The live address is taken from the README too.
+  - Tailwind gray scales are accepted.
+  - A bare `http://localhost` parsing base is ignored.
+  - Amplitude endpoints and cookies are recognized.
+  - The library-count title is fixed, with a "They're there on purpose" option.
+- Tests: 124 (123 pass, 1 skipped). 6 new tests in `realworld.test.js`.
+
 ### M3 — Skill and conversation flow (2026-10-18)
 - `skills/launch-check/SKILL.md`: triggers (natural phrasings and the command, with `quick`), the docs/04 flow stage by stage, the docs/06 wording rules, and the smaller conversations (mute, disagree, why, undo, unclear link). References: `report-format.md`, `fix-playbooks.md` (how to fix every v1 check), `conversation-examples.md`.
 - `skills/launch-fix/SKILL.md`: picks up from the saved state; command only.
@@ -48,7 +65,7 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
-- Nothing. Next: M4 (complete v1 catalog: the 7 judgment checks as review tasks with rubrics, and the false-positive pass over 3 of your real apps).
+- M4: false-positive pass over real apps. NehoRace and Blockout are done (`docs/walkthroughs/m4-real-apps.md`). Still to do: a live re-scan of both once Vercel stops challenging this machine, a third app (one with a form, login or database), the judgment checks as review tasks with rubrics, and the `clean-landing` / `app-with-auth` fixtures.
 
 ## Dependencies (with reasons)
 - `htmlparser2` (MIT) — real HTML parsing for the mechanical checks; regex parsing would be a steady source of false alarms.
@@ -107,6 +124,7 @@
 - `launch.https-redirect`, `launch.ssl-valid` and `mail.auth` skip or don't apply on the local fixture, so only their logic is tested, not a live target. The M4 pass over real apps covers that.
 
 ## Open questions
+- **Scanning a live Vercel site trips Vercel's firewall for the scanning machine** (temporary). The probes are now minimal and run last, and the fix loop uses the local copy. Should live scans skip the probe checks unless the user asks (they'd become "local only")?
 - The walkthrough was done by me (Claude) following the skill inside this session, not by a fresh Claude Code session with the plugin installed. A fresh-session run would also test the skill's triggers. It runs a separate Claude session on your account, so I'd like your OK first.
 - **Hebrew dictionary licence.** The only good Hebrew dictionary (Hspell) is AGPL-3.0. Fine for development; before distributing (M8) decide between: ship it as-is (AGPL obligations may extend to the plugin), download it on first use, or drop Hebrew spell-checking.
 - `--target local` (start the dev server): proposed for M2.

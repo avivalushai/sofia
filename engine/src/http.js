@@ -1,3 +1,5 @@
+import { blockerName, isChallenge } from "./lib/blocked.js";
+
 export class HttpError extends Error {
   constructor(url, cause) {
     super(`Couldn't reach ${url} (${cause?.cause?.code ?? cause?.name ?? "error"})`);
@@ -14,6 +16,8 @@ const UA = "Mozilla/5.0 (compatible; LaunchCheck/0.1; +https://github.com/launch
  */
 export function createHttp({ timeoutMs = 10_000 } = {}) {
   const cache = new Map();
+  /** URLs the host's bot protection answered with a challenge instead of content */
+  const blocked = new Map();
 
   /**
    * @param {string} url
@@ -43,7 +47,9 @@ export function createHttp({ timeoutMs = 10_000 } = {}) {
         body = await res.text();
         size ??= Buffer.byteLength(body);
       }
-      return { status: res.status, url: current, hops, headers: hdrs, body, size };
+      const challenged = isChallenge({ status: res.status, headers: hdrs, body: typeof body === "string" ? body : null });
+      if (challenged) blocked.set(current, blockerName(hdrs));
+      return { status: res.status, url: current, hops, headers: hdrs, body, size, blocked: challenged };
     }
     throw new HttpError(url, new Error("too many redirects"));
   }
@@ -61,6 +67,7 @@ export function createHttp({ timeoutMs = 10_000 } = {}) {
   }
 
   return {
+    blocked,
     request,
     /** Same as request, but cached per run for GETs. */
     get(url, o = {}) {

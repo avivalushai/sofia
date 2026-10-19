@@ -2,7 +2,7 @@
 
 export const SUCCESS_WORDS = /thank|success|received|we'?ll be in touch|you'?re (in|on the list)|sent!|submitted|תודה|נשלח|התקבל|קיבלנו|נחזור|נרשמת|בהצלחה/i;
 export const ERROR_WORDS = /error|wrong|failed|couldn'?t|could not|unable|try again|invalid|required|please (enter|fill|provide)|שגיאה|נסה שוב|נסו שוב|לא הצלחנו|משהו השתבש|חובה|לא תקין|שדה/i;
-export const ANALYTICS_HOSTS = /google-analytics\.com|googletagmanager\.com|analytics\.google\.com|connect\.facebook\.net|facebook\.com\/tr|static\.hotjar\.com|script\.hotjar\.com|clarity\.ms|analytics\.tiktok\.com|snap\.licdn\.com|px\.ads\.linkedin\.com|cdn\.segment\.com|api\.segment\.io|cdn\.mxpnl\.com|api-js\.mixpanel\.com|js\.hs-scripts\.com|js\.hs-analytics\.net|static\.ads-twitter\.com|bat\.bing\.com|cdn\.amplitude\.com|us\.i\.posthog\.com|eu\.i\.posthog\.com|app\.posthog\.com/;
+export const ANALYTICS_HOSTS = /google-analytics\.com|googletagmanager\.com|analytics\.google\.com|connect\.facebook\.net|facebook\.com\/tr|static\.hotjar\.com|script\.hotjar\.com|clarity\.ms|analytics\.tiktok\.com|snap\.licdn\.com|px\.ads\.linkedin\.com|cdn\.segment\.com|api\.segment\.io|cdn\.mxpnl\.com|api-js\.mixpanel\.com|js\.hs-scripts\.com|js\.hs-analytics\.net|static\.ads-twitter\.com|bat\.bing\.com|cdn\.amplitude\.com|api2?\.amplitude\.com|api\.eu\.amplitude\.com|us\.i\.posthog\.com|eu\.i\.posthog\.com|app\.posthog\.com/;
 /** analytics that don't set cookies or track people, so they don't need consent */
 export const COOKIELESS = /plausible\.io|usefathom\.com|cdn\.usefathom|umami|simpleanalytics|va\.vercel-scripts\.com|vitals\.vercel-insights/;
 
@@ -139,4 +139,25 @@ export function shortUrl(url, origin) {
   } catch {
     return url;
   }
+}
+
+/** On a local scan: a refused request to a different address on this machine (a dev API, a live server). */
+export function otherLocalService(ctx, { url, why = "" }) {
+  if (!ctx.isLocalTarget || !/ERR_CONNECTION_REFUSED|ECONNREFUSED/.test(why)) return false;
+  try {
+    const u = new URL(url);
+    return u.origin !== new URL(ctx.target).origin && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** One "couldn't tell" item for addresses a check skipped because they were blocked or can't run here. */
+export function skippedNote(ctx, skipped) {
+  if (!skipped.size) return [];
+  const local = [...skipped.values()].some((w) => /local copy/.test(w));
+  const paths = [...skipped.keys()].slice(0, 3).map((u) => (/local service/.test(skipped.get(u)) ? new URL(u).host : new URL(u).pathname)).join(", ");
+  return [ctx.uncertain(local
+    ? { key: "unavailable", title: "Part of the app doesn't run in this local copy", evidence: `Skipped ${paths}: ${[...skipped.values()].some((w) => /local service/.test(w)) ? "another service the app uses on this machine isn't running" : "the app's server functions only run on the host"}`, fix: "Scan the live site for these" }
+    : { key: "blocked", title: "The site's bot protection blocked part of the check", evidence: `Skipped ${paths}: answered with a challenge page instead of the site`, fix: "Scan the local version instead, or briefly allow automated visits in your host's firewall settings" })];
 }

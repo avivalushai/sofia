@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 7,
-  "nextNoteNum": 9,
+  "nextNum": 11,
+  "nextNoteNum": 12,
   "features": [
     {
       "key": "ALL-1",
@@ -286,8 +286,8 @@
       "key": "ALL-6",
       "title": "Skill and chat flow (M3)",
       "type": "feature",
-      "status": "active",
-      "note": "engine: detect without target, summary, decide, checkpoint, recheck, revert; then SKILL.md",
+      "status": "review",
+      "note": "Read docs/walkthroughs/m3-noa-pilates.md; cd engine && npm test (117 pass)",
       "doneWhen": [
         "docs/04 stages 1-6 reproduced end to end on a fixture copy",
         "Reverting a single fix works",
@@ -300,14 +300,126 @@
         "engine/src/git.js",
         "engine/src/cli.js"
       ],
-      "links": [],
+      "links": [
+        "5755536"
+      ],
       "area": "",
       "createdAt": "2026-10-18T15:03:22Z",
-      "updatedAt": "2026-10-18T15:06:10Z",
+      "updatedAt": "2026-10-18T15:36:46Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-18T15:03:22Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-18T15:36:46Z",
+          "by": "claude",
+          "text": "Moved to review — Read docs/walkthroughs/m3-noa-pilates.md; cd engine && npm test (117 pass)"
+        },
+        {
+          "at": "2026-10-18T15:36:46Z",
+          "by": "claude",
+          "text": "Proof: 5755536"
+        }
+      ]
+    },
+    {
+      "key": "ALL-7",
+      "title": "Run the M3 flow in a fresh Claude Code session with the plugin loaded?",
+      "type": "question",
+      "status": "idea",
+      "note": "Needs owner OK: it runs a separate Claude session on their account",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-18T15:36:46Z",
+      "updatedAt": "2026-10-18T15:36:46Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-18T15:36:46Z",
+          "by": "claude",
+          "text": "Created"
+        }
+      ]
+    },
+    {
+      "key": "ALL-8",
+      "title": "What has Launch Check actually been tested on?",
+      "type": "question",
+      "status": "review",
+      "note": "Only fixtures/broken-landing (2-page static Hebrew HTML, served locally) and copies of it, plus unit tests and a fake dev server. ~28 of 56 checks have been seen catching a problem; the rest only seen passing/skipping. Never tested: a live site, a real React/Next app, db/auth/mail, a clean site (false positives). Proposal: M4 on 3 of the owner's real apps + clean-landing, app-with-auth and a small Next fixture.",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T09:56:28Z",
+      "updatedAt": "2026-10-19T09:56:28Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T09:56:28Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-19T09:56:28Z",
+          "by": "claude",
+          "text": "Moved to review — Only fixtures/broken-landing (2-page static Hebrew HTML, served locally) and copies of it, plus unit tests and a fake dev server. ~28 of 56 checks have been seen catching a problem; the rest only seen passing/skipping. Never tested: a live site, a real React/Next app, db/auth/mail, a clean site (false positives). Proposal: M4 on 3 of the owner's real apps + clean-landing, app-with-auth and a small Next fixture."
+        }
+      ]
+    },
+    {
+      "key": "ALL-9",
+      "title": "Which 3 real apps for the M4 false-positive pass?",
+      "type": "question",
+      "status": "review",
+      "note": "Owner proposed NehoRace, Blockout, Bud. Recommend NehoRace (live, Hebrew, canvas, API) and Blockout (~/Projects/ComponentLab, live, React, 7 UI libraries on purpose = false-positive test, Amplitude). Swap Bud (prototype launch checker full of seeded-bug fixtures, no live URL) for an app with a form/login/database, or build app-with-auth. Scan copies, live URLs read-only, no fixes.",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T10:46:37Z",
+      "updatedAt": "2026-10-19T10:46:37Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T10:46:37Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-19T10:46:37Z",
+          "by": "claude",
+          "text": "Moved to review — Owner proposed NehoRace, Blockout, Bud. Recommend NehoRace (live, Hebrew, canvas, API) and Blockout (~/Projects/ComponentLab, live, React, 7 UI libraries on purpose = false-positive test, Amplitude). Swap Bud (prototype launch checker full of seeded-bug fixtures, no live URL) for an app with a form/login/database, or build app-with-auth. Scan copies, live URLs read-only, no fixes."
+        }
+      ]
+    },
+    {
+      "key": "ALL-10",
+      "title": "False-positive pass: NehoRace and Blockout (M4)",
+      "type": "feature",
+      "status": "active",
+      "note": "Scan copies against the live sites, classify every finding, fix false alarms in the engine",
+      "doneWhen": [],
+      "steps": [],
+      "files": [
+        "engine/src/lib/blocked.js"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T10:51:09Z",
+      "updatedAt": "2026-10-19T10:55:22Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T10:51:09Z",
           "by": "claude",
           "text": "Created — active"
         }
@@ -511,6 +623,60 @@
       "steps": [],
       "createdAt": "2026-10-18T14:41:22Z",
       "updatedAt": "2026-10-18T14:41:22Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N9",
+      "kind": "decision",
+      "title": "A rotated key in git history is closed as accepted risk",
+      "body": "Launch Check can't verify rotation from outside; the user confirms and the finding is accepted with reason key rotated.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-6"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T15:36:46Z",
+      "updatedAt": "2026-10-18T15:36:46Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N10",
+      "kind": "decision",
+      "title": "Consent to side effects lasts 12 hours",
+      "body": "A yes to test submissions carries over to rechecks in the same working session; a scan next week asks again.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-6"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T15:36:46Z",
+      "updatedAt": "2026-10-18T15:36:46Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N11",
+      "kind": "decision",
+      "title": "Each fix starts from a clean tree",
+      "body": "fixing refuses while there are uncommitted changes, so every fix is its own commit and can be undone alone. Found in the walkthrough when two fixes ended up in one commit.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-6"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-18T15:36:46Z",
+      "updatedAt": "2026-10-18T15:36:46Z",
       "updatedBy": "claude"
     }
   ],

@@ -1,6 +1,6 @@
 import { ANALYTICS_HOSTS, COOKIELESS } from "../../lib/browser-checks.js";
 
-const TRACKING_COOKIE = /^(_ga|_gid|_gat|_fbp|_fbc|_gcl_|_hj|_clck|_clsk|_ttp|_uetsid|_uetvid|ajs_|mp_|_pin_unauth|li_|hubspotutk)/;
+const TRACKING_COOKIE = /^(_ga|_gid|_gat|_fbp|_fbc|_gcl_|_hj|_clck|_clsk|_ttp|_uetsid|_uetvid|ajs_|mp_|_pin_unauth|li_|hubspotutk|AMP_|ph_)/;
 
 /** @type {import("../../types.js").Check} */
 export default {

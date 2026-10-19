@@ -5,9 +5,11 @@ export default {
   id: "behave.double-submit",
   layer: "browser",
   async run(ctx) {
+    const forms = await findForms(ctx);
+    if (!forms.length) return [ctx.pass()]; // nothing to submit, nothing to ask
     if (!(await ctx.consent.has("submit-forms"))) return [ctx.skip(ctx.consent.why("submit-forms"), { needs: "submit-forms" })];
     const results = [];
-    for (const form of await findForms(ctx)) {
+    for (const form of forms) {
       const outcome = await ctx.browser.fresh(form.url, { width: 1280 }, async (p) => {
         // answered by us after a short delay, like a real server — so nothing is created anywhere
         const writes = [];

@@ -1,20 +1,20 @@
+// Two requests, spaced out: more of these look like an attack scan to hosts' firewalls. A site that
+// serves .env (or .git) at all serves them from the folder it was deployed from, so these two tell.
 const PATHS = [
   { path: "/.env", looks: /^\s*[A-Z_][A-Z0-9_]*\s*=/m },
-  { path: "/.env.local", looks: /^\s*[A-Z_][A-Z0-9_]*\s*=/m },
-  { path: "/.env.production", looks: /^\s*[A-Z_][A-Z0-9_]*\s*=/m },
-  { path: "/.env.development", looks: /^\s*[A-Z_][A-Z0-9_]*\s*=/m },
-  { path: "/.git/config", looks: /^\s*\[core\]/m },
   { path: "/.git/HEAD", looks: /^ref: refs\//m },
-  { path: "/.npmrc", looks: /_authToken|^registry=/m },
 ];
 
 /** @type {import("../../types.js").Check} */
 export default {
   id: "sec.env-files",
+  // asks for addresses like /.env or /admin: runs last, see runner
+  probe: true,
   layer: "mechanical",
   async run(ctx) {
     const results = [];
     for (const { path, looks } of PATHS) {
+      await new Promise((r) => setTimeout(r, 400));
       const res = await ctx.http.get(new URL(path, ctx.target).href, { follow: false });
       // a 200 with the home page (single-page-app fallback) is not the file
       if (res.status !== 200 || /<html|<!doctype/i.test(res.body.slice(0, 300)) || !looks.test(res.body)) continue;

@@ -61,13 +61,52 @@ export async function findTypos(segments) {
   }
   const typos = [];
   const siteWords = [...counts.keys()];
+  const repeated = siteWords.filter((w) => counts.get(w) > 1 && lang.get(w) === "he").map(stripPrefixes);
   for (const [word, n] of [...counts].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     if (n !== 1) continue;
     const s = await speller(lang.get(word));
     if (s.spell(word)) continue;
     const near = siteWords.find((w) => w !== word && counts.get(w) > 1 && lang.get(w) === lang.get(word) && editDistance(w, word, 1) <= 1);
+    if (lang.get(word) === "he") {
+      // The Hebrew dictionary misses many valid forms (prefixes, loanwords, spelling with or without
+      // ו/י) and its suggestions are unreliable, so only two strong signals count:
+      if (knownStem(word, repeated)) continue; // a form of a name or term the site repeats (נהוראי → הנהוראים)
+      if (near && !differsOnlyAtStart(word, near)) {
+        typos.push({ word, suggestion: near }); // spelled differently from the site's own repeated word
+        continue;
+      }
+      const fixedDouble = undoubled(word).find((w) => s.spell(w)); // a stuck key: שלחח → שלח
+      if (fixedDouble) typos.push({ word, suggestion: fixedDouble });
+      continue;
+    }
     const suggestion = near ?? s.suggest(word).find((x) => editDistance(x, word, 1) <= 1 && !/[\s-]/.test(x));
     if (suggestion) typos.push({ word, suggestion });
   }
   return typos;
+}
+
+const PREFIXES = /^(?:ו?(?:ש|כש|מש|לכש)?(?:ה|ב|ל|כ|מ)?)/;
+
+function stripPrefixes(w) {
+  const stripped = w.replace(PREFIXES, "");
+  return stripped.length >= 3 ? stripped : w;
+}
+
+/** Shares a stem of 4+ letters with a Hebrew word the site uses more than once. */
+function knownStem(word, repeated) {
+  const stem = stripPrefixes(word);
+  return stem.length >= 4 && repeated.some((r) => r.length >= 4 && (stem.startsWith(r.slice(0, Math.max(4, r.length - 1))) || r.startsWith(stem.slice(0, Math.max(4, stem.length - 1)))));
+}
+
+/** The two words differ only in their first letter (a different prefix: בפארק / הפארק / פארק). */
+function differsOnlyAtStart(a, b) {
+  if (a.slice(1) === b.slice(1)) return true;
+  return a.slice(1) === b || b.slice(1) === a;
+}
+
+/** The word with each doubled letter written once. */
+function undoubled(word) {
+  const out = [];
+  for (let i = 1; i < word.length; i++) if (word[i] === word[i - 1]) out.push(word.slice(0, i) + word.slice(i + 1));
+  return out;
 }

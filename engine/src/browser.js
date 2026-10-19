@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
 import { PAGE_HELPERS } from "./lib/page-helpers.js";
+import { blockerName } from "./lib/blocked.js";
 
 const require = createRequire(import.meta.url);
 
@@ -35,6 +36,8 @@ export async function launchBrowser({ maxOpen = 10 } = {}) {
 
   const axeSource = await readFile(require.resolve("axe-core/axe.min.js"), "utf8");
   const cache = new Map(); // key → Promise<LoadedPage>, in least-recently-used order
+  /** URLs the host's bot protection challenged, across every page loaded this run */
+  const blocked = new Map();
 
   async function newContext(width, extra = {}) {
     return browser.newContext({
@@ -51,12 +54,20 @@ export async function launchBrowser({ maxOpen = 10 } = {}) {
   /** Loads a URL and records everything a check might ask about afterwards. */
   async function load(context, url, { beforeGoto, waitUntil = "load", idle = true, settleMs = SETTLE_MS } = {}) {
     const page = await context.newPage();
-    const log = { console: [], pageErrors: [], requests: [], failed: [], responses: new Map() };
+    const log = { console: [], pageErrors: [], requests: [], failed: [], responses: new Map(), blocked: new Set(), pageBlocked: false };
     page.on("console", (m) => m.type() === "error" && log.console.push({ text: m.text(), url: m.location()?.url ?? null }));
     page.on("pageerror", (e) => log.pageErrors.push({ text: `${e.name}: ${e.message}` }));
     page.on("request", (r) => log.requests.push({ url: r.url(), method: r.method(), type: r.resourceType() }));
     page.on("requestfailed", (r) => log.failed.push({ url: r.url(), method: r.method(), type: r.resourceType(), error: r.failure()?.errorText ?? "failed" }));
-    page.on("response", (r) => log.responses.set(r.url(), r.status()));
+    page.on("response", (r) => {
+      log.responses.set(r.url(), r.status());
+      const h = r.headers();
+      if (h["x-vercel-mitigated"] === "challenge" || h["cf-mitigated"] === "challenge" || h["x-launch-check-unavailable"]) {
+        log.blocked.add(r.url());
+        blocked.set(r.url(), blockerName(h));
+        if (r.request().isNavigationRequest() && r.frame() === page.mainFrame()) log.pageBlocked = true;
+      }
+    });
     await page.addInitScript(PAGE_HELPERS);
     if (beforeGoto) await beforeGoto(page);
     let status = null;
@@ -129,6 +140,7 @@ export async function launchBrowser({ maxOpen = 10 } = {}) {
 
   return {
     version: browser.version(),
+    blocked,
     /**
      * Shared page for read-only checks. Don't click or type on it — use fresh() for that.
      * @param {string} url

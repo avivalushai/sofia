@@ -63,6 +63,7 @@ Read [references/report-format.md](references/report-format.md) before writing a
    ✓ Browser checks · 29
    ```
    If the engine says Chrome can't start, tell the user exactly what it said and stop.
+   If it says the site's bot protection is answering with a challenge (Vercel, Cloudflare), say so in one sentence — it's the host protecting the site, not a problem with it — and offer the local version. Never try to get past a challenge.
 
 ## Stage 2 — The summary
 
@@ -81,6 +82,7 @@ Who handles what:
 - **Need you to do something** · {buckets.user}
 ```
 
+"Couldn't tell" items (`uncertain`) are never problems. When they come from bot protection or from parts of the app that only run on the host, say it once, plainly: "8 checks couldn't run because Vercel's bot protection blocked them — the local version avoids that."
 Add at most one line each, only when they apply: `needsConsent` ("4 form checks are waiting for your OK to send test data"), `notices`, and couldn't-tell items (`uncertain`). Then ask one question with AskUserQuestion:
 - "Fix my {n} now (recommended)"
 - "Go through everything by severity"
@@ -90,6 +92,7 @@ Add at most one line each, only when they apply: `needsConsent` ("4 form checks 
 ## Stage 3 — Fixing what you can fix alone (`buckets.claude`)
 
 1. `$LC checkpoint` → print `✓ Checkpoint saved`. Once per session, before the first edit.
+   If the scan was of the live site and `local` is available, fix and re-check against the local version (`$LC run --target local --mode full` once first): edits aren't live until deployed, and hosts' bot protection often blocks repeated checks of a live site. Say this in one line.
 2. Some of "my" fixes need something only the user has — the real text for a placeholder, a logo, where a link should point. Don't stop the run for them: fix everything else first, then ask these in stage 4, together with the decisions.
 3. For each item, in the order given:
    - `$LC show <checkId> --json` — every instance, file and line, evidence.

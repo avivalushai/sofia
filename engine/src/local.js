@@ -38,9 +38,14 @@ async function waitFor(url, ms, isDead) {
 }
 
 /** Serves a plain HTML folder, for projects with no dev script. */
-async function serveStatic(dir) {
+async function serveStatic(dir, { serverFunctions = false } = {}) {
   const server = createServer(async (req, res) => {
     let rel = decodeURIComponent(new URL(req.url, "http://x").pathname);
+    // Vercel/Netlify-style server functions only run on the host: say so instead of a plain 404,
+    // so checks answer "couldn't tell" rather than "broken"
+    if (serverFunctions && /^\/api\//.test(rel)) {
+      return res.writeHead(501, { "content-type": "text/plain", "x-launch-check-unavailable": "server-functions" }).end("Server functions don't run in a plain local copy");
+    }
     // like real static hosts: never serve hidden files (.git, .env, .launch-check)
     if (rel.split("/").some((part) => part.startsWith(".") && part !== ".well-known")) return res.writeHead(404, { "content-type": "text/plain" }).end("Not Found");
     if (rel.endsWith("/")) rel += "index.html";
@@ -72,7 +77,8 @@ export async function startLocal(project) {
   if (!script) {
     const dir = ["", "public", "dist", "build", "out"].find((d) => project.has(d ? `${d}/index.html` : "index.html"));
     if (dir === undefined) throw new Error("Couldn't find how to start the app locally: no dev script in package.json and no index.html. Start it yourself and pass its address with --target.");
-    const s = await serveStatic(path.join(project.root, dir));
+    const serverFunctions = project.files.some((f) => /^api\/.+\.(js|mjs|cjs|ts)$/.test(f));
+    const s = await serveStatic(path.join(project.root, dir), { serverFunctions });
     return { ...s, how: `served the ${dir || "project"} folder` };
   }
 

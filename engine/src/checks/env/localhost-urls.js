@@ -1,6 +1,8 @@
 import { codeKeys, scanSource } from "../../lib/code.js";
 
 export const LOCAL_URL = /\bhttps?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?[^\s"'`)<>]*/g;
+/** "http://localhost" with no port and no path is the usual dummy base for new URL(path, base) — not a request */
+const PARSING_BASE = /^https?:\/\/localhost\/?$/;
 /** lines that are only about local development: env switches and "server running at" logs */
 const DEV_ONLY = /development|NODE_ENV|import\.meta\.env\.DEV|\.listen\(|console\.|isDev|__DEV__/;
 
@@ -13,7 +15,7 @@ export default {
     const results = [];
     const seen = new Set();
     for (const { file, line, lineText, match } of await scanSource(ctx.project, LOCAL_URL, { skipComments: true })) {
-      if (DEV_ONLY.test(lineText)) continue;
+      if (DEV_ONLY.test(lineText) || PARSING_BASE.test(match[0])) continue;
       const k = key(file, lineText);
       seen.add(match[0]);
       results.push(ctx.fail({
@@ -30,7 +32,7 @@ export default {
     if (!ctx.isLocalTarget) {
       for (const { where, code } of await ctx.crawl.scripts()) {
         for (const m of code.matchAll(LOCAL_URL)) {
-          if (seen.has(m[0])) continue;
+          if (seen.has(m[0]) || PARSING_BASE.test(m[0])) continue;
           seen.add(m[0]);
           results.push(ctx.fail({
             key: `served_${where}_${m[0]}`,

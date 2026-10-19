@@ -153,6 +153,11 @@ export async function liveUrlCandidates(project) {
     const m = ((await project.read(f)) ?? "").match(/metadataBase\s*:\s*new URL\(\s*["'`](https:\/\/[^"'`]+)/);
     if (m) add(m[1], f);
   }
+  for (const f of project.files.filter((x) => /^(README|readme)\.md$|^docs\/[^/]+\.md$/.test(x)).slice(0, 10)) {
+    for (const m of ((await project.read(f)) ?? "").matchAll(/https:\/\/[a-z0-9-]+\.(?:vercel\.app|netlify\.app|pages\.dev|github\.io|onrender\.com|fly\.dev|up\.railway\.app|web\.app|firebaseapp\.com)/gi)) {
+      add(m[0], f);
+    }
+  }
   if (project.has(".vercel/project.json")) {
     try {
       const { projectName } = JSON.parse((await project.read(".vercel/project.json")) ?? "{}");

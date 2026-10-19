@@ -52,6 +52,24 @@ export const dns = {
 export function makeContext({ entry, project, crawl, http, browser = null, target, detected, now, consent = [], staging = false }) {
   const targetUrl = new URL(target);
   const local = isLocalHost(targetUrl.hostname);
+  // everything this check saw that the host's bot protection had answered instead of the site
+  const blocked = new Map();
+  const watchedHttp = {
+    ...http,
+    get: (u, o) => http.get(u, o).then((r) => (r.blocked && blocked.set(r.url, http.blocked.get(r.url)), r)),
+    request: (u, o) => http.request(u, o).then((r) => (r.blocked && blocked.set(r.url, http.blocked.get(r.url)), r)),
+  };
+  const note = (p) => {
+    // the page itself was a challenge: nothing on it can be trusted. A blocked API call or image only
+    // matters to checks about requests, which skip those addresses themselves (see blockedOn).
+    if (p.log?.pageBlocked) for (const u of p.log.blocked) blocked.set(u, browser.blocked.get(u));
+    return p;
+  };
+  const watchedBrowser = browser && {
+    ...browser,
+    open: (u, o) => browser.open(u, o).then(note),
+    fresh: (u, o, fn) => browser.fresh(u, o, (p) => fn(note(p)).finally(() => note(p))),
+  };
   const base = { checkId: entry.id };
 
   const need = (r, fields) => {
@@ -64,14 +82,15 @@ export function makeContext({ entry, project, crawl, http, browser = null, targe
     entry,
     project,
     crawl,
-    http,
+    http: watchedHttp,
     dns,
+    blocked,
     target,
     targetUrl,
     /** true when the scanned address only exists on this machine or a private network */
     isLocalTarget: local,
     /** the user's Chrome (null in quick mode) */
-    browser,
+    browser: watchedBrowser,
     detected,
     now,
     viewports: VIEWPORTS,
@@ -112,6 +131,16 @@ export function makeContext({ entry, project, crawl, http, browser = null, targe
       const layouts = [];
       for (const f of project.shippedSource()) if (/<html[\s>]/.test((await project.read(f)) ?? "")) layouts.push(f);
       return layouts.length === 1 ? layouts[0] : null;
+    },
+
+    /**
+     * For checks about requests: the addresses on a page that were blocked or can't run here, and a
+     * "couldn't tell" item for them. Check them against these, don't report them as broken.
+     */
+    blockedOn(p) {
+      const urls = new Set(p.log?.blocked ?? []);
+      const who = [...new Set([...urls].map((u) => browser?.blocked.get(u)).filter(Boolean))][0] ?? "the host";
+      return { urls, who };
     },
 
     pass(key = null) {

@@ -4,6 +4,23 @@ import { cluster, hex, isGray, parseColor } from "../../lib/color.js";
 const NEAR = 6;
 const MAX_NEAR_GROUPS = 3;
 const MAX_GRAYS = 8;
+/** Tailwind's gray families (v3 hex values): a full scale from one family is a deliberate system */
+const TAILWIND_GRAYS = {
+  slate: ["#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a", "#020617"],
+  gray: ["#f9fafb", "#f3f4f6", "#e5e7eb", "#d1d5db", "#9ca3af", "#6b7280", "#4b5563", "#374151", "#1f2937", "#111827", "#030712"],
+  zinc: ["#fafafa", "#f4f4f5", "#e4e4e7", "#d4d4d8", "#a1a1aa", "#71717a", "#52525b", "#3f3f46", "#27272a", "#18181b", "#09090b"],
+  neutral: ["#fafafa", "#f5f5f5", "#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373", "#525252", "#404040", "#262626", "#171717", "#0a0a0a"],
+  stone: ["#fafaf9", "#f5f5f4", "#e7e5e4", "#d6d3d1", "#a8a29e", "#78716c", "#57534e", "#44403c", "#292524", "#1c1917", "#0c0a09"],
+};
+/** Grays outside the one design scale they mostly come from (all of them, if there's no such scale). */
+function offScale(grays) {
+  let best = grays;
+  for (const scale of Object.values(TAILWIND_GRAYS)) {
+    const off = grays.filter((g) => !scale.includes(hex(g)));
+    if (off.length < best.length) best = off;
+  }
+  return best;
+}
 
 function collectColors() {
   const seen = new Map();
@@ -40,8 +57,11 @@ export default {
       }
     }
     const colors = [...all.values()].sort((a, b) => (hex(a) < hex(b) ? -1 : 1));
-    const near = cluster(colors, NEAR).filter((g) => g.length > 1);
-    const grays = colors.filter((c) => isGray(c) && hex(c) !== "#ffffff" && hex(c) !== "#000000");
+    // shades from one design scale are meant to sit close together
+    const scaled = offScale(colors.filter((c) => isGray(c)));
+    const onScale = new Set(colors.filter((c) => isGray(c) && !scaled.includes(c)).map(hex));
+    const near = cluster(colors.filter((c) => !onScale.has(hex(c))), NEAR).filter((g) => g.length > 1);
+    const grays = colors.filter((c) => isGray(c) && hex(c) !== "#ffffff" && hex(c) !== "#000000" && !onScale.has(hex(c)));
 
     if (near.length < MAX_NEAR_GROUPS && grays.length <= MAX_GRAYS) return [ctx.pass()];
     const tooManyGrays = grays.length > MAX_GRAYS;

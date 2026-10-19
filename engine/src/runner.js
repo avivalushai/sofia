@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { BrowserMissing, launchBrowser } from "./browser.js";
 import { CheckBug, makeContext } from "./context.js";
+import { BLOCKED_FIX, BLOCKED_TITLE, isChallenge, UNAVAILABLE, UNAVAILABLE_FIX, UNAVAILABLE_TITLE } from "./lib/blocked.js";
 import { createCrawler } from "./crawl.js";
 import { detect } from "./detect.js";
 import { createHttp, HttpError } from "./http.js";
@@ -78,10 +79,14 @@ async function prepare({ root, target, maxPages = 30 }) {
 
 async function reach({ url, project, maxPages }) {
   const http = createHttp();
+  let home;
   try {
-    await http.request(url, { as: "none" });
+    home = await http.request(url);
   } catch (err) {
     throw new Error(`Couldn't reach ${url} (${err.code ?? err.message}). Is the site running?`);
+  }
+  if (isChallenge(home)) {
+    throw new Error(`The site's bot protection is answering automated visits with a challenge page, so it can't be checked from here right now. Scan the local version instead (--target local), or allow automated visits in the host's firewall settings for a moment. Launch Check never tries to get past it.`);
   }
   const crawl = createCrawler({ target: url, http, limit: maxPages });
   const pages = await crawl.pages();
@@ -109,6 +114,20 @@ async function runOne(c, ctx) {
     const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000)));
     const items = await Promise.race([c.check.run(ctx), timeout]).finally(() => clearTimeout(timer));
     if (!Array.isArray(items)) throw new CheckBug(`${c.id}: run() must return an array`);
+    if (ctx.blocked.size) {
+      // what the check saw was the host's challenge page, not the site: no pass, no fail
+      const who = [...new Set(ctx.blocked.values())][0] ?? "the host's bot protection";
+      const local = who === UNAVAILABLE;
+      const paths = [...ctx.blocked.keys()].slice(0, 3).map((u) => new URL(u).pathname).join(", ");
+      return {
+        entry: c.entry,
+        status: "uncertain",
+        reason: local ? `needs the app's server functions, which don't run in this local copy` : `${who} blocked ${ctx.blocked.size} request${ctx.blocked.size > 1 ? "s" : ""} this check needed`,
+        items: [ctx.uncertain(local
+          ? { key: "unavailable", title: UNAVAILABLE_TITLE, evidence: `${paths} only run on the host`, fix: UNAVAILABLE_FIX }
+          : { key: "blocked", title: BLOCKED_TITLE, evidence: `${who} answered ${paths} with a challenge page instead of the site`, fix: BLOCKED_FIX })],
+      };
+    }
     const skip = items.find((i) => i.status === "skip");
     if (skip) return { entry: c.entry, status: "skip", reason: skip.reason, ...(skip.needs ? { needs: skip.needs } : {}), items: [] };
     const status = items.some((i) => i.status === "fail") ? "fail" : items.some((i) => i.status === "uncertain") ? "uncertain" : "pass";
@@ -221,8 +240,11 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     const runId = makeRunId(startedAt, new Set(state.runs.map((r) => r.id)));
     const scoreBefore = state.current?.score ?? null;
 
-    const runLayer = (layer, limit) =>
-      mapLimit(selected.filter((c) => c.entry.layer === layer), limit, async (c) => {
+    // checks that request addresses like /.env or /admin can make a host's firewall start blocking
+    // this machine: run them last, so a block can't spoil the rest of the scan
+    const isProbe = (c) => Boolean(c.check.probe);
+    const runSet = (list, limit) =>
+      mapLimit(list, limit, async (c) => {
         const fact = c.entry.appliesWhen;
         if (fact !== "always" && !detected[fact]?.value) {
           return { entry: c.entry, status: "skip", reason: detected[fact]?.why ?? `not relevant (${fact})`, items: [] };
@@ -230,7 +252,12 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
         const ctx = makeContext({ entry: c.entry, project, crawl, http, browser, target: url, detected, now: startedAt, consent, staging });
         return runOne(c, ctx);
       });
-    const results = [...(await runLayer("mechanical", 8)), ...(browser ? await runLayer("browser", 3) : [])];
+    const layer = (l) => selected.filter((c) => c.entry.layer === l && !isProbe(c));
+    const results = [
+      ...(await runSet(layer("mechanical"), 8)),
+      ...(browser ? await runSet(layer("browser"), 3) : []),
+      ...(await runSet(selected.filter((c) => isProbe(c) && (c.entry.layer !== "browser" || browser)), 1)),
+    ];
     // keep catalog order so state and report don't depend on which check finished first
     const order = new Map(catalog.checks.map((c, i) => [c.id, i]));
     results.sort((a, b) => order.get(a.entry.id) - order.get(b.entry.id));
@@ -260,6 +287,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       verdict,
       counts: { ...counts, notImplemented: checks.notImplemented.length },
       pages: Math.max(pages.length, rendered.length),
+      ...(http.blocked.size || browser?.blocked.size ? { blocked: http.blocked.size + (browser?.blocked.size ?? 0) } : {}),
       changes,
     };
     state.runs.push(record);

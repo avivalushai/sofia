@@ -1,4 +1,6 @@
-const COMMON = ["/admin", "/admin/", "/dashboard", "/wp-admin/", "/administrator", "/api/admin", "/test", "/debug", "/internal", "/staff", "/backoffice", "/phpinfo.php", "/server-status", "/graphql", "/api/graphql"];
+// Few, and only what AI-built JavaScript apps actually have: probing WordPress or PHP addresses
+// looks like an attack scan to hosts' firewalls (Vercel, Cloudflare) and gets this machine blocked
+const COMMON = ["/admin", "/dashboard"];
 const SENSITIVE_ROUTE = /(^|\/)(admin|dashboard|internal|debug|test|staff|backoffice|manage|moderat\w*)(\/|$)/i;
 const LOGIN = /log ?in|sign ?in|password|התחבר|כניסה|סיסמה/i;
 const CRITICAL = /^\/(admin|wp-admin|administrator|api\/admin|backoffice|staff|internal)/;
@@ -18,6 +20,8 @@ function routesFromCode(files) {
 /** @type {import("../../types.js").Check} */
 export default {
   id: "sec.exposed-paths",
+  // asks for addresses like /.env or /admin: runs last, see runner
+  probe: true,
   layer: "browser",
   async run(ctx) {
     const origin = new URL(ctx.target).origin;
@@ -30,6 +34,7 @@ export default {
 
     const results = [];
     for (const path of paths) {
+      await new Promise((r) => setTimeout(r, 400)); // spaced out, like a person clicking around
       const res = await ctx.http.get(new URL(path, origin).href, { as: "none", follow: false }).catch(() => null);
       if (!res || res.status !== 200) continue; // redirects (usually to login), 401/403/404 are fine
       const p = await ctx.browser.open(new URL(path, origin).href, { width: 1280 });

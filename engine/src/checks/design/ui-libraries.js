@@ -49,15 +49,18 @@ export default {
     const [main, ...rest] = found;
     return [ctx.fail({
       key: found.map((f) => f.name).sort().join("+"),
-      title: "Two design styles are mixed on the site",
+      title: found.length === 2 ? "Two design libraries are mixed on the site" : `${found.length} design libraries are mixed on the site`,
       impact: "Buttons, inputs and menus look different from page to page, so the site feels stitched together — and each library adds weight that slows loading",
       location: { file: "package.json" },
       evidence: found.map((f) => `${f.name} in ${f.files} files`).join(", "),
       fix: `Keep one library and replace the components from the other${rest.length > 1 ? "s" : ""}, then remove ${rest.length > 1 ? "them" : "it"}`,
-      options: found.slice(0, 3).map((f, i) => ({
-        label: `Keep ${f.name}`,
-        detail: i === 0 ? `Used in more places (${f.files} files) — the least to change` : `Used in ${f.files} files`,
-      })),
+      options: [
+        ...found.slice(0, 2).map((f, i) => ({
+          label: `Keep ${f.name}`,
+          detail: i === 0 ? `Used in more places (${f.files} files) — the least to change` : `Used in ${f.files} files`,
+        })),
+        { label: "They're there on purpose", detail: "For example an app that shows the same design in several libraries — I'll stop flagging it" },
+      ],
     })];
   },
 };
