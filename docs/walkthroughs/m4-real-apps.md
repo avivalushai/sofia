@@ -16,16 +16,16 @@ Plain ES modules, canvas, Hebrew, Vercel functions in `api/`.
 |---|---|---|
 | Script, stylesheet and icon don't load (403) | false | Vercel's bot protection ("Security Checkpoint") answered instead of the site |
 | A bare not-found page | false | same: it was the challenge page |
-| 7 spelling mistakes | 6 false, **1 real** (`שלחח` in the share button) | Hebrew prefixes, spelling with or without ו/י, and forms of the game's own word "נהוראי" |
+| 7 spelling mistakes | 6 false; `שלחח` is intentional slang (the owner confirmed), so also false | Hebrew prefixes, spelling with or without ו/י, forms of the game's own word "נהוראי", and slang. A checker can't know what's intentional. |
 | `ADMIN_TOKEN` missing | false (too strong) | set in Vercel's dashboard, as the project's own docs say |
 | No privacy policy | real | |
 
-### After the fixes, local copy: 3 findings, all real
+### After the fixes, local copy: 3 findings, 2 real
 
 | Finding | Status |
 |---|---|
 | No custom not-found page | real |
-| `שלחח` → `שלח` | real |
+| `שלחח` → `שלח` | intentional slang: the owner would mark it "intentional" |
 | No privacy policy | real |
 
 Plus 5 "couldn't tell" items, each with its reason:
@@ -58,3 +58,6 @@ After one scan, Vercel's firewall challenged every request from this machine, ev
 ## Still to do
 - **Re-scan both live sites** once Vercel stops challenging this machine. This confirms the Amplitude detection, the zinc-scale rule and the localhost rule on the real pages.
 - **A third app with a form, login or database,** or the `app-with-auth` fixture.
+
+## Lesson: spelling and wording are the owner's call
+`שלחח` was flagged and I labeled it a real typo without asking. It's intentional slang. A checker can only say "this looks unusual". Whether it's a mistake is the owner's decision. Proposed (awaiting the owner's OK): spelling and placeholder findings move from "I'll fix this" to "Your choice", one word at a time, with "it's intentional" as an option that mutes that word.

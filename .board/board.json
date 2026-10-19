@@ -8,7 +8,7 @@
     "granularity": "normal"
   },
   "nextNum": 11,
-  "nextNoteNum": 12,
+  "nextNoteNum": 14,
   "features": [
     {
       "key": "ALL-1",
@@ -406,22 +406,34 @@
       "title": "False-positive pass: NehoRace and Blockout (M4)",
       "type": "feature",
       "status": "active",
-      "note": "Scan copies against the live sites, classify every finding, fix false alarms in the engine",
+      "note": "Re-scan both live sites when Vercel stops challenging this machine; then a third app with form/login/db",
       "doneWhen": [],
       "steps": [],
       "files": [
         "engine/src/lib/blocked.js"
       ],
-      "links": [],
+      "links": [
+        "b7d2b61"
+      ],
       "area": "",
       "createdAt": "2026-10-19T10:51:09Z",
-      "updatedAt": "2026-10-19T10:55:22Z",
+      "updatedAt": "2026-10-19T11:08:32Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-19T10:51:09Z",
           "by": "claude",
           "text": "Created — active"
+        },
+        {
+          "at": "2026-10-19T11:08:32Z",
+          "by": "claude",
+          "text": "Proof: b7d2b61"
+        },
+        {
+          "at": "2026-10-19T11:08:32Z",
+          "by": "claude",
+          "text": "Note: Re-scan both live sites when Vercel stops challenging this machine; then a third app with form/login/db"
         }
       ]
     }
@@ -677,6 +689,42 @@
       "steps": [],
       "createdAt": "2026-10-18T15:36:46Z",
       "updatedAt": "2026-10-18T15:36:46Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N12",
+      "kind": "decision",
+      "title": "Bot protection is 'couldn't tell', never 'fail'",
+      "body": "Vercel/Cloudflare challenges are recognised by header or page; checks that saw them answer uncertain, a challenged home page stops the scan, and Launch Check never tries to get past a challenge.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-10"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-19T11:08:32Z",
+      "updatedAt": "2026-10-19T11:08:32Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N13",
+      "kind": "decision",
+      "title": "Hebrew spelling flags only strong signals",
+      "body": "Words spelled differently from a word the site repeats, and doubled letters. Prefix and ו/י variants are never flagged: the dictionary misses too many valid forms.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-10"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-19T11:08:32Z",
+      "updatedAt": "2026-10-19T11:08:32Z",
       "updatedBy": "claude"
     }
   ],
