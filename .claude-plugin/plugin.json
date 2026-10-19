@@ -1,6 +1,6 @@
 {
   "name": "sofia",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sofia checks your app before launch, reports what's broken in plain words, talks it through with you, and fixes only what you approve.",
   "author": {
     "name": "Aviv Alush"

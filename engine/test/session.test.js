@@ -194,3 +194,30 @@ test("a share image with a partial address fails: WhatsApp can't fetch it", asyn
   assert.match(f.evidence, /partial address/);
   await writeFile(html, orig);
 });
+
+test("the report page: one server per project, state over HTTP, a live update within a second", async () => {
+  const first = await lc("serve");
+  assert.equal(first.code, 0, first.err);
+  const again = await lc("serve");
+  assert.equal(again.out.url, first.out.url, "a running server is reused");
+  assert.equal(again.out.started, false);
+  const body = await (await fetch(new URL("/api/state", first.out.url))).json();
+  assert.ok(body.summary.score !== undefined);
+  assert.ok(body.catalog.length > 100);
+  assert.equal((await fetch(new URL("/", first.out.url))).status, 200);
+
+  // listen for the change event, then change the state
+  const ctrl = new AbortController();
+  const res = await fetch(new URL("/api/events", first.out.url), { signal: ctrl.signal });
+  const reader = res.body.getReader();
+  const started = Date.now();
+  await lc("decide", "seo.title", "--action", "unmute", "--scope", "check");
+  let got = "";
+  while (!got.includes("event: state") && Date.now() - started < 3000) got += new TextDecoder().decode((await reader.read()).value);
+  ctrl.abort();
+  assert.ok(got.includes("event: state"), "the page hears about the change");
+  assert.ok(Date.now() - started < 1500, `took ${Date.now() - started} ms`);
+
+  const info = JSON.parse(await readFile(path.join(dir, ".launch-check", "server.json"), "utf8"));
+  process.kill(info.pid);
+});

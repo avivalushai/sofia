@@ -7,6 +7,7 @@ import { loadProject } from "./project.js";
 import { writeReport } from "./report.js";
 import { BrowserMissing, detectOnly, recheck, revert, run, UsageError } from "./runner.js";
 import { readState, statePath, writeState } from "./state.js";
+import { ensureServer, runServer } from "./server.js";
 import { buildSummary, refreshCurrent, showItem } from "./summary.js";
 
 const USAGE = `Usage: launch-check <command> [options]
@@ -26,7 +27,8 @@ Commands:
   revert <checkId|findingId>              undo that check's last fix on its own, then re-check
   decide <findingId|checkId|category> --action mute|accept|defer|unmute
          --scope instance|check|category --reason "..."
-  review-tasks | add-findings | serve | export   (not implemented yet)
+  serve                                   open the report page (reuses a running one) and print its address
+  review-tasks | add-findings | export    (not implemented yet)
 
 Options:
   --target local   start the app on this machine (its dev script, or a plain HTML folder) and stop it afterwards
@@ -34,8 +36,8 @@ Options:
   --staging        the target is a staging copy, not the live site
   --json           machine-readable output`;
 
-const LATER = new Set(["review-tasks", "add-findings", "serve", "export"]);
-const COMMANDS = new Set(["detect", "run", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide"]);
+const LATER = new Set(["review-tasks", "add-findings", "export"]);
+const COMMANDS = new Set(["detect", "run", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide", "serve"]);
 const LAYER_TITLE = { mechanical: "Mechanical checks", browser: "Browser checks", judgment: "Judgment checks" };
 
 /**
@@ -60,6 +62,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
         scope: { type: "string" },
         reason: { type: "string", default: "" },
         json: { type: "boolean", default: false },
+        foreground: { type: "boolean", default: false },
         help: { type: "boolean", short: "h", default: false },
       },
     });
@@ -161,6 +164,17 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
         const item = showItem(catalog, await readState(cwd), rest[0]);
         if (!item) throw new UsageError(`"${rest[0]}" is not a check or finding id`);
         print(item, JSON.stringify(item, null, 2));
+        return 0;
+      }
+
+      case "serve": {
+        if (opts.foreground) {
+          const url = await runServer(cwd, catalog);
+          out(`Report page at ${url}`);
+          return await new Promise(() => {}); // keeps serving until idle
+        }
+        const { url, started } = await ensureServer(cwd);
+        print({ url, started }, `✓ Report ${started ? "open" : "already open"} at ${url}`);
         return 0;
       }
 

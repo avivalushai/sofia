@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 16,
-  "nextNoteNum": 15,
+  "nextNum": 17,
+  "nextNoteNum": 16,
   "features": [
     {
       "key": "ALL-1",
@@ -496,20 +496,25 @@
       "title": "Make the skill's triggers distinct from other checker skills (e.g. secute)",
       "type": "chore",
       "status": "idea",
-      "note": "",
+      "note": "Name-based trigger done (Sofia); still check natural phrasing vs secute in a real session",
       "doneWhen": [],
       "steps": [],
       "files": [],
       "links": [],
       "area": "",
       "createdAt": "2026-10-19T12:42:53Z",
-      "updatedAt": "2026-10-19T12:42:53Z",
+      "updatedAt": "2026-10-19T12:58:40Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-19T12:42:53Z",
           "by": "claude",
           "text": "Created"
+        },
+        {
+          "at": "2026-10-19T12:58:40Z",
+          "by": "claude",
+          "text": "Note: Name-based trigger done (Sofia); still check natural phrasing vs secute in a real session"
         }
       ]
     },
@@ -564,6 +569,30 @@
           "at": "2026-10-19T12:55:38Z",
           "by": "user",
           "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-16",
+      "title": "Local report page on localhost (M5, read-only)",
+      "type": "feature",
+      "status": "active",
+      "note": "engine serve command + ui/dist page: score, tally, fixer groups, findings by item with screenshots, live updates",
+      "doneWhen": [],
+      "steps": [],
+      "files": [
+        "engine/src/server.js"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-19T14:23:14Z",
+      "updatedAt": "2026-10-19T14:23:42Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-19T14:23:14Z",
+          "by": "claude",
+          "text": "Created — active"
         }
       ]
     }
@@ -871,6 +900,22 @@
       "steps": [],
       "createdAt": "2026-10-19T12:12:57Z",
       "updatedAt": "2026-10-19T12:12:57Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N15",
+      "kind": "decision",
+      "title": "The tool is called Sofia",
+      "body": "Plugin sofia, commands /sofia:check and /sofia:fix; triggers on the name (Sofia / סופיה) so it isn't confused with other checker skills. Internal names (.launch-check/, engine) unchanged for now.",
+      "considered": "",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-10-19T12:58:40Z",
+      "updatedAt": "2026-10-19T12:58:40Z",
       "updatedBy": "claude"
     }
   ],

@@ -2,6 +2,19 @@
 
 ## Done
 
+### M5, read-only page, pulled forward at the owner's request (2026-10-19)
+- `serve`: one local server per project on 127.0.0.1, preferred port 4319, falling back to the next free one, recorded in `.launch-check/server.json`. A running server is reused, never a second one. Stops after 30 idle minutes.
+- API: `/api/state` (state, summary, catalog), `/api/events` (live updates on every state change, debounced 150 ms), `/shots/…`.
+- The page (`ui/dist`, vanilla, no build step), following docs/05:
+  - Header: score dial, verdict, live status ("Sofia is fixing 3 items" / "Approved to fix · N").
+  - Tally filters, the three fixer cards (display only), since last run.
+  - Findings grouped by severity, fixer or category: one row per check with "N places".
+  - A details drawer with every place, before/after screenshots, the fix (steps for "your action"), options and the check id.
+  - A tab for muted, accepted and skipped items, and a tab with all checks.
+  - Light and dark themes, `dir="auto"` for Hebrew, fixer chips told apart by shape (solid, outlined, dashed).
+- The skill opens the page after each scan.
+- Not yet (M5/M6): queue, mute and decide buttons on the page, an export to a single file, an automatic browser tab on first run, and the before/after slider.
+
 ### M4 so far — false-positive pass, part 1 (2026-10-19)
 - NehoRace: 13 findings on the first scan, 9 of them false. After the fixes, 3 findings, all real, plus 5 "couldn't tell" with reasons.
 - Blockout: 2 false alarms and 1 missed finding (Amplitude before consent), all fixed.
