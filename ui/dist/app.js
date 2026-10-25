@@ -10,6 +10,7 @@ const FIXER_CARD = {
   user: ["Need you to do something", "Steps outside the code — Sofia prepares them"],
 };
 const ACTIVE = new Set(["open", "fixing"]);
+const LAYER = { mechanical: "automatic", browser: "in Chrome", judgment: "code review" };
 const VERDICT_COLOR = { "Not ready": "var(--notready)", Almost: "var(--almost)", Ready: "var(--ready)" };
 
 const ui = { tab: "findings", severity: null, group: "severity", search: "", open: null };
@@ -67,7 +68,9 @@ function render() {
   const approved = state.pending.fix.length;
   const pill = $("#pill");
   pill.className = "pill" + (fixing ? " busy" : "");
-  pill.textContent = fixing ? `Sofia is fixing ${fixing} item${fixing > 1 ? "s" : ""}` : approved ? `Approved to fix · ${approved}` : "Idle";
+  const reviewing = state.reviewTasks.filter((r) => r.status === "pending").length;
+  pill.textContent = fixing ? `Sofia is fixing ${fixing} item${fixing > 1 ? "s" : ""}` : reviewing ? `Code review · ${reviewing} waiting` : approved ? `Approved to fix · ${approved}` : "Idle";
+  pill.className = "pill" + (fixing || reviewing ? " busy" : "");
 
   // score
   const score = summary.score;
@@ -141,7 +144,7 @@ function row(it) {
   return `<button class="row sev-${it.severity}" data-check="${esc(it.checkId)}">
     <span class="stripe"></span>
     <span><span class="title">${t(it.title)}</span><div class="impact">${t(it.impact)}</div></span>
-    <span class="meta">${status}${places}${it.status === "uncertain" ? "" : `<span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span>`}<span class="chip layer">${esc(layer ?? "")}</span></span>
+    <span class="meta">${status}${places}${it.status === "uncertain" ? "" : `<span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span>`}<span class="chip layer">${esc(LAYER[layer] ?? layer ?? "")}</span></span>
   </button>`;
 }
 
@@ -213,6 +216,7 @@ function openDetail(checkId, focus = true) {
       return `<div class="instance">
         <div class="where small">${where(f.location ?? {})}${f.status === "fixed" ? ' · <span class="chip st-fixed">fixed</span>' : ""}</div>
         <div>${t(f.evidence)}</div>
+        ${f.quotes?.length ? `<div class="quotes">${f.quotes.map((q) => `<div class="quote"><span class="mono muted" dir="ltr">${esc(q.file)}:${q.line}</span><code dir="auto">${esc(q.text.trim())}</code></div>`).join("")}</div>` : ""}
         ${shots.length ? `<div class="shots${shots.length === 1 ? " one" : ""}">${shots.map(([cap, src]) => `<figure><img loading="lazy" src="/${esc(src)}" alt="${cap} screenshot"><figcaption>${cap}</figcaption></figure>`).join("")}</div>` : ""}
       </div>`;
     })
@@ -221,6 +225,7 @@ function openDetail(checkId, focus = true) {
     <span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span>
     <h2 style="margin-top:10px">${t(it.title)}</h2>
     <p class="impact">${t(it.impact)}</p>
+    ${catalogEntry(it.checkId)?.layer === "judgment" ? `<p class="note small">Found by a separate reviewer that read the code against a written checklist, without seeing your conversation. It's a judgment — the quotes below show exactly what it relied on.</p>` : ""}
     <div class="part"><h3>Where and what was found</h3>${instances}</div>
     <div class="part"><h3>${it.fixer === "user" ? "What to do" : "How it gets fixed"}</h3>${steps(first.fix)}</div>
     ${options}

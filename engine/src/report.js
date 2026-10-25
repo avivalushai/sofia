@@ -28,6 +28,9 @@ function finding(f) {
     `- **Found:** ${f.evidence}`,
     `- **Fix (${FIXER[f.fixer]}):** ${f.fix}`,
   ];
+  if (f.quotes?.length) {
+    lines.splice(5, 0, `- **From the code** (a separate reviewer read it against a written checklist):`, ...f.quotes.map((q) => `  - \`${q.file}\` line ${q.line}: \`${q.text.trim()}\``));
+  }
   if (f.options?.length) lines.push(...f.options.map((o, i) => `  ${i + 1}. ${o.label}${i === 0 ? " (recommended)" : ""}${o.detail ? ` — ${o.detail}` : ""}`));
   lines.push(`- <sub>\`${f.checkId}\`</sub>`, "");
   return lines.join("\n");

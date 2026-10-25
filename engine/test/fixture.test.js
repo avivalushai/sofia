@@ -65,7 +65,8 @@ test("detected facts match expected.json", () => {
 
 test("every implemented check has a row in expected.json", () => {
   const rows = new Set(expected.expect.map((r) => r.checkId));
-  const missing = implemented.map((c) => c.id).filter((id) => !rows.has(id));
+  // judgment checks are covered by fixtures/judgment-app (judgment.test.js)
+  const missing = implemented.filter((c) => c.entry.layer !== "judgment").map((c) => c.id).filter((id) => !rows.has(id));
   assert.deepEqual(missing, [], `add rows to expected.json for: ${missing.join(", ")}`);
 });
 

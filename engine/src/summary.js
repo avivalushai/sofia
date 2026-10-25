@@ -98,6 +98,7 @@ export function buildSummary(catalog, state) {
     },
     uncertain: items(catalog, state, new Set(["uncertain"])).map((i) => ({ checkId: i.checkId, title: i.title })),
     approved: [...new Set(state.pending.fix.map((id) => state.findings[id]?.checkId).filter(Boolean))],
+    reviewsPending: state.reviewTasks.filter((t) => t.status === "pending").map((t) => ({ checkId: t.checkId, title: catalog.byId.get(t.checkId)?.title })),
     needsConsent: [...new Set(Object.values(state.checks).map((c) => c.needs).filter(Boolean))],
     skippedByFact,
     notices,

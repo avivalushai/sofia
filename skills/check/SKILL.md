@@ -28,6 +28,8 @@ If it fails with "Cannot find package", install its dependencies once (no browse
 | `$LC run --target <url\|local> [--mode quick] --json` | a scan |
 | `$LC summary --json` | score, blockers, the three fixer groups, since last run |
 | `$LC serve --json` | open (or reuse) the live report page for this project; prints its address |
+| `$LC review-tasks --json` | judgment checks waiting for the reviewer: rubric, files, where to save the answer |
+| `$LC add-findings <file> [--commit "…"] --json` | the reviewer's answer; quotes are verified against the code before anything counts |
 | `$LC show <checkId> --json` | every finding of one check: where, evidence, fix, options, screenshots |
 | `$LC queue add\|remove\|list <checkId\|findingId...> --json` | the fixes the user approved in the discussion. The engine refuses to fix anything else |
 | `$LC checkpoint` | safe point — once, before the first fix of the session |
@@ -69,9 +71,22 @@ Read [references/report-format.md](references/report-format.md) before writing a
    ✓ Mechanical checks · 27
    ✓ Browser checks · 29
    ```
+   If the result has `reviewTasks`, run the code review now (see **Code review** below) before the summary.
    Then `$LC serve --json` and add the line `✓ Report open at {url}` — the report page (score, every finding with screenshots), which updates live while you work. Mention it once; don't paste the report into chat.
    If the engine says Chrome can't start, tell the user exactly what it said and stop.
    If it says the site's bot protection is answering with a challenge (Vercel, Cloudflare), say so in one sentence — it's the host protecting the site, not a problem with it — and offer the local version. Never try to get past a challenge.
+
+## Code review (judgment checks)
+
+Some problems can't be found by running the app, only by reading its code with judgment — numbers typed in as if they were real, buttons wired to nothing, an endpoint anyone can call, a model answer pasted into the page as code. For these, Sofia doesn't judge her own work: a separate reviewer does.
+
+1. **Tell the user, once, in one or two plain sentences** — before starting, so the wait makes sense:
+   "Now a second opinion: {n} checks need someone to read the code, not just run the app — for example whether the numbers on your home page are real. I'm handing them to a separate reviewer that hasn't seen our conversation, so it judges the code fresh, and it has to quote the exact line for everything it says."
+2. `$LC review-tasks --json`. For each task, start the reviewer agent (`sofia:reviewer`), all of them in parallel. Give each only: the project folder (`root`), the check id, the rubric path, and the files — never the conversation or your own opinion.
+3. Save each reviewer's JSON reply to the task's `out` path, then `$LC add-findings <out> --json`. If it's rejected (a quote that isn't really in the code, a missing answer), send the rejection text back to the same reviewer once and try again; if it fails twice, leave that check as "couldn't tell" and say so.
+4. Progress line: `✓ Code review · {n} (a separate reviewer)`. Its findings join the report like any other; in chat, when you present one, say it came from the code review and quote the line it rests on.
+
+Re-checking a judgment check after a fix works the same way: `recheck <id>` prepares a new task when the code changed; run the reviewer, then `add-findings <out> --commit "<what changed>"` (commits only if it passes). Unchanged code keeps its earlier review — no new review needed.
 
 ## Stage 2 — The report
 

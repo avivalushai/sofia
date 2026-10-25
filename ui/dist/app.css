@@ -174,3 +174,9 @@ tr:last-child td { border-bottom: 0; }
 .panel h2.sec { font-size: 15px; margin: 20px 0 10px; }
 .panel h2.sec:first-child { margin-top: 0; }
 .foot { padding: 32px 20px 40px; text-align: center; }
+
+/* code-review quotes */
+.note { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; color: var(--muted); }
+.quotes { margin-top: 8px; display: grid; gap: 6px; }
+.quote { display: grid; gap: 2px; border-inline-start: 3px solid var(--accent); padding: 4px 10px; background: var(--surface-2); border-radius: 4px; }
+.quote code { font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }

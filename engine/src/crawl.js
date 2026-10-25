@@ -123,6 +123,16 @@ export function createCrawler({ target, http, limit = 30 }) {
       rendered ??= renderedCrawl();
       return rendered;
     },
+    /** Rendered pages with their visible text, one line per block. */
+    async browserPagesWithText() {
+      const out = [];
+      for (const p of await this.browserPages()) {
+        const page = await browser.open(p.url, { width: 1280 });
+        const text = await page.evaluate(() => (document.body?.innerText ?? "").split("\n").map((l) => l.trim()).filter(Boolean));
+        out.push({ path: p.path, segments: text });
+      }
+      return out;
+    },
     /** @returns {Promise<Page[]>} */
     async pages() {
       result ??= crawl();

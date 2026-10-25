@@ -4,6 +4,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const CATALOG_PATH = fileURLToPath(new URL("../../catalog/checks.json", import.meta.url));
 export const CHECKS_DIR = fileURLToPath(new URL("./checks/", import.meta.url));
+/** Judgment checks are "built" when their rubric exists: the reviewer reads code against it (docs/03). */
+export const RUBRICS_DIR = fileURLToPath(new URL("../../skills/check/references/rubrics/", import.meta.url));
 
 export const LAYERS = ["mechanical", "browser", "judgment"];
 export const SEVERITIES = ["blocker", "important", "polish"];
@@ -86,7 +88,7 @@ export function checkPathFor(id) {
  * @param {{ checks: any[], byId: Map<string, any> }} catalog
  * @param {string} [dir]
  */
-export async function loadChecks(catalog, dir = CHECKS_DIR) {
+export async function loadChecks(catalog, dir = CHECKS_DIR, rubricsDir = RUBRICS_DIR) {
   const files = (await readdir(dir, { recursive: true }))
     .filter((f) => f.endsWith(".js"))
     .sort();
@@ -110,6 +112,13 @@ export async function loadChecks(catalog, dir = CHECKS_DIR) {
     if (check.layer !== entry.layer) problems.push(`${rel}: layer "${check.layer}" doesn't match catalog "${entry.layer}"`);
     if (entry.layer !== "judgment" && typeof check.run !== "function") problems.push(`${rel}: missing run(ctx)`);
     implemented.push({ id, file: rel, entry, check });
+  }
+  for (const f of (await readdir(rubricsDir).catch(() => [])).filter((x) => x.endsWith(".md")).sort()) {
+    const id = f.slice(0, -3);
+    const entry = catalog.byId.get(id);
+    if (!entry) problems.push(`rubrics/${f}: "${id}" is not in catalog/checks.json`);
+    else if (entry.layer !== "judgment") problems.push(`rubrics/${f}: "${id}" is a ${entry.layer} check, not a judgment check`);
+    else implemented.push({ id, file: `rubrics/${f}`, entry, check: null, rubric: path.join(rubricsDir, f) });
   }
   if (problems.length) throw new CatalogError("Some check files don't match the catalog", problems);
 

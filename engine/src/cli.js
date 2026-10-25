@@ -1,12 +1,15 @@
 import { parseArgs } from "node:util";
 import { ActionError, decide, markFixing, queue } from "./actions.js";
-import { CatalogError, loadCatalog, loadChecks } from "./catalog.js";
+import { CatalogError, loadCatalog, loadChecks, RUBRICS_DIR } from "./catalog.js";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { ReviewError, verifyReview } from "./judgment.js";
 import { detect, liveUrlCandidates } from "./detect.js";
-import { checkpoint, dirtyFiles } from "./git.js";
+import { checkpoint, commitAll, dirtyFiles, isGitRepo } from "./git.js";
 import { loadProject } from "./project.js";
 import { writeReport } from "./report.js";
 import { BrowserMissing, detectOnly, recheck, revert, run, UsageError } from "./runner.js";
-import { readState, statePath, writeState } from "./state.js";
+import { mergeRun, readState, statePath, writeState } from "./state.js";
 import { ensureServer, runServer } from "./server.js";
 import { buildSummary, refreshCurrent, showItem } from "./summary.js";
 
@@ -28,7 +31,10 @@ Commands:
   decide <findingId|checkId|category> --action mute|accept|defer|unmute
          --scope instance|check|category --reason "..."
   serve                                   open the report page (reuses a running one) and print its address
-  review-tasks | add-findings | export    (not implemented yet)
+  review-tasks                            the judgment checks waiting for the reviewer (rubric + files)
+  add-findings <review.json> [--commit "what changed"]
+                                          the reviewer's answers; quotes are verified before they count
+  export                                  (not implemented yet)
 
 Options:
   --target local   start the app on this machine (its dev script, or a plain HTML folder) and stop it afterwards
@@ -36,8 +42,8 @@ Options:
   --staging        the target is a staging copy, not the live site
   --json           machine-readable output`;
 
-const LATER = new Set(["review-tasks", "add-findings", "export"]);
-const COMMANDS = new Set(["detect", "run", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide", "serve"]);
+const LATER = new Set(["export"]);
+const COMMANDS = new Set(["detect", "run", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide", "serve", "review-tasks", "add-findings"]);
 const LAYER_TITLE = { mechanical: "Mechanical checks", browser: "Browser checks", judgment: "Judgment checks" };
 
 /**
@@ -178,6 +184,57 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
         return 0;
       }
 
+      case "review-tasks": {
+        const state = await readState(cwd);
+        const tasks = state.reviewTasks.filter((t) => t.status === "pending").map((t) => ({
+          checkId: t.checkId,
+          title: catalog.byId.get(t.checkId)?.title,
+          rubric: path.join(RUBRICS_DIR, `${t.checkId}.md`),
+          root: cwd,
+          files: t.files,
+          out: path.join(cwd, ".launch-check", "review", `${t.checkId}.json`),
+        }));
+        print({ tasks }, tasks.length ? tasks.map((t) => `· ${t.title} (${t.checkId}): ${t.files.length} files`).join("\n") : "No reviews waiting");
+        return 0;
+      }
+
+      case "add-findings": {
+        if (!rest[0]) throw new UsageError("add-findings needs the reviewer's JSON file");
+        const raw = JSON.parse(await readFile(path.resolve(cwd, rest[0]), "utf8"));
+        const reviews = Array.isArray(raw) ? raw : [raw];
+        const state = await readState(cwd);
+        const at = new Date().toISOString();
+        const before = state.current?.score ?? null;
+        const done = [];
+        for (const review of reviews) {
+          const task = state.reviewTasks.find((t) => t.checkId === review.checkId && t.status === "pending");
+          if (!task) throw new UsageError(`No review is waiting for "${review.checkId}"`);
+          const entry = catalog.byId.get(task.checkId);
+          const { status, items, answers } = await verifyReview(cwd, task, entry, review);
+          const changes = mergeRun(state, { runId: task.run, at, results: [{ entry, status, items }], scannedPaths: { has: () => true } });
+          const run = state.runs.find((r) => r.id === task.run);
+          if (run) for (const k of ["new", "fixed", "reopened"]) run.changes[k] = [...new Set([...run.changes[k], ...changes[k]])];
+          Object.assign(task, { status: "done", result: status, reviewedAt: at, answers });
+          // a verified fix leaves the approved list, and with --commit becomes its own commit
+          state.pending.fix = state.pending.fix.filter((id) => !changes.fixed.includes(id));
+          let commit = null;
+          if (opts.commit && status === "pass" && changes.fixed.length && (await isGitRepo(cwd))) {
+            commit = await commitAll(cwd, `Sofia: ${opts.commit}\n\nChecks: ${task.checkId}`);
+            for (const id of changes.fixed) {
+              const f = state.findings[id];
+              f.fixCommits = [...(f.fixCommits ?? []), commit];
+              f.history.at(-1).commit = commit;
+            }
+          }
+          done.push({ checkId: task.checkId, status, findings: items.filter((i) => i.status === "fail").length, fixed: changes.fixed.length, commit });
+        }
+        const current = refreshCurrent(catalog, state, at);
+        await writeState(cwd, state);
+        await writeReport(cwd, catalog, state);
+        print({ reviewed: done, scoreBefore: before, scoreAfter: current.score, verdict: current.verdict }, done.map((d) => `✓ ${d.checkId}: ${d.status}${d.findings ? ` · ${d.findings} finding${d.findings > 1 ? "s" : ""}` : ""}${d.fixed ? ` · ${d.fixed} fixed` : ""}`).join("\n") + `\n${before ?? "—"} → ${current.score ?? "—"} · ${current.verdict}`);
+        return 0;
+      }
+
       case "queue": {
         const [op, ...refs] = rest;
         if (!["add", "remove", "clear", "list"].includes(op)) throw new UsageError("queue add|remove|clear|list [ids...]");
@@ -239,7 +296,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
     }
     return 0;
   } catch (e) {
-    if (e instanceof UsageError || e instanceof ActionError) {
+    if (e instanceof UsageError || e instanceof ActionError || e instanceof ReviewError) {
       err(e.message);
       return 2;
     }

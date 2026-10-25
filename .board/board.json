@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 17,
-  "nextNoteNum": 16,
+  "nextNum": 18,
+  "nextNoteNum": 17,
   "features": [
     {
       "key": "ALL-1",
@@ -522,16 +522,18 @@
       "key": "ALL-14",
       "title": "What should the tool be called, the name you'll say to Claude (\"<name>, check my app\")?",
       "type": "question",
-      "status": "done",
-      "note": "Sofia. (their own answer). Other options: Launch Check · Preflight · Ready Check",
+      "status": "review",
+      "note": "Open http://127.0.0.1:4319 — the demo report; click a finding for screenshots",
       "doneWhen": [],
       "steps": [],
       "files": [],
-      "links": [],
+      "links": [
+        "http://127.0.0.1:4319/"
+      ],
       "area": "",
       "createdAt": "2026-10-19T12:55:38Z",
-      "updatedAt": "2026-10-19T12:55:38Z",
-      "updatedBy": "user",
+      "updatedAt": "2026-10-19T14:28:44Z",
+      "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-19T12:55:38Z",
@@ -542,6 +544,16 @@
           "at": "2026-10-19T12:55:38Z",
           "by": "user",
           "text": "Done"
+        },
+        {
+          "at": "2026-10-19T14:28:44Z",
+          "by": "claude",
+          "text": "Moved to review — Open http://127.0.0.1:4319 — the demo report; click a finding for screenshots"
+        },
+        {
+          "at": "2026-10-19T14:28:44Z",
+          "by": "claude",
+          "text": "Proof: http://127.0.0.1:4319/"
         }
       ]
     },
@@ -583,14 +595,49 @@
       "files": [
         "engine/src/server.js"
       ],
-      "links": [],
+      "links": [
+        "http://127.0.0.1:4319"
+      ],
       "area": "",
       "createdAt": "2026-10-19T14:23:14Z",
-      "updatedAt": "2026-10-19T14:23:42Z",
+      "updatedAt": "2026-10-19T14:28:54Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-19T14:23:14Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-19T14:28:54Z",
+          "by": "claude",
+          "text": "Proof: http://127.0.0.1:4319"
+        }
+      ]
+    },
+    {
+      "key": "ALL-17",
+      "title": "Judgment checks: a separate reviewer reads the code against written rubrics (M7)",
+      "type": "feature",
+      "status": "active",
+      "note": "rubrics for the 7 v1 checks, review tasks in the engine, add-findings with quote checks, reviewer agent, judgment fixture",
+      "doneWhen": [
+        "Reviewer findings include file+line quotes",
+        "The same review twice gives the same pass/fail per rubric item on the fixture",
+        "Sofia explains to the user what the reviewer does and why"
+      ],
+      "steps": [],
+      "files": [
+        "engine/src/judgment.js"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-25T11:23:18Z",
+      "updatedAt": "2026-10-25T11:25:49Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-25T11:23:18Z",
           "by": "claude",
           "text": "Created — active"
         }
@@ -916,6 +963,24 @@
       "steps": [],
       "createdAt": "2026-10-19T12:58:40Z",
       "updatedAt": "2026-10-19T12:58:40Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N16",
+      "kind": "decision",
+      "title": "Report page look: calm neutral grays, indigo accent, red/amber/gray severity",
+      "body": "Neutral zinc-like surfaces (#f7f7f8 page, #fff cards, #18181b text) with a separate indigo accent (#4f46e5); severity red/amber/gray and verdict green per docs/05; system fonts, tabular numbers, mono paths; dark mode follows the OS. My call, following docs/05's 'calm, utilitarian' direction.",
+      "considered": "Brand-colored page: competes with the severity colors. Custom webfont: docs/05 forbids external requests.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-16"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-19T14:29:00Z",
+      "updatedAt": "2026-10-19T14:29:00Z",
       "updatedBy": "claude"
     }
   ],

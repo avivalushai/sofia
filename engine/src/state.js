@@ -89,6 +89,7 @@ export function mergeRun(state, { runId, at, results, scannedPaths }) {
         evidence: r.evidence,
         fix: r.fix,
         ...(r.options ? { options: r.options } : {}),
+        ...(r.quotes ? { quotes: r.quotes } : {}),
       };
       const prev = state.findings[id];
       if (!prev) {

@@ -2,6 +2,17 @@
 
 ## Done
 
+### M7, judgment checks: a separate reviewer reads the code (2026-10-25)
+- 7 rubrics in `skills/check/references/rubrics/`: `leftover.mock-data`, `leftover.unwired-ui`, `qa.empty-states`, `content.terms`, `sec.server-authz`, `sec.rate-limit` and `ai.output-as-code`. A rubric is a set of numbered yes/no questions with pass and fail examples. A judgment check counts as "built" once its rubric exists.
+- The engine doesn't judge. In a full scan it prepares a **review task** for each judgment check that applies: the rubric plus the files worth reading. When a check reads wording, the task also gets the pages' visible text (`.launch-check/review/pages.txt`). A fingerprint of the rubric and the files means unchanged code keeps its earlier review. A check with nothing to read is skipped and the reason is stated.
+- `agents/reviewer.md`: a separate agent with fresh context and read-only tools (Read, Grep, Glob). It answers every question pass, fail or uncertain, quotes a `file:line` for each answer, and replies in JSON. When the thing a question asks about doesn't exist in the app, the answer is "pass" with "Doesn't apply:"; "uncertain" is only for something that exists but can't be decided.
+- `add-findings` accepts a review only if every quote really is on that line of that file and inside the project, every failing answer has a finding, every finding has quotes, and every "choice" check has 2–3 options. Anything else is rejected with the reason, and the skill retries once.
+- In chat, Sofia explains the step once in plain words ("a second opinion: … a separate reviewer that hasn't seen our conversation … has to quote the exact line"), then starts the reviewers in parallel.
+- On the report page and in report.md, a reviewer's findings carry the quoted lines and the note "Found by a separate reviewer". The page header shows "Code review · N waiting" while reviews are pending.
+- Fixture `fixtures/judgment-app/`: a Hebrew notes app with one planted problem for each judgment check. Tests: `engine/test/judgment.test.js`.
+- Consistency: four independent reviewers ran the three hardest checks twice (server permissions, rate limit, empty states). Their answers were identical question by question. An earlier round differed on 2 questions, which led to the "Doesn't apply → pass" rule and to rewriting the rate-limit rubric as 3 plain yes/no questions.
+- Still to do: run the reviewers on a real app (part of the validation pass).
+
 ### M5, read-only page, pulled forward at the owner's request (2026-10-19)
 - `serve`: one local server per project on 127.0.0.1, preferred port 4319, falling back to the next free one, recorded in `.launch-check/server.json`. A running server is reused, never a second one. Stops after 30 idle minutes.
 - API: `/api/state` (state, summary, catalog), `/api/events` (live updates on every state change, debounced 150 ms), `/shots/…`.
@@ -78,7 +89,7 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
-- M4: false-positive pass over real apps. NehoRace and Blockout are done (`docs/walkthroughs/m4-real-apps.md`). Still to do: a live re-scan of both once Vercel stops challenging this machine, a third app (one with a form, login or database), the judgment checks as review tasks with rubrics, and the `clean-landing` / `app-with-auth` fixtures.
+- M4: false-positive pass over real apps. NehoRace and Blockout are done (`docs/walkthroughs/m4-real-apps.md`). Still to do: a live re-scan of both once Vercel stops challenging this machine, a third app (one with a form, login or database), and the `clean-landing` / `app-with-auth` fixtures.
 
 ## Dependencies (with reasons)
 - `htmlparser2` (MIT) — real HTML parsing for the mechanical checks; regex parsing would be a steady source of false alarms.
@@ -111,6 +122,11 @@
 - `runs[]`: `kind` (`scan` | `recheck`), `targetSpec` (`local` or the URL, so a recheck can reach the same target), `consent`, `staging`, `scoreBefore`.
 - `findings[].fixCommits`: the commits that fixed it, used by `revert`. A history event `fixing`, and `fixed` events carry the `commit`.
 - `decisions[]` also records instance-level accept, defer and mute, with the finding id as `target`.
+
+## Additions to the state shape in M7 — please confirm
+- `reviewTasks[]`: `{ id, checkId, run, rubric, files, fingerprint, status: pending|done, result?, answers?, reviewedAt? }`.
+- `findings[].quotes`: `[{ file, line, text }]`, the lines a reviewer quoted, each one verified against the code.
+- `runs[].reviewsPending`: how many reviews the run left waiting.
 
 ## Owner decision 2026-10-19: the tool is called Sofia
 - **Plugin and commands:** the plugin is `sofia`. The commands are `/sofia:check` (scan) and `/sofia:fix` (the approved fixes).

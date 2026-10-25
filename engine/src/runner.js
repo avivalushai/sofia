@@ -13,6 +13,7 @@ import { writeReport } from "./report.js";
 import { summarize } from "./score.js";
 import { mergeRun, readState, STATE_DIR, writeState } from "./state.js";
 import { lastScan, refreshCurrent } from "./summary.js";
+import { fingerprint, PAGES_FILE, reviewSources, writePagesText } from "./judgment.js";
 import { commitAll, isGitRepo, revertCommit } from "./git.js";
 import { mkdir } from "node:fs/promises";
 
@@ -46,7 +47,7 @@ export function parseTarget(target) {
 }
 
 /** Which layers each mode runs. Judgment checks are never run by the engine (docs/02). */
-const MODE_LAYERS = { quick: new Set(["mechanical"]), full: new Set(["mechanical", "browser"]) };
+const MODE_LAYERS = { quick: new Set(["mechanical"]), full: new Set(["mechanical", "browser", "judgment"]) };
 const CHECK_TIMEOUT_MS = { mechanical: 60_000, browser: 240_000 };
 
 /** --only "seo,sec.client-secrets" → the selected check ids. */
@@ -158,6 +159,47 @@ async function ensureGitignore(root, project) {
   return true;
 }
 
+/**
+ * Review tasks for the judgment checks in this run. A check whose rubric and files haven't changed
+ * since its last review keeps that result; one with nothing to read is skipped with a reason.
+ */
+async function prepareReviews({ root, project, state, runId, detected, pages, checks }) {
+  const results = [];
+  const pending = [];
+  if (!checks.length) return { results, pending };
+  let pagesWritten = false;
+  const keep = state.reviewTasks.filter((t) => !checks.some((c) => c.id === t.checkId));
+  const tasks = [];
+  for (const c of checks) {
+    const fact = c.entry.appliesWhen;
+    if (fact !== "always" && !detected[fact]?.value) {
+      results.push({ entry: c.entry, status: "skip", reason: detected[fact]?.why ?? `not relevant (${fact})`, items: [] });
+      continue;
+    }
+    const src = await reviewSources(project, c);
+    if (src.skip) {
+      results.push({ entry: c.entry, status: "skip", reason: src.skip, items: [] });
+      continue;
+    }
+    if (src.pages && !pagesWritten) {
+      await writePagesText(root, pages);
+      pagesWritten = true;
+    }
+    const files = [...src.files, ...(src.pages ? [PAGES_FILE] : [])];
+    const fp = await fingerprint(root, c.rubric, files);
+    const previous = state.reviewTasks.find((t) => t.checkId === c.id);
+    if (previous?.status === "done" && previous.fingerprint === fp) {
+      tasks.push(previous); // same code, same rubric: the earlier review stands
+      continue;
+    }
+    const task = { id: `t_${c.id}`, checkId: c.id, run: runId, rubric: `rubrics/${c.id}.md`, files, fingerprint: fp, status: "pending" };
+    tasks.push(task);
+    pending.push({ ...task, rubric: c.rubric, title: c.entry.title });
+  }
+  state.reviewTasks = [...keep, ...tasks];
+  return { results, pending };
+}
+
 /** Saves a check's screenshot as the finding's before.png — unless it already has one. */
 async function saveShots(root, state, results) {
   for (const r of results) {
@@ -242,7 +284,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
 
     // checks that request addresses like /.env or /admin can make a host's firewall start blocking
     // this machine: run them last, so a block can't spoil the rest of the scan
-    const isProbe = (c) => Boolean(c.check.probe);
+    const isProbe = (c) => Boolean(c.check?.probe);
     const runSet = (list, limit) =>
       mapLimit(list, limit, async (c) => {
         const fact = c.entry.appliesWhen;
@@ -253,7 +295,10 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
         return runOne(c, ctx);
       });
     const layer = (l) => selected.filter((c) => c.entry.layer === l && !isProbe(c));
+    // judgment checks: prepare review tasks for the reviewer; nothing is judged here
+    const reviews = await prepareReviews({ root, project, state, runId, detected, pages: browser ? await crawl.browserPagesWithText() : pages, checks: layer("judgment") });
     const results = [
+      ...reviews.results,
       ...(await runSet(layer("mechanical"), 8)),
       ...(browser ? await runSet(layer("browser"), 3) : []),
       ...(await runSet(selected.filter((c) => isProbe(c) && (c.entry.layer !== "browser" || browser)), 1)),
@@ -288,6 +333,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       counts: { ...counts, notImplemented: checks.notImplemented.length },
       pages: Math.max(pages.length, rendered.length),
       ...(http.blocked.size || browser?.blocked.size ? { blocked: http.blocked.size + (browser?.blocked.size ?? 0) } : {}),
+      ...(reviews.pending.length ? { reviewsPending: reviews.pending.length } : {}),
       changes,
     };
     state.runs.push(record);
@@ -300,7 +346,8 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       run: record,
       gitignored,
       local: local ? { how: local.how, url } : null,
-      ran: results.map((r) => ({ id: r.entry.id, layer: r.entry.layer, status: r.status, ...(r.reason ? { reason: r.reason } : {}), ...(r.needs ? { needs: r.needs } : {}) })),
+      reviewTasks: reviews.pending,
+    ran: results.map((r) => ({ id: r.entry.id, layer: r.entry.layer, status: r.status, ...(r.reason ? { reason: r.reason } : {}), ...(r.needs ? { needs: r.needs } : {}) })),
       errors: results.filter((r) => r.error).map((r) => r.error),
       implemented: checks.implemented.map((c) => c.id),
       notImplemented: checks.notImplemented,

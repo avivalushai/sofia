@@ -52,7 +52,7 @@ test("a check file is matched to its catalog entry", async () => {
     "seo/robots.js": 'export default { id: "seo.robots", layer: "mechanical", async run() { return []; } };',
   });
   try {
-    const { implemented, notImplemented } = await loadChecks(catalog, dir);
+    const { implemented, notImplemented } = await loadChecks(catalog, dir, dir);
     assert.deepEqual(implemented.map((c) => c.id), ["seo.robots"]);
     assert.equal(notImplemented.length, 174);
     assert.ok(!notImplemented.includes("seo.robots"));
@@ -66,7 +66,7 @@ test("a check id missing from the catalog stops startup", async () => {
     "seo/made-up.js": 'export default { id: "seo.made-up", layer: "mechanical", async run() { return []; } };',
   });
   try {
-    await assert.rejects(loadChecks(catalog, dir), (e) => e instanceof CatalogError && /not in catalog/.test(e.message));
+    await assert.rejects(loadChecks(catalog, dir, dir), (e) => e instanceof CatalogError && /not in catalog/.test(e.message));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -77,7 +77,7 @@ test("a check in the wrong place or with the wrong layer stops startup", async (
     "qa/robots.js": 'export default { id: "seo.robots", layer: "browser", async run() { return []; } };',
   });
   try {
-    await assert.rejects(loadChecks(catalog, dir), (e) => /must live in/.test(e.message) && /doesn't match catalog/.test(e.message));
+    await assert.rejects(loadChecks(catalog, dir, dir), (e) => /must live in/.test(e.message) && /doesn't match catalog/.test(e.message));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -88,4 +88,16 @@ test("run ids get a suffix when two runs share a second", () => {
   assert.equal(makeRunId(d, new Set()), "r_2026-10-18T12-00-00");
   assert.equal(makeRunId(d, new Set(["r_2026-10-18T12-00-00"])), "r_2026-10-18T12-00-00-2");
   assert.equal(makeRunId(d, new Set(["r_2026-10-18T12-00-00", "r_2026-10-18T12-00-00-2"])), "r_2026-10-18T12-00-00-3");
+});
+
+test("a rubric makes its judgment check implemented; a rubric for any other check stops startup", async () => {
+  const dir = await checksDir({ "sec.rate-limit.md": "1. Is it limited?" });
+  try {
+    const { implemented } = await loadChecks(catalog, dir, dir);
+    assert.deepEqual(implemented.map((c) => [c.id, c.check]), [["sec.rate-limit", null]]);
+    await writeFile(path.join(dir, "seo.robots.md"), "1. ?");
+    await assert.rejects(loadChecks(catalog, dir, dir), /not a judgment check/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
