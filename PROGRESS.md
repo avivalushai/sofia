@@ -9,6 +9,7 @@
 - In chat, after the scan, Sofia adds `✓ Saved a copy: .launch-check/report.html`.
 - New test in `fixture.test.js`. 423 tests, all pass.
 - This is docs/05 "Export"; there's no "Export report" button yet, because the file is written automatically.
+- Design: Night shift, the owner's pick of the landing page's designs (dark, JetBrains Mono headlines, IBM Plex Sans text, orange signal). The fonts ship with the plugin in `ui/dist/fonts` (OFL, licenses next to them, 86 KB) and are inlined into the saved copy, so it looks the same offline and nothing is loaded from Google. Printing switches to light colors.
 - Look refreshed, on the live page and the saved copy alike: a sticky top bar; one summary card with the score, the verdict, a bar showing how the results split, and the filters; smaller "who fixes" cards; a count on each group; quieter labels on each finding; a severity label in the details panel; screenshots that open full size on click; and a print layout with the whole report. Checked at desktop width and at phone width in dark mode, with no sideways scrolling.
 
 ### M7, judgment checks: a separate reviewer reads the code (2026-10-25)

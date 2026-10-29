@@ -30,17 +30,25 @@ async function embedShots(root, state) {
   return shots;
 }
 
+/** The page's fonts (ui/dist/fonts) as data URIs, so the saved copy looks the same offline. */
+async function inlineFonts(css) {
+  const files = [...new Set([...css.matchAll(/url\("(fonts\/[^"]+\.woff2)"\)/g)].map((m) => m[1]))];
+  const data = new Map(await Promise.all(files.map(async (f) => [f, (await readFile(path.join(UI_DIR, f))).toString("base64")])));
+  return css.replace(/url\("(fonts\/[^"]+\.woff2)"\)/g, (_, f) => `url("data:font/woff2;base64,${data.get(f)}")`);
+}
+
 /**
  * The same page as the live one (docs/05 "Export"), as one file: styles, script, results and
  * screenshots inlined. Opens straight from disk, no server, nothing loaded from the network.
  */
 export async function renderHtmlReport(root, catalog, state) {
   const [html, css, js] = await Promise.all(["index.html", "app.css", "app.js"].map((f) => readFile(path.join(UI_DIR, f), "utf8")));
+  const style = await inlineFonts(css);
   const data = { ...pageData(catalog, state, root), shots: await embedShots(root, state), savedAt: new Date().toISOString() };
   // JSON inside <script>: escape "<" so no value can close the tag
   const json = JSON.stringify(data).replace(/</g, "\\u003c");
   return html
-    .replace(`<link rel="stylesheet" href="app.css">`, () => `<style>\n${css}</style>`)
+    .replace(`<link rel="stylesheet" href="app.css">`, () => `<style>\n${style}</style>`)
     .replace(`<script type="module" src="app.js"></script>`, () => `<script id="sofia-data" type="application/json">${json}</script>\n  <script type="module">\n${js}</script>`);
 }
 

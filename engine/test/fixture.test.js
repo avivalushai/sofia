@@ -166,6 +166,8 @@ test("report.md is written with the six parts", async () => {
 test("report.html is one self-contained file: the page, the results and the screenshots inside it", async () => {
   const html = await readFile(path.join(dir, ".launch-check", "report.html"), "utf8");
   assert.doesNotMatch(html, /<link rel="stylesheet"|<script[^>]+src=/, "nothing loaded from outside the file");
+  assert.doesNotMatch(html, /url\("fonts\//, "fonts are inside the file");
+  assert.match(html, /url\("data:font\/woff2;base64,/);
   const json = html.match(/<script id="sofia-data" type="application\/json">(.*?)<\/script>/s)?.[1];
   assert.ok(json, "results are embedded");
   const data = JSON.parse(json);

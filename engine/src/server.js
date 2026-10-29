@@ -9,7 +9,7 @@ import { UI_DIR, pageData } from "./report-html.js";
 
 const PREFERRED_PORT = 4319;
 const IDLE_MS = 30 * 60 * 1000;
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml", ".json": "application/json" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml", ".json": "application/json", ".woff2": "font/woff2" };
 
 const serverFile = (root) => path.join(root, STATE_DIR, "server.json");
 

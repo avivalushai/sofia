@@ -8,7 +8,7 @@
     "granularity": "normal"
   },
   "nextNum": 27,
-  "nextNoteNum": 33,
+  "nextNoteNum": 37,
   "features": [
     {
       "key": "ALL-1",
@@ -599,11 +599,16 @@
       "links": [
         "http://127.0.0.1:4319",
         "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM",
-        "http://localhost:4330"
+        "http://localhost:4330",
+        "http://localhost:4330/#a",
+        "http://localhost:4330/#b",
+        "http://localhost:4330/#c",
+        "http://localhost:4330/#d",
+        "http://localhost:4330/#e"
       ],
       "area": "",
       "createdAt": "2026-10-19T14:23:14Z",
-      "updatedAt": "2026-10-29T12:34:46Z",
+      "updatedAt": "2026-10-29T13:33:15Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -625,6 +630,11 @@
           "at": "2026-10-29T11:00:26Z",
           "by": "claude",
           "text": "Proof: http://localhost:4330"
+        },
+        {
+          "at": "2026-10-29T13:33:15Z",
+          "by": "claude",
+          "text": "Proof: http://localhost:4330/#a, http://localhost:4330/#b, http://localhost:4330/#c, http://localhost:4330/#d, http://localhost:4330/#e"
         }
       ]
     },
@@ -711,11 +721,12 @@
         "https://superclaude.netlify.app",
         "b2ab26e",
         "https://github.com/avivalushai/sofia",
-        "d1e67c3"
+        "d1e67c3",
+        "42dc56f"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T12:33:12Z",
+      "updatedAt": "2026-10-29T13:03:36Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -832,6 +843,11 @@
           "at": "2026-10-29T12:33:12Z",
           "by": "claude",
           "text": "Note: v0.2.1 released (167 active checks, README update section); fresh install from GitHub verified"
+        },
+        {
+          "at": "2026-10-29T13:03:36Z",
+          "by": "claude",
+          "text": "Proof: 42dc56f"
         }
       ]
     },
@@ -840,7 +856,7 @@
       "title": "Landing page for Sofia",
       "type": "feature",
       "status": "review",
-      "note": "Owner reviews: Taste layout with the earlier drawn visuals",
+      "note": "Owner reviews the Night shift page; open: phone-width check, commit site/, real install once the repo is public",
       "doneWhen": [],
       "steps": [],
       "files": [
@@ -852,7 +868,7 @@
       ],
       "area": "",
       "createdAt": "2026-10-29T09:24:57Z",
-      "updatedAt": "2026-10-29T11:23:19Z",
+      "updatedAt": "2026-10-29T13:55:45Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -909,6 +925,21 @@
           "at": "2026-10-29T11:23:19Z",
           "by": "claude",
           "text": "Note: Owner reviews: Taste layout with the earlier drawn visuals"
+        },
+        {
+          "at": "2026-10-29T13:11:37Z",
+          "by": "claude",
+          "text": "Note: Owner picks one of five designs (A Indigo, B Brutalist, C Night shift, D Friendly, E Editorial) from the switcher at the top; then remove the switcher and the other four"
+        },
+        {
+          "at": "2026-10-29T13:36:33Z",
+          "by": "claude",
+          "text": "Note: Owner picks Brutalist or Night shift; then remove the switcher"
+        },
+        {
+          "at": "2026-10-29T13:55:45Z",
+          "by": "claude",
+          "text": "Note: Owner reviews the Night shift page; open: phone-width check, commit site/, real install once the repo is public"
         }
       ]
     },
@@ -1091,7 +1122,7 @@
       "title": "Saved report after every run (report.html, one file)",
       "type": "feature",
       "status": "review",
-      "note": "Run Sofia on any app, then open .launch-check/report.html by double-clicking it: everything from the live page is there (score, findings, screenshots, muted/skipped, all checks) with no server running",
+      "note": "",
       "doneWhen": [],
       "steps": [],
       "files": [
@@ -1099,14 +1130,16 @@
         "ui/dist/app.js",
         "engine/src/report.js",
         "ui/dist/app.css",
-        "ui/dist/index.html"
+        "ui/dist/index.html",
+        "ui/dist/fonts"
       ],
       "links": [
-        "87f2e00"
+        "87f2e00",
+        "42dc56f"
       ],
       "area": "",
       "createdAt": "2026-10-29T12:43:00Z",
-      "updatedAt": "2026-10-29T12:53:42Z",
+      "updatedAt": "2026-10-29T13:59:55Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -1128,6 +1161,31 @@
           "at": "2026-10-29T12:53:42Z",
           "by": "claude",
           "text": "Proof: 87f2e00"
+        },
+        {
+          "at": "2026-10-29T13:03:36Z",
+          "by": "claude",
+          "text": "Proof: 42dc56f"
+        },
+        {
+          "at": "2026-10-29T13:21:48Z",
+          "by": "claude",
+          "text": "Note: Owner picks one of the five report designs (switcher at the top), then remove the switcher and the other four"
+        },
+        {
+          "at": "2026-10-29T13:44:38Z",
+          "by": "claude",
+          "text": "Note: Owner picks Brutalist (refined) or Night shift, then remove the switcher and the other one"
+        },
+        {
+          "at": "2026-10-29T13:59:55Z",
+          "by": "claude",
+          "text": "Files: ui/dist/fonts"
+        },
+        {
+          "at": "2026-10-29T13:59:55Z",
+          "by": "claude",
+          "text": "Cleared note"
         }
       ]
     }
@@ -1751,6 +1809,78 @@
       "steps": [],
       "createdAt": "2026-10-29T12:43:00Z",
       "updatedAt": "2026-10-29T12:43:00Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N33",
+      "kind": "decision",
+      "title": "Sofia landing page: down to two designs, Brutalist (black and yellow, sharp, hard shadows) and Night shift (dark, mono headlines, orange)",
+      "body": "Owner dropped Indigo, Friendly and Editorial. Brutalist is the default in the switcher.",
+      "considered": "A Indigo, D Friendly, E Editorial",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T13:36:33Z",
+      "updatedAt": "2026-10-29T13:36:33Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N34",
+      "kind": "decision",
+      "title": "Report designs narrowed to Brutalist (refined) and Night shift",
+      "body": "Owner kept these two of the landing page's five; asked for a softer Brutalist in the report.",
+      "considered": "",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-26"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T13:44:38Z",
+      "updatedAt": "2026-10-29T13:44:38Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N35",
+      "kind": "decision",
+      "title": "Sofia landing page design is Night shift: dark only, JetBrains Mono headlines, IBM Plex Sans body, one orange accent",
+      "body": "Owner picked Night shift over Brutalist. Switcher and other designs removed; copies of the five-design and two-design versions kept in the session scratchpad.",
+      "considered": "Brutalist (black and yellow)",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T13:55:45Z",
+      "updatedAt": "2026-10-29T13:55:45Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N36",
+      "kind": "decision",
+      "title": "Report design: Night shift",
+      "body": "Owner picked Night shift over Brutalist (refined). Switcher and other designs removed; fonts vendored (OFL) instead of Google Fonts so the saved report stays offline and private.",
+      "considered": "",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-26"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T13:59:55Z",
+      "updatedAt": "2026-10-29T13:59:55Z",
       "updatedBy": "claude"
     }
   ],
