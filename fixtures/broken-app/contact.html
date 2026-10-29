@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — Tidy</title>
+  <meta name="description" content="Talk to the Tidy team.">
+</head>
+<body>
+  <main>
+    <h1>Contact us</h1>
+    <!-- forms.input-types: phone as plain text; forms.autocomplete: no autocomplete; forms.enterkey: no enterkeyhint; forms.spam: no trap or challenge -->
+    <form action="/api/contact" method="post">
+      <label>Full name <input type="text" name="name"></label>
+      <label>Email <input type="text" name="email"></label>
+      <label>Phone <input type="text" name="phone"></label>
+      <label>Message <textarea name="message"></textarea></label>
+      <button type="submit">Send</button>
+    </form>
+  </main>
+</body>
+</html>

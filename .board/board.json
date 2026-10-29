@@ -8,7 +8,7 @@
     "granularity": "normal"
   },
   "nextNum": 20,
-  "nextNoteNum": 22,
+  "nextNoteNum": 24,
   "features": [
     {
       "key": "ALL-1",
@@ -1159,6 +1159,42 @@
       "steps": [],
       "createdAt": "2026-10-29T09:31:28Z",
       "updatedAt": "2026-10-29T09:31:28Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N22",
+      "kind": "reference",
+      "title": "Which checks use which library",
+      "body": "Built (77): playwright-core 13MB for 29 browser checks (axe-core 3.3MB only a11y.button-names, a11y.contrast); htmlparser2 for every site check, 16 need only it; hunspell+dictionaries ~11.5MB only content.spelling; 19 no library; judgment none. Remaining 98 (40 browser, 47 mechanical, 11 judgment): expected to need no new big library — ~40 Chrome, ~17 htmlparser2, ~30 Node built-ins only, 11 reviewer. Open: leftover.dead-code (own simple version vs knip), mail.spam-score (external service?), launch.sitemap-submitted (can't verify without Search Console).",
+      "considered": "",
+      "decidedBy": "",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-18"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T09:40:20Z",
+      "updatedAt": "2026-10-29T09:42:09Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N23",
+      "kind": "reference",
+      "title": "More skills like Impeccable — stars and pages",
+      "body": "Stars via gh 2026-10-29: obra/superpowers 308k (README only); mattpocock/skills 306k (aihero.dev/skills, docs-style); anthropics/skills 185k; ui-ux-pro-max 142k (uupm.cc, numbers as proof); garrytan/gstack 138k (README, tools framed as team roles); taste-skill 105k (tasteskill.dev, npx install in hero + 5 full-page demos); claude-mem 104k (claude-mem.ai, did not load); gsd 64k; BMAD 55k; emilkowalski/skills 51k (emilkowal.ski/skill, plain list + course upsell); vercel agent-skills 33k; SuperClaude 24k; ibelick/ui-skills 10k. Pattern: the top two have no designed landing page; README/one-liner carries it.",
+      "considered": "",
+      "decidedBy": "",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T09:40:54Z",
+      "updatedAt": "2026-10-29T09:40:54Z",
       "updatedBy": "claude"
     }
   ],

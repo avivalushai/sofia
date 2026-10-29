@@ -48,6 +48,11 @@
     { "checkId": "a11y.lang",                  "status": "fail", "note": "index.html has no lang; pricing.html is fine" },
     { "checkId": "a11y.button-names",           "status": "pass", "note": "every button and link has text" },
 
+    { "checkId": "forms.input-types",          "status": "fail", "note": "the email field has no type, so phones show the letter keyboard" },
+    { "checkId": "forms.autocomplete",         "status": "fail", "note": "name and email fields have no autocomplete" },
+    { "checkId": "forms.enterkey",             "status": "fail", "note": "two fields, no enterkeyhint" },
+    { "checkId": "forms.spam",                 "status": "fail", "note": "no trap field or challenge on the sign-up form" },
+    { "checkId": "forms.backup",               "status": "pass", "note": "nothing sends email" },
     { "checkId": "forms.success-truth",        "status": "fail", "note": "requires consent; success message shown although the request fails" },
     { "checkId": "forms.destination",           "status": "fail", "note": "requires consent; submits to http://localhost:3000/api, not the site" },
     { "checkId": "forms.validation",            "status": "fail", "note": "requires consent; no required fields, an empty email is sent" },

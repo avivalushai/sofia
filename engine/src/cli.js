@@ -200,7 +200,8 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
 
       case "add-findings": {
         if (!rest[0]) throw new UsageError("add-findings needs the reviewer's JSON file");
-        const raw = JSON.parse(await readFile(path.resolve(cwd, rest[0]), "utf8"));
+        // a reviewer sometimes wraps its JSON in a Markdown code fence
+        const raw = JSON.parse((await readFile(path.resolve(cwd, rest[0]), "utf8")).trim().replace(/^```(?:json)?\s*\n?|\n?```$/g, ""));
         const reviews = Array.isArray(raw) ? raw : [raw];
         const state = await readState(cwd);
         const at = new Date().toISOString();

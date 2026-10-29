@@ -94,6 +94,12 @@
     - In code: `sec.headers`, `sec.cookies`, `sec.cors`, `sec.source-maps`.
     - In the browser: `sec.mixed-content`.
     - Code review: `sec.xss-output`, `sec.login-limit`.
+  - Forms, 6 of 6:
+    - Mechanical: `forms.input-types`, `forms.autocomplete`, `forms.enterkey`, `forms.spam`, `forms.backup`. The fields are read from the source files (HTML, JSX, Vue, Svelte), so apps that build their pages in the browser are covered too. Hidden trap fields are ignored.
+    - Code review: `forms.thank-you`.
+  - Data, 1 of 1: `data.delete-export` (code review).
+  - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
+  - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:
     - `fixtures/broken-app/` has one planted problem for each new check.
     - `fixtures/clean-app/` is the same app with every problem fixed, so every check must pass there; it guards against false alarms.

@@ -169,8 +169,11 @@ test("a new fix can't start on top of uncommitted changes", async () => {
 test("recheck takes a category, and a yes to submitting forms lasts for the session", async () => {
   const first = await lc("recheck", "forms", "--consent", "submit-forms");
   assert.equal(first.code, 0, first.err);
-  assert.deepEqual(first.out.checks.map((c) => c.id).sort(), ["forms.destination", "forms.success-truth", "forms.validation"]);
-  assert.ok(first.out.checks.every((c) => c.status !== "skip"));
+  const ids = first.out.checks.map((c) => c.id);
+  assert.ok(ids.every((id) => id.startsWith("forms.")), ids.join(", "));
+  const submitting = first.out.checks.filter((c) => ["forms.destination", "forms.success-truth", "forms.validation"].includes(c.id));
+  assert.equal(submitting.length, 3, "the checks that submit the form are rechecked");
+  assert.ok(submitting.every((c) => c.status !== "skip"), "the yes to submitting forms is used");
   // no --consent this time: the yes from a moment ago still counts
   const again = await lc("recheck", "forms.success-truth");
   assert.equal(again.out.checks[0].status, "fail");

@@ -80,6 +80,22 @@
       ],
       "status": "fail",
       "note": "bcrypt password check with no limit on failed attempts"
+    },
+    {
+      "checkId": "forms.thank-you",
+      "files": [
+        "assets/contact.js"
+      ],
+      "status": "fail",
+      "note": "contact form only resets after sending: no confirmation, no next step"
+    },
+    {
+      "checkId": "data.delete-export",
+      "files": [
+        ".launch-check/review/pages.txt"
+      ],
+      "status": "fail",
+      "note": "sign-up and login, but no way to delete the account or download the notes"
     }
   ]
 }

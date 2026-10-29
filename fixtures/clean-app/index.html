@@ -12,7 +12,8 @@
     
     <img src="/hero.svg" alt="Tidy on a laptop" width="600" height="400">
     <form action="/api/subscribe" method="post">
-      <label>Email <input type="email" name="email"></label>
+      <label>Email <input type="email" name="email" autocomplete="email"></label>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" hidden aria-hidden="true">
       <button type="submit">Get updates</button>
     </form>
     <p><a href="/login.html">Log in</a></p>

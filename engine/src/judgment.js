@@ -27,6 +27,8 @@ const SOURCES = {
   "sec.rate-limit": { server: true, match: (t, f) => (SERVER_PATH.test(f) || SERVER_CODE.test(t) || /(^|\/)middleware\.[jt]s$/.test(f)) && (PAID_CALL.test(t) || /ratelimit|rate-limit|rateLimit/i.test(t)) },
   "sec.xss-output": { match: (t) => /dangerouslySetInnerHTML|\.innerHTML\s*[+]?=|insertAdjacentHTML|outerHTML\s*=|document\.write\(|v-html=|\{@html|marked\(|markdown-it|rehype-raw|location\.(search|hash)|URLSearchParams|useSearchParams|href=\{/.test(t) },
   "sec.login-limit": { server: true, match: (t, f) => /bcrypt|argon2|scrypt|pbkdf2|CredentialsProvider|Credentials\(|password|signIn|login|otp|verify-?code|reset/i.test(t) && (SERVER_PATH.test(f) || SERVER_CODE.test(t) || /(^|\/)(auth|lib)\//.test(f)) },
+  "forms.thank-you": { match: (t) => /onSubmit|addEventListener\(\s*["']submit|<form\b|handleSubmit|action=\{/.test(t) },
+  "data.delete-export": { pages: true, match: (t, f) => /account|settings|profile|delete|remove|export|download|חשבון|הגדרות|פרופיל|מחיקה|ייצוא/i.test(f) || ((SERVER_PATH.test(f) || SERVER_CODE.test(t)) && /user|account|profile/i.test(t)) || /deleteUser|auth\.admin\.deleteUser|delete-?account|export-?data/i.test(t) },
   "ai.output-as-code": { match: (t) => /dangerouslySetInnerHTML|\.innerHTML\s*=|v-html=|\{@html|marked\(|markdown-it|rehype-raw|eval\(|new Function\(/.test(t) || PAID_CALL.test(t) && /openai|anthropic|generativelanguage|completion|messages\.create/i.test(t) },
 };
 
@@ -35,6 +37,8 @@ const NOTHING = {
   "sec.server-authz": "no server code found — permissions can only be checked where the server code is",
   "sec.rate-limit": "no server endpoints that call paid services were found",
   "ai.output-as-code": "no code that shows model answers was found",
+  "forms.thank-you": "no forms were found",
+  "data.delete-export": "nothing to read",
   "sec.xss-output": "no code that inserts HTML or reads the address bar was found",
   "sec.login-limit": "no code that checks a password was found — sign-in is handled elsewhere",
   "leftover.mock-data": "nothing that looks like sample content was found",

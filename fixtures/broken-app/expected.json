@@ -1,11 +1,59 @@
 {
   "about": "A small app with login and API endpoints, with one planted problem for each check listed here (the M9 checks). clean-app is the same app with every one of them fixed. Used by engine/test/apps.test.js.",
-  "detected": { "auth": true, "forms": true },
+  "detected": {
+    "auth": true,
+    "forms": true
+  },
   "expect": [
-    { "checkId": "sec.headers", "status": "fail", "note": "vercel.json sets no security headers" },
-    { "checkId": "sec.cookies", "status": "fail", "note": "api/session.js sets the session cookie with no HttpOnly, Secure or SameSite" },
-    { "checkId": "sec.cors", "status": "fail", "note": "api/profile.js copies back the caller's origin and allows credentials" },
-    { "checkId": "sec.source-maps", "status": "fail", "note": "vite.config.js: sourcemap: true" },
-    { "checkId": "sec.mixed-content", "status": "fail", "note": "http:// image and http:// form action on the home page" }
+    {
+      "checkId": "sec.headers",
+      "status": "fail",
+      "note": "vercel.json sets no security headers"
+    },
+    {
+      "checkId": "sec.cookies",
+      "status": "fail",
+      "note": "api/session.js sets the session cookie with no HttpOnly, Secure or SameSite"
+    },
+    {
+      "checkId": "sec.cors",
+      "status": "fail",
+      "note": "api/profile.js copies back the caller's origin and allows credentials"
+    },
+    {
+      "checkId": "sec.source-maps",
+      "status": "fail",
+      "note": "vite.config.js: sourcemap: true"
+    },
+    {
+      "checkId": "sec.mixed-content",
+      "status": "fail",
+      "note": "http:// image and http:// form action on the home page"
+    },
+    {
+      "checkId": "forms.input-types",
+      "status": "fail",
+      "note": "contact.html: email and phone fields are type=text"
+    },
+    {
+      "checkId": "forms.autocomplete",
+      "status": "fail",
+      "note": "no autocomplete on name, email, phone"
+    },
+    {
+      "checkId": "forms.enterkey",
+      "status": "fail",
+      "note": "contact form: 3 fields, no enterkeyhint"
+    },
+    {
+      "checkId": "forms.spam",
+      "status": "fail",
+      "note": "no trap field or challenge on the contact and subscribe forms"
+    },
+    {
+      "checkId": "forms.backup",
+      "status": "fail",
+      "note": "api/contact.js only sends an email"
+    }
   ]
 }

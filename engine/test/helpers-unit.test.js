@@ -77,3 +77,25 @@ test("local addresses are recognised", () => {
 test("stripStrings leaves only identifiers", () => {
   assert.equal(stripStrings('console.log("signup user", data)'), 'console.log("", data)');
 });
+
+test("form fields are read from React source too", async () => {
+  const { sourceForms, fieldKind, attrsOf } = await import("../src/lib/fields.js");
+  const files = {
+    "src/Signup.jsx": `export function Signup() {
+  return (
+    <form onSubmit={submit}>
+      <label>שם מלא <input value={name} onChange={(e) => setName(e.target.value)} /></label>
+      <input type="text" name="email" placeholder="you@example.com" autoComplete="email" />
+      <input type={kind} name="phone" />
+      <input name="website" tabIndex={-1} aria-hidden="true" />
+    </form>
+  );
+}`,
+  };
+  const project = { shippedSource: () => Object.keys(files), read: async (f) => files[f] };
+  const [{ forms }] = await sourceForms(project);
+  assert.deepEqual(forms[0].fields.map((f) => f.kind), ["name", "email", "tel", null]);
+  assert.equal(forms[0].fields[1].attrs.autocomplete, "email");
+  assert.equal(forms[0].fields[2].attrs.type, "{kind}", "a type set by code is kept as code, so checks can skip it");
+  assert.equal(fieldKind(attrsOf(' type="search" name="q"')), "search");
+});

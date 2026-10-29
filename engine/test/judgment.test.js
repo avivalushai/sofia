@@ -46,7 +46,7 @@ const goodRateLimit = () => ({
 
 before(async () => {
   dir = await copyFixture("judgment-app");
-  const r = await lc("run", "--target", "local", "--mode", "full", "--only", "leftover,qa.empty-states,content.terms,sec,ai");
+  const r = await lc("run", "--target", "local", "--mode", "full", "--only", "leftover,qa.empty-states,content.terms,sec,ai,forms.thank-you,data.delete-export");
   assert.equal(r.code, 0, r.err);
 });
 
@@ -102,7 +102,8 @@ test("a failing answer needs a finding, a choice check needs options, a finding 
 });
 
 test("a correct review is accepted: the check fails, the finding carries its quotes", async () => {
-  await save("good.json", goodRateLimit());
+  // wrapped in a Markdown code fence, the way a reviewer sometimes answers
+  await writeFile(path.join(dir, "good.json"), "```json\n" + JSON.stringify(goodRateLimit()) + "\n```\n");
   const r = await lc("add-findings", "good.json");
   assert.equal(r.code, 0, r.err);
   assert.equal(r.out.reviewed[0].status, "fail");
