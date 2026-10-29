@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sofia report</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ctext x='16' y='22' font-family='system-ui' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="banner" class="banner" hidden></div>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">S</span>
+      <div>
+        <h1>Sofia report <span id="project" class="muted"></span></h1>
+        <p id="meta" class="muted small"></p>
+      </div>
+    </div>
+    <div class="status">
+      <span id="pill" class="pill">Loading…</span>
+    </div>
+  </header>
+
+  <main id="app" class="wrap" aria-live="polite">
+    <section class="hero">
+      <div class="dial-wrap">
+        <svg class="dial" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="dial-track" cx="60" cy="60" r="52"></circle>
+          <circle id="dial-value" class="dial-value" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="dial-text"><span id="score" class="score">—</span><span class="muted small">/ 100</span></div>
+      </div>
+      <div class="hero-text">
+        <p id="verdict" class="verdict"></p>
+        <p id="since" class="muted"></p>
+      </div>
+    </section>
+
+    <nav class="tally" id="tally" aria-label="Filter by result"></nav>
+
+    <section class="fixers" id="fixers" aria-label="Who can handle what"></section>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="findings" aria-selected="true">Findings</button>
+      <button role="tab" data-tab="parked" aria-selected="false">Muted, accepted &amp; skipped</button>
+      <button role="tab" data-tab="catalog" aria-selected="false">All checks</button>
+    </div>
+
+    <section id="panel-findings" class="panel">
+      <div class="controls">
+        <label class="search"><span class="sr-only">Search</span><input id="search" type="search" placeholder="Search findings" autocomplete="off"></label>
+        <label class="small muted">Group by
+          <select id="group">
+            <option value="severity">Severity</option>
+            <option value="fixer">Who can fix</option>
+            <option value="category">Category</option>
+          </select>
+        </label>
+      </div>
+      <div id="list"></div>
+    </section>
+    <section id="panel-parked" class="panel" hidden></section>
+    <section id="panel-catalog" class="panel" hidden></section>
+  </main>
+
+  <aside id="drawer" class="drawer" hidden aria-label="Finding details">
+    <div class="drawer-head">
+      <button id="close" class="icon-btn" aria-label="Close">✕</button>
+    </div>
+    <div id="detail"></div>
+  </aside>
+  <div id="scrim" class="scrim" hidden></div>
+
+  <footer class="wrap foot muted small">Updates live while Sofia works · nothing here changes your app</footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
