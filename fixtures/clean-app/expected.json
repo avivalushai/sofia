@@ -3,7 +3,8 @@
   "detected": {
     "auth": true,
     "forms": true,
-    "dark": true
+    "dark": true,
+    "mail": true
   },
   "expect": [
     {
@@ -217,6 +218,77 @@
       "checkId": "perf.third-party",
       "status": "pass",
       "note": "no scripts from other services; measuring is covered by the real-app pass"
+    },
+    {
+      "checkId": "mail.real-sender",
+      "status": "pass"
+    },
+    {
+      "checkId": "mail.reply-to",
+      "status": "pass"
+    },
+    {
+      "checkId": "mail.unsubscribe",
+      "status": "pass"
+    },
+    {
+      "checkId": "run.error-tracking",
+      "status": "pass"
+    },
+    {
+      "checkId": "launch.sitemap-submitted",
+      "status": "pass",
+      "note": "google-site-verification tag on the home page"
+    },
+    {
+      "checkId": "run.uptime",
+      "status": "pass",
+      "note": "README names UptimeRobot"
+    },
+    {
+      "checkId": "mail.spam-score",
+      "status": "uncertain",
+      "note": "needs a real email: steps for the user"
+    },
+    {
+      "checkId": "mail.system-emails",
+      "status": "uncertain",
+      "note": "needs a real email: steps for the user"
+    },
+    {
+      "checkId": "launch.canonical-host",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "launch.dns",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "launch.custom-domain",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "launch.redirects-old",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "launch.staging-noindex",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "run.ssl-expiry",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "run.domain-expiry",
+      "status": "skip",
+      "note": "local address (live path: live-paths.test.js)"
     }
   ]
 }

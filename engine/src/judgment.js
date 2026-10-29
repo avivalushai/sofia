@@ -33,6 +33,7 @@ const SOURCES = {
   "content.error-copy": { match: (t) => /\.catch\(|catch\s*\(|toast\.error|setError|showError|alert\(|\berror\s*[:=]|errors?\.[a-z]+\s*=|!res\.ok|res\.status\((4|5)\d\d\)|שגיאה|נכשל/i.test(t) },
   // Next's not-found, Astro/Gatsby/Next pages 404, SvelteKit +error, Nuxt error.vue, React Router NotFound
   "content.404-copy": { match: (t, f) => /(^|\/)(404|not-found|NotFound|\+error)\.(html?|jsx?|tsx?|vue|svelte|astro|mdx?)$|(^|\/)error\.vue$/.test(f) },
+  "shop.vat": { match: (t) => /\bvat\b|מע"?מ|מע״מ|\btax(es|Rate)?\b|shipping|משלוח|subtotal|unit_amount|total\s*[=:]|price\s*\*/i.test(t) && /price|amount|total|cart|checkout|סכום|מחיר/i.test(t) },
   "ai.output-as-code": { match: (t) => /dangerouslySetInnerHTML|\.innerHTML\s*=|v-html=|\{@html|marked\(|markdown-it|rehype-raw|eval\(|new Function\(/.test(t) || PAID_CALL.test(t) && /openai|anthropic|generativelanguage|completion|messages\.create/i.test(t) },
 };
 
@@ -42,6 +43,7 @@ const NOTHING = {
   "sec.rate-limit": "no server endpoints that call paid services were found",
   "ai.output-as-code": "no code that shows model answers was found",
   "forms.thank-you": "no forms were found",
+  "shop.vat": "no price or tax calculation was found in the code",
   "content.button-labels": "no buttons or links were found",
   "content.error-copy": "no error messages were found in the code",
   "content.404-copy": "the site has no not-found page of its own (qa.custom-404 covers that)",

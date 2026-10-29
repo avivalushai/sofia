@@ -46,7 +46,7 @@ const goodRateLimit = () => ({
 
 before(async () => {
   dir = await copyFixture("judgment-app");
-  const r = await lc("run", "--target", "local", "--mode", "full", "--only", "leftover,qa.empty-states,content.terms,sec,ai,forms.thank-you,data.delete-export,content.button-labels,content.error-copy,content.404-copy");
+  const r = await lc("run", "--target", "local", "--mode", "full", "--only", "leftover,qa.empty-states,content.terms,sec,ai,forms.thank-you,data.delete-export,content.button-labels,content.error-copy,content.404-copy,shop.vat");
   assert.equal(r.code, 0, r.err);
 });
 

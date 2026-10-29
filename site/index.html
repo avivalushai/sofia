@@ -14,7 +14,8 @@
 :root{
   --bg:#f7f7f8; --surface:#ffffff; --sunk:#eeeef1; --ink:#16161a; --muted:#5c5c66; --line:#e2e2e7;
   --accent:#4f46e5; --accent-ink:#ffffff;
-  --bad:#c62828; --good:#1f7a44;
+  --bad:#c62828; --good:#1f7a44; --warn:#a15c00;
+  --bad-bg:#fdecea; --good-bg:#e5f4eb; --warn-bg:#fcf1de;
   --shadow:0 14px 32px -18px rgba(40,36,110,.30);
   --sans:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -22,11 +23,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f0f12; --surface:#17171c; --sunk:#1d1d23; --ink:#ededf0; --muted:#a0a0ab; --line:#2a2a31;
   --accent:#8b85ff; --accent-ink:#0f0f12;
-  --bad:#ff7b72; --good:#5fd08d; --shadow:0 14px 32px -18px rgba(0,0,0,.7); color-scheme:dark}}
+  --bad:#ff7b72; --good:#5fd08d; --warn:#f0b04a; --bad-bg:#3a1a18; --good-bg:#12301f; --warn-bg:#36290f; --shadow:0 14px 32px -18px rgba(0,0,0,.7); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f0f12; --surface:#17171c; --sunk:#1d1d23; --ink:#ededf0; --muted:#a0a0ab; --line:#2a2a31;
   --accent:#8b85ff; --accent-ink:#0f0f12;
-  --bad:#ff7b72; --good:#5fd08d; --shadow:0 14px 32px -18px rgba(0,0,0,.7); color-scheme:dark}
+  --bad:#ff7b72; --good:#5fd08d; --warn:#f0b04a; --bad-bg:#3a1a18; --good-bg:#12301f; --warn-bg:#36290f; --shadow:0 14px 32px -18px rgba(0,0,0,.7); color-scheme:dark}
 
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -69,7 +70,6 @@ nav ul a:hover{color:var(--ink)}
 .hero .lead{margin-top:22px;font-size:clamp(18px,1.5vw,20px);max-width:36ch}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
 .shot{border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px var(--line),var(--shadow);background:var(--surface)}
-.hero .shot{animation:rise .9s cubic-bezier(.16,1,.3,1) both}
 @keyframes rise{from{transform:translateY(28px)}to{transform:none}}
 
 /* category marquee */
@@ -80,29 +80,83 @@ nav ul a:hover{color:var(--ink)}
 .track b{font-family:var(--mono);font-weight:500;color:var(--ink);margin-inline-end:8px}
 @keyframes slide{to{transform:translateX(-50%)}}
 
-/* before / after slider */
-.compare{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:clamp(32px,6vw,96px);align-items:center}
-.compare .text{display:grid;gap:18px;max-width:46ch}
-.compare .text p{color:var(--muted)}
-.compare .text .finding{font-size:15px;color:var(--ink);display:grid;gap:2px}
-.compare .text .finding b{font-size:13px;font-weight:600;color:var(--bad)}
-.compare .text .finding.ok b{color:var(--good)}
-.ba{position:relative;width:100%;max-width:340px;aspect-ratio:390/844;border-radius:28px;overflow:hidden;border:8px solid var(--ink);box-shadow:var(--shadow);background:#fafafa;--pos:50%}
-.ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.ba .after{clip-path:inset(0 0 0 var(--pos))}
-.ba .handle{position:absolute;top:0;bottom:0;left:var(--pos);width:2px;background:var(--accent);transform:translateX(-1px);pointer-events:none}
-.ba .handle::after{content:"";position:absolute;top:50%;left:50%;width:34px;height:34px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
-.ba input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
-.ba:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:4px}
-.ba .lbl{position:absolute;bottom:12px;font:500 12px var(--sans);padding:6px 12px;border-radius:999px;background:rgba(22,22,26,.78);color:#fff;pointer-events:none}
-.ba .lbl.l{left:12px}.ba .lbl.r{right:12px}
+/* chat demo (hero) */
+.chat{background:var(--surface);border-radius:16px;box-shadow:0 0 0 1px var(--line),var(--shadow);overflow:hidden;animation:rise .9s cubic-bezier(.16,1,.3,1) both}
+.chat-bar{display:flex;align-items:center;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.chat-bar span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.chat-bar em{font-style:normal;margin-left:auto;font-family:var(--mono)}
+.chat-body{padding:22px;display:grid;gap:16px;font-size:15px}
+.msg-user{justify-self:end;background:var(--sunk);padding:10px 16px;border-radius:16px;max-width:85%}
+.progress{display:grid;gap:3px;font-size:13.5px;color:var(--muted)}
+.progress b{color:var(--good);font-weight:500}
+.score-line{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.score-line strong{font-size:36px;font-weight:600;letter-spacing:-.04em;line-height:1}
+.score-line span{color:var(--muted);font-size:14px}
+.blockers{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.blockers li{display:flex;gap:10px;align-items:baseline}
+.blockers li::before{content:"Blocker";flex-shrink:0;font-size:12px;font-weight:600;color:var(--bad);background:var(--bad-bg);padding:3px 9px;border-radius:999px}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts span{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px}
+.opts span:first-child{border-color:var(--accent);color:var(--accent)}
 
-/* drawer screenshot, full width */
+/* before / after cards: asymmetric 3+2 / 2+3 */
+.ba-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:48px}
+.ba{background:var(--surface);border-radius:16px;box-shadow:0 0 0 1px var(--line);overflow:hidden;display:grid;align-content:start}
+.ba:nth-child(1),.ba:nth-child(4){grid-column:span 3}
+.ba:nth-child(2),.ba:nth-child(3){grid-column:span 2}
+.ba-panes{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk)}
+.pane{padding:18px;display:grid;gap:10px;align-content:start;min-height:200px;min-width:0}
+.pane+.pane{border-left:1px solid var(--line)}
+.tag{justify-self:start;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+.tag.before{background:var(--bad-bg);color:var(--bad)}
+.tag.after{background:var(--good-bg);color:var(--good)}
+.ba-text{padding:22px 24px;display:grid;gap:8px}
+.ba-text p{color:var(--muted);font-size:15.5px}
+.ba-text code{color:var(--muted);font-size:12.5px}
+.wa{background:var(--surface);border-radius:10px;padding:8px;font-size:12.5px}
+.wa-card{border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.wa-img{aspect-ratio:1.91/1;max-width:100%;background:linear-gradient(135deg,#dcdafe,#c9f0dc)}
+.wa-img.empty{background:var(--line)}
+.wa-card div{padding:6px 8px}
+.wa-card b{display:block;font-size:12.5px;font-weight:600}
+.wa-card small{color:var(--muted);font-size:12px;display:block}
+.form{display:grid;gap:6px;font-size:12.5px}
+.form i{display:block;height:26px;border-radius:6px;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.form .ok{background:var(--good-bg);color:var(--good);border-radius:6px;padding:8px 10px}
+.form .lost{font-family:var(--mono);font-size:12px;color:var(--bad)}
+.form .saved{font-family:var(--mono);font-size:12px;color:var(--good)}
+.phone{width:96px;height:150px;border:2px solid var(--ink);border-radius:16px;justify-self:center;padding:10px 7px;overflow:hidden;background:var(--surface)}
+.phone .row{height:10px;border-radius:3px;background:var(--line);margin-bottom:6px}
+.phone .wide{width:150%;background:var(--bad-bg);outline:1px dashed var(--bad)}
+.phone .fit{background:var(--good-bg)}
+.code{font-family:var(--mono);font-size:12px;background:var(--surface);border-radius:8px;padding:10px;line-height:1.55;overflow-x:auto;white-space:pre;box-shadow:0 0 0 1px var(--line)}
+.code .bad{color:var(--bad)}
+.code .good{color:var(--good)}
+
+/* report mock */
 .wide{display:grid;gap:36px}
 .wide .head{display:grid;gap:16px;max-width:60ch}
 .wide .head p{color:var(--muted)}
-.wide .shot{aspect-ratio:2720/1500}
-.wide .shot img{width:100%;height:100%;object-fit:cover;object-position:right top}
+.report{background:var(--surface);border-radius:16px;box-shadow:0 0 0 1px var(--line),var(--shadow);overflow:hidden}
+.report-top{display:flex;align-items:center;gap:24px;padding:28px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.dial{width:96px;height:96px;flex-shrink:0}
+.dial circle{fill:none;stroke-width:9}
+.dial .ring{stroke:var(--line)}
+.dial .val{stroke:var(--warn);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
+.dial text{fill:var(--ink);font-family:var(--sans);font-weight:600;font-size:30px}
+.report-top h3{font-size:24px}
+.report-top p{color:var(--muted);font-size:15px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.chip{font-size:13px;padding:5px 12px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent)}
+.chip.solid{background:var(--accent);color:var(--accent-ink)}
+.chip.dashed{border-style:dashed;border-color:var(--muted);color:var(--muted)}
+.r{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 28px;border-bottom:1px solid var(--line);font-size:15px}
+.r:last-child{border-bottom:0}
+.sev{justify-self:start;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.sev.b{background:var(--bad-bg);color:var(--bad)}
+.sev.i{background:var(--warn-bg);color:var(--warn)}
+.sev.p{background:var(--sunk);color:var(--muted)}
+.r small{color:var(--muted);font-size:13px;white-space:nowrap}
 
 /* how it works: typographic sequence */
 .flow{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,6vw,96px);align-items:start}
@@ -156,12 +210,13 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
 
 @media (max-width:1099px){
   .hero{grid-template-columns:minmax(0,1fr)}
-  .hero .shot{max-width:760px}
+  .hero .chat{max-width:620px}
 }
 @media (max-width:1023px){
-  .compare,.flow,.install,.promises{grid-template-columns:minmax(0,1fr)}
+  .flow,.install,.promises{grid-template-columns:minmax(0,1fr)}
   .flow .head{position:static}
-  .ba{justify-self:center}
+  .ba-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ba:nth-child(n){grid-column:auto}
   nav ul{gap:18px}
 }
 @media (max-width:767px){
@@ -170,8 +225,10 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
   .c1,.c2,.c3{grid-column:auto;grid-row:auto}
   .plist{grid-template-columns:minmax(0,1fr)}
   .cmd code{font-size:12.5px}
-  .wide .shot{aspect-ratio:auto}
-  .wide .shot img{height:auto}
+  .ba-grid{grid-template-columns:minmax(0,1fr)}
+  .r{grid-template-columns:auto minmax(0,1fr)}
+  .r small{display:none}
+  .chips{margin-left:0}
 }
 @media (prefers-reduced-motion: reduce){
   *{animation:none!important;transition:none!important}
@@ -187,7 +244,7 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
 <nav>
   <a class="brand" href="#top" id="top"><b aria-hidden="true">S</b>Sofia</a>
   <ul>
-    <li><a href="#report">The report</a></li>
+    <li><a href="#finds">What she finds</a></li>
     <li><a href="#how">How it works</a></li>
     <li><a href="#install">Install</a></li>
     <li><a href="https://github.com/avivalushai/sofia">GitHub</a></li>
@@ -201,14 +258,27 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
     <p class="lead">Sofia checks what you built before launch, explains what's broken in plain words, and fixes only what you approve.</p>
     <div class="cta">
       <div class="cmd"><code id="c-hero">/plugin marketplace add avivalushai/sofia</code><button class="copy" type="button" data-copy="c-hero">Copy</button></div>
-      <a class="btn" href="#report">See a real report</a>
+      <a class="btn" href="#how">How it works</a>
     </div>
   </div>
-  <div class="shot">
-    <picture>
-      <source srcset="img/report-dark.png" media="(prefers-color-scheme: dark)">
-      <img src="img/report-light.png" width="2720" height="1720" alt="Sofia's report page: score 57 out of 100, not ready yet, 4 blockers, 22 important, 26 polish, with findings like a link to a page that doesn't exist">
-    </picture>
+  <div class="chat" aria-label="Example conversation with Sofia">
+    <div class="chat-bar"><span></span><span></span><span></span><em>noa-pilates</em></div>
+    <div class="chat-body">
+      <div class="msg-user">Sofia, check my app before I launch</div>
+      <div class="progress">
+        <div><b>&#10003;</b> Using your installed Chrome</div>
+        <div><b>&#10003;</b> Mechanical checks, 31</div>
+        <div><b>&#10003;</b> Browser checks, 47</div>
+        <div><b>&#10003;</b> Report open in your browser</div>
+      </div>
+      <div class="score-line"><strong>58 / 100</strong><span>Not ready yet. Three things will lose you sign-ups.</span></div>
+      <ul class="blockers">
+        <li>The sign-up form doesn't save anything</li>
+        <li>Confirmation emails will land in spam</li>
+        <li>The page scrolls sideways on iPhone</li>
+      </ul>
+      <div class="opts"><span>Fix your 5</span><span>Blockers only</span><span>Not now</span></div>
+    </div>
   </div>
 </header>
 
@@ -225,21 +295,83 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
 <div class="page">
 <div class="wrap">
 
-<section>
-  <div class="compare">
-    <div class="text reveal">
-      <h2>She opens your app the way your visitors will.</h2>
-      <p>In your own Chrome, at real phone sizes. Here, the pricing page on an iPhone, before and after one approved fix.</p>
-      <p class="finding"><b>Found</b>The page scrolls sideways on phones. Visitors drag it around and it feels broken.</p>
-      <p class="finding ok"><b>Fixed</b>Re-checked at 375 and 390 pixels wide. It passes, so it counts as fixed.</p>
-    </div>
-    <div class="ba" id="ba">
-      <img src="img/scroll-before.png" width="390" height="844" alt="Before: on a phone the plan cards run off the right edge of the screen">
-      <img class="after" src="img/scroll-after.png" width="390" height="844" alt="After: the plan cards stack and fit the screen">
-      <span class="handle" aria-hidden="true"></span>
-      <span class="lbl l" aria-hidden="true">Before</span><span class="lbl r" aria-hidden="true">After</span>
-      <input type="range" id="ba-range" min="0" max="100" value="50" aria-label="Drag to compare before and after">
-    </div>
+<section id="finds">
+  <h2 class="reveal" style="max-width:20ch">The things you didn't think to check.</h2>
+  <p class="lead reveal" style="margin-top:16px">Claude builds fast. It's less good at remembering to check. Typical findings, worded the way Sofia words them.</p>
+  <div class="ba-grid">
+    <article class="ba reveal">
+      <div class="ba-panes">
+        <div class="pane">
+          <span class="tag before">Before</span>
+          <div class="wa"><div class="wa-card"><div class="wa-img empty"></div><div><b>noa-pilates.vercel.app</b><small>noa-pilates.vercel.app</small></div></div></div>
+        </div>
+        <div class="pane">
+          <span class="tag after">After</span>
+          <div class="wa"><div class="wa-card"><div class="wa-img"></div><div><b>Noa Pilates: first class free</b><small>noa-pilates.vercel.app</small></div></div></div>
+        </div>
+      </div>
+      <div class="ba-text">
+        <h3>A link shared on WhatsApp looks empty</h3>
+        <p>Anyone who sends your site to a friend gets a gray box with no title. Sofia adds an image, a title and a description.</p>
+        <code>seo.share-image</code>
+      </div>
+    </article>
+
+    <article class="ba reveal">
+      <div class="ba-panes">
+        <div class="pane">
+          <span class="tag before">Before</span>
+          <div class="form"><i></i><i></i><div class="ok">Thanks! We'll be in touch</div><div class="lost">POST &rarr; (nowhere)</div></div>
+        </div>
+        <div class="pane">
+          <span class="tag after">After</span>
+          <div class="form"><i></i><i></i><div class="ok">You're in. Check your inbox</div><div class="saved">&#10003; row added to sheet</div></div>
+        </div>
+      </div>
+      <div class="ba-text">
+        <h3>The form says thanks and saves nothing</h3>
+        <p>People sign up, see a success message, and the sign-up is gone. Sofia asks where sign-ups should go and connects it.</p>
+        <code>forms.submission-lands</code>
+      </div>
+    </article>
+
+    <article class="ba reveal">
+      <div class="ba-panes">
+        <div class="pane">
+          <span class="tag before">Before</span>
+          <div class="phone" aria-hidden="true"><div class="row"></div><div class="row wide"></div><div class="row"></div><div class="row wide"></div><div class="row"></div></div>
+        </div>
+        <div class="pane">
+          <span class="tag after">After</span>
+          <div class="phone" aria-hidden="true"><div class="row fit"></div><div class="row fit"></div><div class="row fit"></div><div class="row fit"></div><div class="row fit"></div></div>
+        </div>
+      </div>
+      <div class="ba-text">
+        <h3>On iPhone the page slides sideways</h3>
+        <p>The pricing table is wider than the screen, so the whole page drags left and right. Sofia checks at real phone sizes and fixes it.</p>
+        <code>resp.no-horizontal-scroll</code>
+      </div>
+    </article>
+
+    <article class="ba reveal">
+      <div class="ba-panes">
+        <div class="pane">
+          <span class="tag before">Before</span>
+          <div class="code"><span class="bad">// app.js, visible to everyone
+const key = "sk_live_51H&hellip;"</span></div>
+        </div>
+        <div class="pane">
+          <span class="tag after">After</span>
+          <div class="code"><span class="good">// api/pay.js, server only
+const key = process.env.PAY_KEY</span></div>
+        </div>
+      </div>
+      <div class="ba-text">
+        <h3>A secret key anyone can see</h3>
+        <p>Every visitor can read it and use it on your account. Sofia moves it to the server and walks you through replacing it.</p>
+        <code>sec.secrets-in-bundle</code>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -247,13 +379,20 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
   <div class="wide">
     <div class="head reveal">
       <h2>Every finding says where, what, and how to fix it.</h2>
-      <p>The full report opens on your own computer and updates while things get fixed. Click any finding for the exact page, the line of code, and a screenshot.</p>
+      <p>The full report opens on your own computer and updates while things get fixed. Every finding with the places it was found, screenshots, and what to do.</p>
     </div>
-    <div class="shot reveal">
-      <picture>
-        <source srcset="img/drawer-dark.png" media="(prefers-color-scheme: dark)">
-        <img src="img/drawer-light.png" width="2720" height="1720" alt="A finding opened in the report: the Chat with us button does nothing, found on mobile.html line 37, with a screenshot marking the button" loading="lazy">
-      </picture>
+    <div class="report reveal">
+      <div class="report-top">
+        <svg class="dial" viewBox="0 0 100 100" aria-label="Score 71 out of 100"><circle class="ring" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="76.5"/><text x="50" y="61" text-anchor="middle">71</text></svg>
+        <div><h3>Almost ready</h3><p>1 blocker left, 3 important, 2 polish</p></div>
+        <div class="chips"><span class="chip solid">Sofia fixes, 2</span><span class="chip">Your choice, 2</span><span class="chip dashed">Only you, 1</span></div>
+      </div>
+      <div class="rows">
+        <div class="r"><span class="sev b">Blocker</span><span>Confirmation emails will land in spam</span><small>Only you</small></div>
+        <div class="r"><span class="sev i">Important</span><span>The cookie banner only lets people accept</span><small>Your choice</small></div>
+        <div class="r"><span class="sev i">Important</span><span>Form fields without labels, so screen readers can't tell what to fill (3 places)</span><small>Sofia fixes</small></div>
+        <div class="r"><span class="sev p">Polish</span><span>9 shades of gray. They can be merged into 3</span><small>Your choice</small></div>
+      </div>
     </div>
   </div>
 </section>
@@ -350,8 +489,4 @@ document.querySelectorAll('[data-copy]').forEach(function(btn){
     try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
   });
 });
-(function(){
-  var ba=document.getElementById('ba'),r=document.getElementById('ba-range');
-  r.addEventListener('input',function(){ba.style.setProperty('--pos',r.value+'%')});
-})();
 </script>

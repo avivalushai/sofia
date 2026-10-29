@@ -2,7 +2,8 @@
   "about": "A small Hebrew site with an English version, with one planted problem for each Hebrew/RTL and language check listed here. clean-he is the same site fixed.",
   "detected": {
     "he": true,
-    "i18n": true
+    "i18n": true,
+    "shop": true
   },
   "expect": [
     {
@@ -44,6 +45,31 @@
       "checkId": "a11y.statement",
       "status": "fail",
       "note": "no accessibility statement"
+    },
+    {
+      "checkId": "shop.israeli-payment",
+      "status": "fail",
+      "note": "a Hebrew site charging through Stripe"
+    },
+    {
+      "checkId": "shop.invoices",
+      "status": "uncertain",
+      "note": "no invoicing found: steps for the user"
+    },
+    {
+      "checkId": "shop.checkout-flow",
+      "status": "uncertain",
+      "note": "needs a test purchase: steps for the user"
+    },
+    {
+      "checkId": "shop.test-purchase",
+      "status": "uncertain",
+      "note": "needs a test purchase: steps for the user"
+    },
+    {
+      "checkId": "shop.order-emails",
+      "status": "uncertain",
+      "note": "needs a test purchase: steps for the user"
     }
   ]
 }

@@ -135,6 +135,15 @@
     - Chrome marks load-time layout shifts as "after input" under touch emulation, so `perf.cls` ignores that flag.
   - Tests run 3 files at a time (`--test-concurrency=3`), and the test apps are scanned one after another. With everything in parallel, Chrome instances starved each other and checks timed out.
   - `LC_TIMINGS=1` prints how long each check took.
+  - Email (5), shop (6), launch (6) and operations (5):
+    - Mechanical: `mail.real-sender` (Gmail, sendmail or PHP mail()), `mail.reply-to`, `mail.unsubscribe` (comments ignored), `shop.israeli-payment`, `shop.invoices` (Morning, iCount, EZcount…), `run.error-tracking`.
+    - Live only: `launch.canonical-host`, `launch.dns` (including dangling CNAMEs), `launch.custom-domain`, `launch.redirects-old` (old addresses from the Internet Archive), `run.ssl-expiry` and `run.domain-expiry` (RDAP; .il domains give "couldn't tell"). All are tested with the network stubbed out.
+    - `launch.staging-noindex` runs when the scanned address is a preview or staging address. From the real domain, how the host handles previews isn't visible.
+    - Code review: `shop.vat` (18% since January 2025; consumer prices must include VAT). Planted in `judgment-app`: a 17% rate.
+  - **Guided checks (a decision for you to confirm):** some checks can't be verified from outside, or need a real email or purchase: `mail.spam-score`, `mail.system-emails`, `shop.checkout-flow`, `shop.test-purchase`, `shop.order-emails`, `launch.sitemap-submitted`, `run.uptime`, `run.backup`. They answer "couldn't tell", with exact steps for the user (`lib/guided.js`). They pass only when there's evidence: a Search Console verification tag, an uptime monitor named in the project, a backup job, or an invoicing service in the code. "Couldn't tell" doesn't lower the score.
+  - Detection now recognises mail and payment libraries imported in code (not only listed in package.json), and Israeli payment providers.
+  - Without Chrome (quick mode), browser checks that don't apply are now recorded as "doesn't apply" instead of being left out.
+  - `perf.cls` also checks the cause, images and videos near the top with no reserved space, so its answer no longer depends on how fast the machine is.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:

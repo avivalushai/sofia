@@ -16,6 +16,8 @@ export default {
     for (const file of files) {
       const text = await ctx.project.read(file);
       if (!text || !SENDS_EMAIL.test(text) || !(FORMISH.test(file) || FORMISH.test(text.slice(0, 4000)))) continue;
+      // a newsletter or broadcast sends to a list; it isn't a visitor's submission
+      if (/batch\.send|broadcast|campaign|subscribers\b|digest|newsletter/i.test(text) && !/\bmessage\b|phone|הודעה/i.test(text)) continue;
       if (STORES.test(text.replace(/import[^\n]*\n/g, ""))) continue;
       const lines = text.split("\n");
       const at = (re) => lines.findIndex((l) => re.test(l) && !/^\s*(import|\/\/|\*)/.test(l));

@@ -311,7 +311,8 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     const results = [
       ...reviews.results,
       ...(await runSet(layer("mechanical"), 8)),
-      ...(browser ? await runSet(layer("browser"), 3) : []),
+      // without Chrome (quick mode) browser checks don't run, but the ones that don't apply are still recorded as such
+      ...(browser ? await runSet(layer("browser"), 3) : await runSet(layer("browser").filter((c) => !applicable(c)), 3)),
       ...(await runSet(selected.filter((c) => isProbe(c) && (c.entry.layer !== "browser" || browser)), 1)),
     ];
     // keep catalog order so state and report don't depend on which check finished first

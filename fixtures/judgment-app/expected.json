@@ -4,7 +4,8 @@
     "forms": true,
     "auth": true,
     "ai": true,
-    "he": true
+    "he": true,
+    "shop": true
   },
   "reviews": [
     {
@@ -121,6 +122,14 @@
       ],
       "status": "fail",
       "note": "404.html says only '404 Not Found', with no link"
+    },
+    {
+      "checkId": "shop.vat",
+      "files": [
+        "api/checkout.js"
+      ],
+      "status": "fail",
+      "note": "VAT hard-coded at 17% (18% since January 2025), added on top of the price shown"
     }
   ]
 }

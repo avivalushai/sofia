@@ -11,7 +11,16 @@ export default {
     for (const page of (await ctx.crawl.browserPages()).slice(0, 5)) {
       const m = await onSlowPhone(ctx.browser, page.url, async (p) => {
         await p.waitForTimeout(2500);
-        return p.evaluate(() => window.__cls);
+        // the cause, which doesn't depend on timing: images, videos and frames near the top with no space
+        // reserved, so whatever is below them moves when they arrive
+        const unsized = await p.evaluate(() => [...document.querySelectorAll("img, video, iframe")].filter((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.top > window.innerHeight * 1.5 || r.height < 80 || !window.__lc.isVisible(el)) return false;
+          const s = getComputedStyle(el);
+          const reserved = (el.getAttribute("width") && el.getAttribute("height")) || (s.aspectRatio && s.aspectRatio !== "auto") || /px|vh|rem|em/.test(el.style.height) || el.closest("[style*='aspect-ratio'], [style*='height']");
+          return !reserved;
+        }).map((el) => window.__lc.cssPath(el)));
+        return { ...(await p.evaluate(() => window.__cls)), unsized };
       }, {
         beforeGoto: (p) => p.addInitScript(() => {
           // the largest burst of shifts (a "session window"), the way Chrome scores it
@@ -46,13 +55,16 @@ export default {
           }).observe({ type: "layout-shift", buffered: true });
         }),
       });
-      if (!m || m.score <= POOR) continue;
+      if (!m || (m.score <= POOR && !m.unsized.length)) continue;
       results.push(ctx.fail({
         key: page.path,
         title: "The page jumps around while it loads",
         impact: "Text and buttons move just as people start to read or tap, so they lose their place or tap the wrong thing",
-        location: { url: page.path, viewport: 390, ...(m.sources[0] ? { selector: m.sources[0] } : {}) },
-        evidence: `layout shift score ${m.score.toFixed(2)} on a phone over 4G (good is under 0.1)${m.sources.length ? `; moved: ${m.sources.join(", ")}` : ""}`,
+        location: { url: page.path, viewport: 390, ...((m.unsized[0] ?? m.sources[0]) ? { selector: m.unsized[0] ?? m.sources[0] } : {}) },
+        evidence: [
+          m.unsized.length && `${m.unsized.slice(0, 3).join(", ")} ${m.unsized.length === 1 ? "has" : "have"} no width and height, so the content below moves when ${m.unsized.length === 1 ? "it arrives" : "they arrive"}`,
+          m.score > 0.01 && `measured layout shift ${m.score.toFixed(2)} on a phone over 4G (good is under 0.1)${m.sources.length ? `; moved: ${m.sources.join(", ")}` : ""}`,
+        ].filter(Boolean).join("; "),
         fix: "Reserve space for things that load late: width and height on images and videos, a fixed height for ads, embeds and banners, and font-display: optional or matched fallback fonts",
       }));
     }

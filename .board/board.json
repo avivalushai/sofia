@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 22,
-  "nextNoteNum": 28,
+  "nextNum": 23,
+  "nextNoteNum": 29,
   "features": [
     {
       "key": "ALL-1",
@@ -818,20 +818,19 @@
       "title": "Landing page for Sofia",
       "type": "feature",
       "status": "review",
-      "note": "Owner reviews the Taste-skill version at http://localhost:4330",
+      "note": "Owner reviews: Taste layout with the earlier drawn visuals",
       "doneWhen": [],
       "steps": [],
       "files": [
         "site/index.html",
-        ".claude/launch.json",
-        "site/img"
+        ".claude/launch.json"
       ],
       "links": [
         "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:24:57Z",
-      "updatedAt": "2026-10-29T11:12:36Z",
+      "updatedAt": "2026-10-29T11:23:19Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -878,6 +877,16 @@
           "at": "2026-10-29T11:12:36Z",
           "by": "claude",
           "text": "Note: Owner reviews the Taste-skill version at http://localhost:4330"
+        },
+        {
+          "at": "2026-10-29T11:23:19Z",
+          "by": "claude",
+          "text": "Removed files: site/img"
+        },
+        {
+          "at": "2026-10-29T11:23:19Z",
+          "by": "claude",
+          "text": "Note: Owner reviews: Taste layout with the earlier drawn visuals"
         }
       ]
     },
@@ -930,6 +939,33 @@
         },
         {
           "at": "2026-10-29T09:52:10Z",
+          "by": "user",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-22",
+      "title": "מה לעשות עם הגרסה?",
+      "type": "question",
+      "status": "done",
+      "note": "לסגור את ה-Chrome היתומים ולבדוק שוב (Recommended) — אסגור רק את 75 החלונות של browser-use (לא את ה-Chrome שלך ולא את agent-runner עצמו), אריץ שוב את בדיקת המהירות, ואם עובר — משחרר 0.2.0. Other options: לשחרר בכל זאת · לחכות",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T11:20:58Z",
+      "updatedAt": "2026-10-29T11:20:58Z",
+      "updatedBy": "user",
+      "log": [
+        {
+          "at": "2026-10-29T11:20:58Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-29T11:20:58Z",
           "by": "user",
           "text": "Done"
         }
@@ -1469,6 +1505,24 @@
       "steps": [],
       "createdAt": "2026-10-29T11:12:35Z",
       "updatedAt": "2026-10-29T11:12:35Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N28",
+      "kind": "decision",
+      "title": "Sofia landing page uses the drawn HTML visuals (chat, four before/after cards, report mock), not real scan screenshots",
+      "body": "Owner preferred the earlier drawn visuals over the real report/phone screenshots. Taste-skill layout, Geist, indigo and the rest of the redesign stay.",
+      "considered": "Real screenshots from a scan of fixtures/broken-app (report page, finding drawer, before/after slider)",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T11:23:19Z",
+      "updatedAt": "2026-10-29T11:23:19Z",
       "updatedBy": "claude"
     }
   ],

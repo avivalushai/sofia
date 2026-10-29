@@ -2,7 +2,8 @@
   "about": "broken-he with every planted problem fixed. Every row must pass.",
   "detected": {
     "he": true,
-    "i18n": true
+    "i18n": true,
+    "shop": true
   },
   "expect": [
     {
@@ -36,6 +37,30 @@
     {
       "checkId": "a11y.statement",
       "status": "pass"
+    },
+    {
+      "checkId": "shop.israeli-payment",
+      "status": "pass"
+    },
+    {
+      "checkId": "shop.invoices",
+      "status": "pass",
+      "note": "api/receipt.js uses Morning (Green Invoice)"
+    },
+    {
+      "checkId": "shop.checkout-flow",
+      "status": "uncertain",
+      "note": "needs a test purchase: steps for the user"
+    },
+    {
+      "checkId": "shop.test-purchase",
+      "status": "uncertain",
+      "note": "needs a test purchase: steps for the user"
+    },
+    {
+      "checkId": "shop.order-emails",
+      "status": "uncertain",
+      "note": "needs a test purchase: steps for the user"
     }
   ]
 }
