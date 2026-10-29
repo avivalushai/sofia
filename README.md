@@ -1,28 +1,67 @@
-# Launch Check — build brief
+# Sofia — check your app before launch
 
-Unzip this into the root of a new, empty Claude Code project, then tell Claude:
+Sofia is a plugin for Claude Code. Before you put your app in front of people, she goes through it the way a careful friend would: opens it in your browser, clicks the buttons, fills the forms, reads the code, and tells you in plain words what's broken and what can wait.
 
-> Read CLAUDE.md and the docs it points to, then start milestone M0.
+She doesn't change anything on her own. You see the report, talk it through with her, and she fixes only what you approve.
 
-## What's inside
+## What she checks
+
+Things you probably didn't think to check:
+
+- **Does it work?** Buttons that do nothing, forms that look sent but aren't, broken links, errors on the page
+- **Phones and tablets** — text too small, things sliding off the screen, menus that don't open
+- **Safety** — secret keys visible in the browser, an open database, missing security settings
+- **First impression** — typos (Hebrew and English), what your link looks like when shared on WhatsApp, Google seeing your pages
+- **Hebrew and right-to-left** — text direction, fonts, mixed Hebrew and English
+- **Privacy** — cookies before consent, a privacy policy
+- **Design** — too many fonts, colors and button styles
+
+Every check runs the same way every time, so the same app gets the same report.
+
+## Install
+
+You need [Claude Code](https://claude.com/claude-code), [Google Chrome](https://www.google.com/chrome) and [Node.js](https://nodejs.org) 20 or newer. If you've ever run your app on your own computer, you most likely have Node already.
+
+In Claude Code, type:
 
 ```
-CLAUDE.md                       project instructions Claude Code loads automatically
-docs/
-  01-product.md                 who it's for, principles
-  02-architecture.md            plugin layout, engine, state, dashboard server, hook
-  03-check-contract.md          how a check is written, result schema, score
-  04-conversation-flow.md       the chat experience, as transcripts
-  05-dashboard-ui.md            the local report page
-  06-report-format.md           wording rules and templates
-  07-milestones.md              build order and acceptance criteria
-catalog/
-  checks.json                   175 checks — the source of truth
-  checks.csv                    same, for spreadsheets
-  build_catalog.py              regenerates both files
-fixtures/
-  broken-landing/               a site with seeded problems
-  broken-landing/expected.json  what each check must find
+/plugin marketplace add avivalushai/sofia
+/plugin install sofia@sofia
 ```
 
-To change the catalog, edit `catalog/build_catalog.py` and run `python3 catalog/build_catalog.py`.
+## Use
+
+In your app's folder, ask Claude:
+
+> Sofia, check my app
+
+or type `/sofia:check`. For a quick check that takes seconds, type `/sofia:check quick`.
+
+Sofia shows a summary in the chat and opens a full report page on your computer. When you're ready to fix things, tell her which ones, or type `/sofia:fix`.
+
+## Your privacy
+
+- Everything runs on your computer. Sofia doesn't send your code or your results anywhere.
+- She only visits your own app: the local copy, or the live address you give her.
+- Results are saved in a `.launch-check` folder inside your project.
+- She won't submit real forms, send email or make purchases without asking you first.
+- Before her first fix she saves a checkpoint, and each fix is saved separately, so any fix can be undone on its own.
+
+## בעברית
+
+סופיה היא תוסף ל-Claude Code שבודק את האפליקציה שלך לפני שמשיקים: לוחצת על הכפתורים, ממלאת טפסים, קוראת את הקוד, ומספרת במילים פשוטות מה שבור ומה יכול לחכות. היא לא משנה שום דבר בלי אישור שלך.
+
+התקנה, בתוך Claude Code:
+
+```
+/plugin marketplace add avivalushai/sofia
+/plugin install sofia@sofia
+```
+
+שימוש: בתיקייה של האפליקציה, כתבו ל-Claude ״סופיה, תבדקי לי את האפליקציה״.
+
+צריך Google Chrome ו-Node.js בגרסה 20 ומעלה.
+
+## License
+
+MIT
