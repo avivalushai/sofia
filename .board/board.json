@@ -1101,10 +1101,12 @@
         "ui/dist/app.css",
         "ui/dist/index.html"
       ],
-      "links": [],
+      "links": [
+        "87f2e00"
+      ],
       "area": "",
       "createdAt": "2026-10-29T12:43:00Z",
-      "updatedAt": "2026-10-29T12:52:25Z",
+      "updatedAt": "2026-10-29T12:53:42Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -1121,6 +1123,11 @@
           "at": "2026-10-29T12:52:25Z",
           "by": "claude",
           "text": "Files: ui/dist/app.css, ui/dist/index.html"
+        },
+        {
+          "at": "2026-10-29T12:53:42Z",
+          "by": "claude",
+          "text": "Proof: 87f2e00"
         }
       ]
     }
