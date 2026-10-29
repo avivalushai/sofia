@@ -1,5 +1,5 @@
 import { codeKeys } from "../../lib/code.js";
-import { isLoginOrSearch, literal, sourceForms, typed } from "../../lib/fields.js";
+import { isLoginOrSearch, literal, sendsSomewhere, sourceForms, typed } from "../../lib/fields.js";
 
 const CAPTCHA_DEPS = ["react-google-recaptcha", "react-google-recaptcha-v3", "@hcaptcha/react-hcaptcha", "@marsidev/react-turnstile", "react-turnstile", "@friendlycaptcha/sdk", "friendly-challenge", "altcha", "@cloudflare/turnstile", "next-recaptcha-v3", "botid"];
 const CAPTCHA_CODE = /recaptcha|hcaptcha|turnstile|cf-turnstile|friendly-?captcha|altcha|g-recaptcha|botid/i;
@@ -15,11 +15,10 @@ export default {
     if (CAPTCHA_DEPS.some((d) => ctx.project.deps.has(d))) return [ctx.pass()];
     const key = codeKeys();
     const results = [];
-    for (const { file, forms } of await sourceForms(ctx.project)) {
-      const fileText = (await ctx.project.read(file)) ?? "";
-      if (CAPTCHA_CODE.test(fileText)) continue;
+    for (const { file, forms, code } of await sourceForms(ctx.project)) {
+      if (CAPTCHA_CODE.test(code)) continue;
       for (const form of forms) {
-        if (isLoginOrSearch(form) || !form.fields.some(typed)) continue;
+        if (isLoginOrSearch(form) || !form.fields.some(typed) || !sendsSomewhere(form, code)) continue;
         // a lone checkbox or slider isn't something a bot fills
         if (HONEYPOT.test(form.body) || FILTERED.test(form.body) || FILTERED.test(literal(form.attrs.action) ?? "")) continue;
         results.push(ctx.fail({

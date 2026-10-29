@@ -1,5 +1,5 @@
 import { codeKeys } from "../../lib/code.js";
-import { literal, sourceForms } from "../../lib/fields.js";
+import { literal, sendsSomewhere, sourceForms } from "../../lib/fields.js";
 
 const TOKEN = { email: "email", tel: "tel", name: "name", username: "username", password: "current-password" };
 
@@ -10,12 +10,14 @@ export default {
   async run(ctx) {
     const key = codeKeys();
     const results = [];
-    for (const { file, forms } of await sourceForms(ctx.project)) {
+    for (const { file, forms, code } of await sourceForms(ctx.project)) {
       for (const form of forms) {
+        if (!sendsSomewhere(form, code)) continue;
         const formOff = /^off$/i.test(literal(form.attrs.autocomplete) ?? "");
         for (const f of form.fields) {
           const token = TOKEN[f.kind];
-          if (!token) continue;
+          // a read-only or disabled field isn't filled in by anyone
+          if (!token || "readonly" in f.attrs || "disabled" in f.attrs) continue;
           const value = literal(f.attrs.autocomplete);
           if (value && /^\{/.test(value)) continue; // set by code
           if (value && !/^off$/i.test(value) && !formOff) continue;

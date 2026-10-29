@@ -12,7 +12,9 @@ const AUTH_CODE = /supabase\.auth\.|from ["']firebase\/auth["']|getAuth\(|signIn
 const DB_DEPS = ["prisma", "@prisma/client", "drizzle-orm", "mongoose", "mongodb", "pg", "postgres", "mysql2", "@supabase/supabase-js", "@planetscale/database", "@neondatabase/serverless", "better-sqlite3", "sqlite3", "@libsql/client", "kysely", "typeorm", "sequelize", "@vercel/postgres", "@vercel/kv", "@upstash/redis", "convex", "@instantdb/react", "pocketbase", "appwrite"];
 const DB_CODE = /from ["']firebase\/(firestore|database)["']|getFirestore\(|getDatabase\(|supabase\s*\.\s*from\(/;
 const SHOP_DEPS = ["stripe", "@stripe/stripe-js", "@stripe/react-stripe-js", "@lemonsqueezy/lemonsqueezy.js", "@paddle/paddle-js", "@paddle/paddle-node-sdk", "@paypal/react-paypal-js", "@paypal/paypal-js", "@shopify/hydrogen", "shopify-buy", "polar-sdk", "@polar-sh/sdk"];
-const SHOP_HTML = /js\.stripe\.com|buy\.stripe\.com|checkout\.stripe\.com|paypal\.com\/sdk|paypal\.me\/|lemonsqueezy\.com\/(checkout|buy)|gumroad\.com\/l\/|cdn\.paddle\.com/;
+const SHOP_HTML = /js\.stripe\.com|buy\.stripe\.com|checkout\.stripe\.com|paypal\.com\/sdk|paypal\.me\/|lemonsqueezy\.com\/(checkout|buy)|gumroad\.com\/l\/|cdn\.paddle\.com|meshulam\.co\.il|grow\.link|cardcom\.solutions|secure\.cardcom|tranzila\.com|payplus\.co\.il|pelecard\.biz|icredit\.rivhit|pay\.hyp\.co\.il|yaadpay/;
+/** A library imported in code, for projects whose package.json isn't where the code is. */
+const importOf = (names) => new RegExp(`(from\\s+|require\\(\\s*|import\\(\\s*)["'](${names.map((n) => n.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")).join("|")})["']`);
 const AI_DEPS = ["openai", "@anthropic-ai/sdk", "ai", "@ai-sdk/openai", "@ai-sdk/anthropic", "@google/generative-ai", "@google/genai", "langchain", "@langchain/core", "replicate", "groq-sdk", "cohere-ai", "@mistralai/mistralai", "together-ai", "ollama"];
 const AI_CODE = /api\.openai\.com|api\.anthropic\.com|generativelanguage\.googleapis\.com|api\.groq\.com|openrouter\.ai\/api/;
 const I18N_DEPS = ["i18next", "react-i18next", "next-intl", "react-intl", "vue-i18n", "@nuxtjs/i18n", "next-i18next", "@lingui/core", "svelte-i18n", "@inlang/paraglide-js", "typesafe-i18n"];
@@ -48,7 +50,7 @@ export async function detect(project, pages = []) {
 
   // mail
   const mailDep = dep(MAIL_DEPS);
-  const mailCode = inCode(MAIL_HOSTS);
+  const mailCode = inCode(MAIL_HOSTS) ?? inCode(importOf(MAIL_DEPS));
   facts.mail = mailDep ? yes(`uses ${mailDep}`) : mailCode ? yes(`calls an email service in ${mailCode.file}`) : no("no email-sending library or service found");
 
   // auth
@@ -66,12 +68,12 @@ export async function detect(project, pages = []) {
   // shop
   const shopDep = dep(SHOP_DEPS);
   const shopPage = inPages(SHOP_HTML);
-  const shopCode = inCode(SHOP_HTML);
+  const shopCode = inCode(SHOP_HTML) ?? inCode(importOf(SHOP_DEPS));
   facts.shop = shopDep ? yes(`uses ${shopDep}`) : shopPage ? yes(`payment link or script on ${shopPage.path}`) : shopCode ? yes(`payment link in ${shopCode.file}`) : no("no payment provider found");
 
   // ai
   const aiDep = dep(AI_DEPS);
-  const aiCode = inCode(AI_CODE);
+  const aiCode = inCode(AI_CODE) ?? inCode(importOf(AI_DEPS));
   facts.ai = aiDep ? yes(`uses ${aiDep}`) : aiCode ? yes(`calls an AI model in ${aiCode.file}`) : no("no AI model calls found");
 
   // he

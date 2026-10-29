@@ -22,6 +22,13 @@ function measure() {
       if (w <= 0 || h <= 0) continue;
       const smaller = Math.min(a.r.width * a.r.height, b.r.width * b.r.height);
       if ((w * h) / smaller < 0.3) continue;
+      // really drawn on top of each other: not scrolled out of a panel, not under a dialog
+      a.el.scrollIntoView({ block: "center", inline: "center" });
+      const ra = a.el.getBoundingClientRect();
+      const rb = b.el.getBoundingClientRect();
+      const hit = document.elementFromPoint((Math.max(ra.left, rb.left) + Math.min(ra.right, rb.right)) / 2, (Math.max(ra.top, rb.top) + Math.min(ra.bottom, rb.bottom)) / 2);
+      window.scrollTo(0, 0);
+      if (!hit || !(a.el.contains(hit) || b.el.contains(hit))) continue;
       const label = (el) => (el.innerText || el.getAttribute("aria-label") || el.tagName).trim().slice(0, 30);
       overlaps.push({ a: label(a.el), b: label(b.el), selector: window.__lc.cssPath(a.el) });
       break;

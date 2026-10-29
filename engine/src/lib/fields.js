@@ -1,3 +1,4 @@
+import path from "node:path";
 import { lineAt } from "./text.js";
 
 /**
@@ -43,7 +44,8 @@ export function fieldKind(a, label = "") {
 }
 
 /**
- * @returns {Promise<{ file: string, forms: { line: number, attrs: any, fields: { tag: string, line: number, attrs: any, kind: string|null, text: string }[], buttons: any[], body: string }[] }[]>}
+ * `code` is the file's text plus, for an HTML page, the scripts it loads from the project.
+ * @returns {Promise<{ file: string, code: string, forms: { line: number, attrs: any, fields: { tag: string, line: number, attrs: any, kind: string|null, text: string }[], buttons: any[], body: string }[] }[]>}
  */
 export async function sourceForms(project) {
   const out = [];
@@ -79,13 +81,37 @@ export async function sourceForms(project) {
       }
     }
     const real = forms.filter((f) => f.fields.length);
-    if (real.length) out.push({ file, forms: real });
+    if (!real.length) continue;
+    // a plain HTML page keeps its form code in its own script files
+    let code = text;
+    if (/\.html?$/.test(file)) {
+      for (const m of text.matchAll(/<script[^>]*\ssrc=["']([^"']+)["']/gi)) {
+        if (/^(https?:)?\/\//.test(m[1])) continue;
+        const rel = m[1].startsWith("/") ? m[1].slice(1) : path.posix.join(path.posix.dirname(file), m[1]);
+        code += "\n" + ((await project.read(path.posix.normalize(rel))) ?? "");
+      }
+    }
+    out.push({ file, forms: real, code });
   }
   return out;
 }
 
 /** A field a person types into (not hidden, not a checkbox). */
 export const typed = (f) => !hiddenField(f.attrs) && (f.tag === "textarea" || (f.tag === "input" && !["hidden", "submit", "button", "reset", "image", "checkbox", "radio", "file", "range", "color"].includes((literal(f.attrs.type) ?? "text").toLowerCase())));
+
+// code that sends what was typed somewhere: a POST, a database write, a form service, a sign-in call
+const SENDS = /method\s*:\s*["'](POST|PUT|PATCH)["']|axios\.(post|put|patch)|\$\.post\(|\.insert\(|\.upsert\(|\.create\(|addDoc\(|setDoc\(|emailjs|formspree|getform|web3forms|sendForm\(|["']use server["']|signIn|signUp|auth\.sign|createUser|mutate\(|useMutation|\.submit\(\)|new FormData\(|navigator\.sendBeacon/i;
+
+/**
+ * A form whose content goes somewhere (a server, a service, a sign-in): the forms that spam, autofill
+ * and the Enter key matter for. Editor panels and component demos don't count.
+ */
+export function sendsSomewhere(form, fileText) {
+  const action = literal(form.attrs.action) ?? "";
+  if (!form.loose && action && action !== "#" && !/^javascript:/i.test(action)) return true;
+  if (/netlify|data-netlify/i.test(Object.keys(form.attrs).join(" "))) return true;
+  return SENDS.test(fileText);
+}
 
 /** Login, search and one-field filters aren't the forms these checks are about. */
 export const isLoginOrSearch = (form) => form.fields.some((f) => f.kind === "password" || f.kind === "search") || form.attrs.role === "search";

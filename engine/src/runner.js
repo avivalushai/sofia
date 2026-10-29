@@ -110,12 +110,23 @@ export async function detectOnly({ root, target }) {
  * @returns {Promise<{ entry: any, status: string, reason?: string, items: any[], error?: string }>}
  */
 async function runOne(c, ctx) {
+  const started = Date.now();
+  try {
+    return await runOneTimed(c, ctx);
+  } finally {
+    // LC_TIMINGS=1: how long each check took, for finding the slow ones
+    if (process.env.LC_TIMINGS) process.stderr.write(`${String(Date.now() - started).padStart(6)} ms  ${c.id}\n`);
+  }
+}
+
+async function runOneTimed(c, ctx) {
   try {
     let timer;
     const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000)));
     const items = await Promise.race([c.check.run(ctx), timeout]).finally(() => clearTimeout(timer));
     if (!Array.isArray(items)) throw new CheckBug(`${c.id}: run() must return an array`);
-    if (ctx.blocked.size) {
+    // checks about bot protection itself read the challenge as their answer
+    if (ctx.blocked.size && !c.check.expectsBlocks) {
       // what the check saw was the host's challenge page, not the site: no pass, no fail
       const who = [...new Set(ctx.blocked.values())][0] ?? "the host's bot protection";
       const local = who === UNAVAILABLE;
@@ -300,7 +311,8 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     const results = [
       ...reviews.results,
       ...(await runSet(layer("mechanical"), 8)),
-      ...(browser ? await runSet(layer("browser"), 3) : []),
+      // without Chrome (quick mode) browser checks don't run, but the ones that don't apply are still recorded as such
+      ...(browser ? await runSet(layer("browser"), 3) : await runSet(layer("browser").filter((c) => !applicable(c)), 3)),
       ...(await runSet(selected.filter((c) => isProbe(c) && (c.entry.layer !== "browser" || browser)), 1)),
     ];
     // keep catalog order so state and report don't depend on which check finished first
