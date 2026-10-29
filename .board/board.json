@@ -722,11 +722,12 @@
         "b2ab26e",
         "https://github.com/avivalushai/sofia",
         "d1e67c3",
-        "42dc56f"
+        "42dc56f",
+        "6baca3d"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T13:03:36Z",
+      "updatedAt": "2026-10-29T14:04:25Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -848,6 +849,11 @@
           "at": "2026-10-29T13:03:36Z",
           "by": "claude",
           "text": "Proof: 42dc56f"
+        },
+        {
+          "at": "2026-10-29T14:04:25Z",
+          "by": "claude",
+          "text": "Proof: 6baca3d"
         }
       ]
     },
@@ -856,7 +862,7 @@
       "title": "Landing page for Sofia",
       "type": "feature",
       "status": "review",
-      "note": "Owner reviews; numbers on the page (63 live / 175) are out of date: catalog now says all 175 built, 8 deprecated, 167 active",
+      "note": "Owner reviews the Night shift page with current numbers",
       "doneWhen": [],
       "steps": [],
       "files": [
@@ -865,11 +871,12 @@
       ],
       "links": [
         "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM",
-        "09eab5c"
+        "09eab5c",
+        "1f46513"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:24:57Z",
-      "updatedAt": "2026-10-29T14:01:11Z",
+      "updatedAt": "2026-10-29T14:03:36Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -951,6 +958,16 @@
           "at": "2026-10-29T14:01:11Z",
           "by": "claude",
           "text": "Note: Owner reviews; numbers on the page (63 live / 175) are out of date: catalog now says all 175 built, 8 deprecated, 167 active"
+        },
+        {
+          "at": "2026-10-29T14:03:36Z",
+          "by": "claude",
+          "text": "Proof: 1f46513"
+        },
+        {
+          "at": "2026-10-29T14:03:36Z",
+          "by": "claude",
+          "text": "Note: Owner reviews the Night shift page with current numbers"
         }
       ]
     },
@@ -1146,11 +1163,12 @@
       ],
       "links": [
         "87f2e00",
-        "42dc56f"
+        "42dc56f",
+        "6baca3d"
       ],
       "area": "",
       "createdAt": "2026-10-29T12:43:00Z",
-      "updatedAt": "2026-10-29T13:59:55Z",
+      "updatedAt": "2026-10-29T14:04:24Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -1197,6 +1215,11 @@
           "at": "2026-10-29T13:59:55Z",
           "by": "claude",
           "text": "Cleared note"
+        },
+        {
+          "at": "2026-10-29T14:04:24Z",
+          "by": "claude",
+          "text": "Proof: 6baca3d"
         }
       ]
     }
