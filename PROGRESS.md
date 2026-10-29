@@ -98,6 +98,7 @@
     - Mechanical: `forms.input-types`, `forms.autocomplete`, `forms.enterkey`, `forms.spam`, `forms.backup`. The fields are read from the source files (HTML, JSX, Vue, Svelte), so apps that build their pages in the browser are covered too. Hidden trap fields are ignored.
     - Code review: `forms.thank-you`.
   - Data, 1 of 1: `data.delete-export` (code review).
+  - Mobile, 5 of 5 (in the browser): `resp.text-size`, `resp.orientation` (a phone in landscape), `resp.safari-ios` (100vh sections whose bottom hides under Safari's bar), `resp.fixed-overlap` (links under a floating element, checked at the top and the bottom of the page, where scrolling can't uncover them), `resp.tablet` (768 and 1024: overlapping links and buttons, sideways scrolling at 1024). Cookie banners and full-screen menus aren't counted as floating elements.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:

@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 20,
-  "nextNoteNum": 24,
+  "nextNum": 22,
+  "nextNoteNum": 25,
   "features": [
     {
       "key": "ALL-1",
@@ -667,8 +667,8 @@
       "key": "ALL-18",
       "title": "Distribute Sofia: public marketplace others can install from",
       "type": "feature",
-      "status": "idea",
-      "note": "Decide how to handle missing Node (detect + offer install) and how deps ship",
+      "status": "active",
+      "note": "Waiting on docs check, then marketplace.json + packaging deps",
       "doneWhen": [],
       "steps": [
         {
@@ -685,7 +685,7 @@
         },
         {
           "text": "User README, LICENSE, privacy note",
-          "done": false
+          "done": true
         },
         {
           "text": "claude plugin validate + fresh install on a clean machine",
@@ -693,10 +693,12 @@
         }
       ],
       "files": [],
-      "links": [],
+      "links": [
+        "40c6f03"
+      ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T09:29:49Z",
+      "updatedAt": "2026-10-29T09:53:24Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -708,6 +710,26 @@
           "at": "2026-10-29T09:29:49Z",
           "by": "claude",
           "text": "Note: Decide how to handle missing Node (detect + offer install) and how deps ship"
+        },
+        {
+          "at": "2026-10-29T09:52:16Z",
+          "by": "claude",
+          "text": "Started — Release prep in worktree ../sofia-release (branch distribute): marketplace, README, LICENSE, packaging, privacy scan"
+        },
+        {
+          "at": "2026-10-29T09:53:24Z",
+          "by": "claude",
+          "text": "Step done: User README, LICENSE, privacy note"
+        },
+        {
+          "at": "2026-10-29T09:53:24Z",
+          "by": "claude",
+          "text": "Proof: 40c6f03"
+        },
+        {
+          "at": "2026-10-29T09:53:24Z",
+          "by": "claude",
+          "text": "Note: Waiting on docs check, then marketplace.json + packaging deps"
         }
       ]
     },
@@ -730,6 +752,60 @@
           "at": "2026-10-29T09:24:57Z",
           "by": "claude",
           "text": "Created — active"
+        }
+      ]
+    },
+    {
+      "key": "ALL-20",
+      "title": "מה יהיה שם הריפו? (המשתמשים יקלידו אותו בהתקנה: /plugin marketplace add avivalushai/<שם>)",
+      "type": "question",
+      "status": "done",
+      "note": "sofia (Recommended) — קצר וזהה לשם התוסף: avivalushai/sofia. Other options: sofia-launch-check · sofia-plugin",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T09:52:10Z",
+      "updatedAt": "2026-10-29T09:52:10Z",
+      "updatedBy": "user",
+      "log": [
+        {
+          "at": "2026-10-29T09:52:10Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-29T09:52:10Z",
+          "by": "user",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-21",
+      "title": "איזה רישיון?",
+      "type": "question",
+      "status": "done",
+      "note": "MIT (Recommended) — קוד פתוח מלא: כל אחד יכול להשתמש, לשנות ולהפיץ. הנפוץ ביותר לתוספים. Other options: Apache 2.0 · ציבורי אבל לא קוד פתוח",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T09:52:10Z",
+      "updatedAt": "2026-10-29T09:52:10Z",
+      "updatedBy": "user",
+      "log": [
+        {
+          "at": "2026-10-29T09:52:10Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-29T09:52:10Z",
+          "by": "user",
+          "text": "Done"
         }
       ]
     }
@@ -1195,6 +1271,24 @@
       "steps": [],
       "createdAt": "2026-10-29T09:40:54Z",
       "updatedAt": "2026-10-29T09:40:54Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N24",
+      "kind": "decision",
+      "title": "Public repo avivalushai/sofia, MIT license",
+      "body": "",
+      "considered": "",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-18"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T09:52:16Z",
+      "updatedAt": "2026-10-29T09:52:16Z",
       "updatedBy": "claude"
     }
   ],
