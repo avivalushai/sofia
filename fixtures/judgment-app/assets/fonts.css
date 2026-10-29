@@ -1,0 +1,6 @@
+/* privacy.licenses — a commercial typeface served from the site's own files, with no licence in the project */
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham-Book.woff2") format("woff2");
+}
+body { font-family: "Gotham", sans-serif; }

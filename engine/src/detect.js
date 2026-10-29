@@ -73,7 +73,7 @@ export async function detect(project, pages = []) {
 
   // ai
   const aiDep = dep(AI_DEPS);
-  const aiCode = inCode(AI_CODE);
+  const aiCode = inCode(AI_CODE) ?? inCode(importOf(AI_DEPS));
   facts.ai = aiDep ? yes(`uses ${aiDep}`) : aiCode ? yes(`calls an AI model in ${aiCode.file}`) : no("no AI model calls found");
 
   // he

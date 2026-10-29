@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- behave.slow-network: the page stays invisible until vendor.js has downloaded -->
+  <style>.js-loading body { opacity: 0; }</style>
+  <script>document.documentElement.classList.add("js-loading");</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tidy — team notes</title>
@@ -17,8 +20,15 @@
       <label>Email <input type="email" name="email"></label>
       <button type="submit">Get updates</button>
     </form>
-    <p><a href="/blog.html">Blog</a> · <a href="/login.html">Log in</a> · <a href="/mobile.html">Why Tidy</a> · <a href="/pricing.html">Pricing</a> · <a href="/features.html">Features</a></p>
+    <!-- behave.back-button: the first link replaces the history entry, so Back leaves the site -->
+    <p><a href="/blog.html" onclick="location.replace(this.href); return false">Blog</a> · <a href="/login.html">Log in</a> · <a href="/mobile.html">Why Tidy</a> · <a href="/pricing.html">Pricing</a> · <a href="/features.html">Features</a></p>
+    <!-- privacy.cookie-reject: a big Accept button, a tiny Reject link -->
+    <div class="cookies" style="margin-top:24px;padding:16px;border:1px solid #ddd">We use cookies to improve Tidy.
+      <button type="button" style="padding:12px 28px;background:#222;color:#fff;border:0;font-size:16px">Accept all</button>
+      <a href="/privacy.html" style="font-size:11px;color:#999">Reject</a></div>
   </main>
   <script src="/src/vendor.js"></script>
+  <!-- analytics.double-fire: the tag is in the page and added again -->
+  <script>navigator.sendBeacon("/g/collect?v=2&tid=G-TIDY123&en=page_view"); navigator.sendBeacon("/g/collect?v=2&tid=G-TIDY123&en=page_view");</script>
 </body>
 </html>

@@ -4,7 +4,8 @@
     "auth": true,
     "forms": true,
     "dark": true,
-    "mail": true
+    "mail": true,
+    "ai": true
   },
   "expect": [
     {
@@ -289,6 +290,64 @@
       "checkId": "run.domain-expiry",
       "status": "skip",
       "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "privacy.terms",
+      "status": "pass"
+    },
+    {
+      "checkId": "privacy.session-replay",
+      "status": "pass"
+    },
+    {
+      "checkId": "analytics.internal",
+      "status": "pass"
+    },
+    {
+      "checkId": "ai.limits",
+      "status": "pass"
+    },
+    {
+      "checkId": "leftover.duplicate-files",
+      "status": "pass"
+    },
+    {
+      "checkId": "leftover.dead-code",
+      "status": "pass"
+    },
+    {
+      "checkId": "privacy.cookie-reject",
+      "status": "pass"
+    },
+    {
+      "checkId": "analytics.double-fire",
+      "status": "pass"
+    },
+    {
+      "checkId": "behave.refresh",
+      "status": "pass"
+    },
+    {
+      "checkId": "behave.back-button",
+      "status": "pass"
+    },
+    {
+      "checkId": "behave.slow-network",
+      "status": "pass"
+    },
+    {
+      "checkId": "behave.extreme-input",
+      "status": "pass"
+    },
+    {
+      "checkId": "analytics.installed",
+      "status": "pass",
+      "note": "a page view is sent on load"
+    },
+    {
+      "checkId": "analytics.pixels",
+      "status": "skip",
+      "note": "no ads"
     }
   ]
 }

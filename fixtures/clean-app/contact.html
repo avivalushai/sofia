@@ -24,5 +24,13 @@
       <button type="submit">Send</button>
     </form>
   </main>
+  <script>
+    // keep what's typed across a refresh, and clear it once sent
+    const form = document.querySelector("form");
+    const saved = JSON.parse(sessionStorage.getItem("contact-draft") || "{}");
+    for (const [k, v] of Object.entries(saved)) if (form.elements[k]) form.elements[k].value = v;
+    form.addEventListener("input", () => sessionStorage.setItem("contact-draft", JSON.stringify(Object.fromEntries(new FormData(form)))));
+    form.addEventListener("submit", () => sessionStorage.removeItem("contact-draft"));
+  </script>
 </body>
 </html>

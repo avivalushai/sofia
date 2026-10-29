@@ -5,7 +5,9 @@
     "auth": true,
     "ai": true,
     "he": true,
-    "shop": true
+    "shop": true,
+    "mail": true,
+    "db": true
   },
   "reviews": [
     {
@@ -130,6 +132,64 @@
       ],
       "status": "fail",
       "note": "VAT hard-coded at 17% (18% since January 2025), added on top of the price shown"
+    },
+    {
+      "checkId": "privacy.policy-matches",
+      "files": [
+        "privacy.html",
+        ".launch-check/review/pages.txt"
+      ],
+      "status": "fail",
+      "note": "policy says email only and no third parties; notes go to OpenAI, the login to Google Analytics"
+    },
+    {
+      "checkId": "privacy.licenses",
+      "files": [
+        "assets/fonts.css"
+      ],
+      "status": "fail",
+      "note": "Gotham served from the site's own files; a shutterstock_ image"
+    },
+    {
+      "checkId": "privacy.third-party-data",
+      "files": [
+        "assets/login.js"
+      ],
+      "status": "fail",
+      "note": "the email goes to Google Analytics, and analytics starts before any consent (sending notes to AI is disclosed by the home page heading, so that question passes)"
+    },
+    {
+      "checkId": "analytics.conversions",
+      "files": [
+        "assets/contact.js"
+      ],
+      "status": "fail",
+      "note": "analytics loads only on login; nothing measures sign-up or the contact form"
+    },
+    {
+      "checkId": "ai.prompt-injection",
+      "files": [
+        "api/summarize.js"
+      ],
+      "status": "fail",
+      "note": "the note is pasted into the system prompt; the model can delete notes with no check"
+    },
+    {
+      "checkId": "cost.per-load",
+      "files": [
+        "api/tip.js"
+      ],
+      "status": "fail",
+      "note": "a gpt-4o call on every home page visit"
+    },
+    {
+      "checkId": "cost.free-tier",
+      "files": [
+        "package.json",
+        "lib/supabase.js"
+      ],
+      "status": "fail",
+      "note": "Supabase free plan pauses after a week without activity"
     }
   ]
 }

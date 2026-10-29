@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 23,
-  "nextNoteNum": 29,
+  "nextNum": 25,
+  "nextNoteNum": 30,
   "features": [
     {
       "key": "ALL-1",
@@ -679,8 +679,8 @@
       "key": "ALL-18",
       "title": "Distribute Sofia: public marketplace others can install from",
       "type": "feature",
-      "status": "review",
-      "note": "Install in your own Claude Code: /plugin marketplace add avivalushai/sofia then /plugin install sofia@sofia; merge branch distribute into main when the checks session is at a clean point",
+      "status": "parked",
+      "note": "v0.1.2 public and installable. 0.2.0 waits until the checks session makes browser checks stable under load (tests flaky: speed 146-158s vs 55s, dead-buttons, two-run determinism)",
       "doneWhen": [],
       "steps": [
         {
@@ -713,7 +713,7 @@
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T10:40:07Z",
+      "updatedAt": "2026-10-29T11:43:05Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -810,6 +810,11 @@
           "at": "2026-10-29T10:40:07Z",
           "by": "claude",
           "text": "Proof: https://github.com/avivalushai/sofia"
+        },
+        {
+          "at": "2026-10-29T11:43:05Z",
+          "by": "claude",
+          "text": "Parked — v0.1.2 public and installable. 0.2.0 waits until the checks session makes browser checks stable under load (tests flaky: speed 146-158s vs 55s, dead-buttons, two-run determinism)"
         }
       ]
     },
@@ -968,6 +973,66 @@
           "at": "2026-10-29T11:20:58Z",
           "by": "user",
           "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-23",
+      "title": "איך להמשיך עם הגרסה?",
+      "type": "question",
+      "status": "done",
+      "note": "לחכות לסשן הבדיקות — לא משחררים עד שהסשן השני מסיים ומייצב את הבדיקות האלה. Other options: לעצור את agent-runner ולבדוק שוב (Recommended) · לשחרר 0.2.0 עכשיו",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T11:42:40Z",
+      "updatedAt": "2026-10-29T11:42:40Z",
+      "updatedBy": "user",
+      "log": [
+        {
+          "at": "2026-10-29T11:42:40Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-29T11:42:40Z",
+          "by": "user",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-24",
+      "title": "Browser checks give different answers on a busy computer",
+      "type": "bug",
+      "status": "idea",
+      "note": "Blocks release 0.2.0; handed to the checks session",
+      "doneWhen": [
+        "npm test passes 3 times in a row, once under artificial load"
+      ],
+      "steps": [
+        {
+          "text": "Find timing-dependent checks (start with qa.dead-buttons)",
+          "done": false
+        },
+        {
+          "text": "Wait on conditions, uncertain instead of flip-flopping",
+          "done": false
+        }
+      ],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T11:43:05Z",
+      "updatedAt": "2026-10-29T11:43:05Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-29T11:43:05Z",
+          "by": "claude",
+          "text": "Created"
         }
       ]
     }
@@ -1523,6 +1588,24 @@
       "steps": [],
       "createdAt": "2026-10-29T11:23:19Z",
       "updatedAt": "2026-10-29T11:23:19Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N29",
+      "kind": "decision",
+      "title": "Sofia landing page uses indigo boldly: indigo stage behind the hero chat, indigo category band, indigo closing block, red/green tinted before/after panes, indigo-tinted neutrals",
+      "body": "Owner found the page too gray and wanted it more eye-catching. Still one accent color (Sofia's indigo); red and green only mark before/after and severity.",
+      "considered": "Neutral gray page with indigo only on buttons; adding a second accent color",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T11:43:07Z",
+      "updatedAt": "2026-10-29T11:43:07Z",
       "updatedBy": "claude"
     }
   ],

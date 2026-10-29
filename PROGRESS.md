@@ -89,7 +89,7 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
-- **M9, the rest of the catalog (started 2026-10-29).** Order: security → forms → data → mobile → content → design → sharing & search → the rest.
+- **M9, the rest of the catalog (started 2026-10-29): all 112 built.** Still to do: a full scan of the real apps with every check. Order: security → forms → data → mobile → content → design → sharing & search → the rest.
   - Security, 7 of 7 built:
     - In code: `sec.headers`, `sec.cookies`, `sec.cors`, `sec.source-maps`.
     - In the browser: `sec.mixed-content`.
@@ -144,6 +144,13 @@
   - Detection now recognises mail and payment libraries imported in code (not only listed in package.json), and Israeli payment providers.
   - Without Chrome (quick mode), browser checks that don't apply are now recorded as "doesn't apply" instead of being left out.
   - `perf.cls` also checks the cause, images and videos near the top with no reserved space, so its answer no longer depends on how fast the machine is.
+  - The last 23 (privacy, analytics, AI, cost, libraries, leftovers, behaviour):
+    - Mechanical: `privacy.terms` (the linked page must open), `privacy.session-replay` (Hotjar, Clarity, LogRocket… without masking), `analytics.internal`, `ai.limits` (max_tokens and a timeout), `deps.vulnerable` (osv.dev, from the lockfile; HIGH and CRITICAL only), `deps.heavy`, `leftover.duplicate-files`, `leftover.dead-code` ("couldn't tell" when the code loads files by pattern).
+    - Browser: `privacy.cookie-reject`, `analytics.installed`, `analytics.double-fire`, `analytics.pixels`.
+    - Behaviour, in the browser: `behave.refresh`, `behave.back-button`, `behave.slow-network` (Slow 3G; text faded out or hidden doesn't count as shown) and `behave.extreme-input` (Hebrew and accented names against strict patterns; a long word breaking the layout).
+    - Code review: `privacy.policy-matches`, `privacy.licenses`, `privacy.third-party-data`, `analytics.conversions`, `ai.prompt-injection`, `cost.per-load`, `cost.free-tier`. Each was planted in `judgment-app` and run twice with real reviewers; both matched on every question.
+  - **All 175 checks in the catalog are built.**
+  - A lesson from `deps.vulnerable`: lodash 4.17.21, long "the safe version", has a HIGH advisory fixed in 4.18.0. Its test depends on live data and says so.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:

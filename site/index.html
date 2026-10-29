@@ -12,7 +12,8 @@
   Shape rule: anything you click is a pill; screenshots and cells are 16px; inline code is 8px.
 */
 :root{
-  --bg:#f7f7f8; --surface:#ffffff; --sunk:#eeeef1; --ink:#16161a; --muted:#5c5c66; --line:#e2e2e7;
+  --bg:#f4f4fb; --surface:#ffffff; --sunk:#ebebf7; --ink:#14132b; --muted:#55546e; --line:#dfdeef;
+  --accent-soft:#e7e5ff; --accent-deep:#3a31c9;
   --accent:#4f46e5; --accent-ink:#ffffff;
   --bad:#c62828; --good:#1f7a44; --warn:#a15c00;
   --bad-bg:#fdecea; --good-bg:#e5f4eb; --warn-bg:#fcf1de;
@@ -21,11 +22,11 @@
   --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f0f12; --surface:#17171c; --sunk:#1d1d23; --ink:#ededf0; --muted:#a0a0ab; --line:#2a2a31;
+  --bg:#0e0d1a; --surface:#171629; --sunk:#1f1e36; --ink:#eeedf8; --muted:#a6a5c0; --line:#2c2b47; --accent-soft:#25234f; --accent-deep:#5a52f0;
   --accent:#8b85ff; --accent-ink:#0f0f12;
   --bad:#ff7b72; --good:#5fd08d; --warn:#f0b04a; --bad-bg:#3a1a18; --good-bg:#12301f; --warn-bg:#36290f; --shadow:0 14px 32px -18px rgba(0,0,0,.7); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f0f12; --surface:#17171c; --sunk:#1d1d23; --ink:#ededf0; --muted:#a0a0ab; --line:#2a2a31;
+  --bg:#0e0d1a; --surface:#171629; --sunk:#1f1e36; --ink:#eeedf8; --muted:#a6a5c0; --line:#2c2b47; --accent-soft:#25234f; --accent-deep:#5a52f0;
   --accent:#8b85ff; --accent-ink:#0f0f12;
   --bad:#ff7b72; --good:#5fd08d; --warn:#f0b04a; --bad-bg:#3a1a18; --good-bg:#12301f; --warn-bg:#36290f; --shadow:0 14px 32px -18px rgba(0,0,0,.7); color-scheme:dark}
 
@@ -66,22 +67,23 @@ nav ul a:hover{color:var(--ink)}
 /* hero */
 .hero{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,5vw,64px);align-items:center;padding-block:clamp(32px,6vw,80px) clamp(56px,8vw,96px)}
 .hero h1{font-size:clamp(42px,5.4vw,72px);font-weight:600;letter-spacing:-.04em;line-height:1.04;margin-top:18px}
-.hero h1 span{color:var(--muted);display:block}
+.hero h1 span{color:var(--accent);display:block}
 .hero .lead{margin-top:22px;font-size:clamp(18px,1.5vw,20px);max-width:36ch}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
 .shot{border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px var(--line),var(--shadow);background:var(--surface)}
 @keyframes rise{from{transform:translateY(28px)}to{transform:none}}
 
 /* category marquee */
-.marquee{border-block:1px solid var(--line);overflow:hidden;padding-block:18px;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee{background:var(--accent);overflow:hidden;padding-block:20px;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .track{display:flex;gap:44px;width:max-content;animation:slide 60s linear infinite}
 .marquee:hover .track{animation-play-state:paused}
-.track span{white-space:nowrap;font-size:15.5px;color:var(--muted)}
-.track b{font-family:var(--mono);font-weight:500;color:var(--ink);margin-inline-end:8px}
+.track span{white-space:nowrap;font-size:15.5px;color:var(--accent-ink);opacity:.85}
+.track b{font-family:var(--mono);font-weight:600;color:var(--accent-ink);margin-inline-end:8px}
 @keyframes slide{to{transform:translateX(-50%)}}
 
 /* chat demo (hero) */
-.chat{background:var(--surface);border-radius:16px;box-shadow:0 0 0 1px var(--line),var(--shadow);overflow:hidden;animation:rise .9s cubic-bezier(.16,1,.3,1) both}
+.stage{background:var(--accent-deep);background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.16) 1px,transparent 0);background-size:22px 22px;border-radius:16px;padding:clamp(20px,4vw,48px)}
+.chat{background:var(--surface);border-radius:16px;box-shadow:0 30px 60px -24px rgba(10,8,60,.55);overflow:hidden;animation:rise .9s cubic-bezier(.16,1,.3,1) both}
 .chat-bar{display:flex;align-items:center;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
 .chat-bar span{width:10px;height:10px;border-radius:50%;background:var(--line)}
 .chat-bar em{font-style:normal;margin-left:auto;font-family:var(--mono)}
@@ -105,6 +107,8 @@ nav ul a:hover{color:var(--ink)}
 .ba:nth-child(1),.ba:nth-child(4){grid-column:span 3}
 .ba:nth-child(2),.ba:nth-child(3){grid-column:span 2}
 .ba-panes{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk)}
+.pane:first-child{background:var(--bad-bg)}
+.pane:last-child{background:var(--good-bg)}
 .pane{padding:18px;display:grid;gap:10px;align-content:start;min-height:200px;min-width:0}
 .pane+.pane{border-left:1px solid var(--line)}
 .tag{justify-self:start;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
@@ -164,7 +168,7 @@ nav ul a:hover{color:var(--ink)}
 .flow .head p{color:var(--muted)}
 .verbs{display:grid;gap:clamp(36px,5vw,56px)}
 .verb{display:grid;gap:10px}
-.verb h3{font-size:clamp(28px,3.4vw,40px);font-weight:600;letter-spacing:-.03em;line-height:1.08}
+.verb h3{color:var(--accent);font-size:clamp(28px,3.4vw,40px);font-weight:600;letter-spacing:-.03em;line-height:1.08}
 .verb p{color:var(--muted);max-width:48ch}
 .verb .say{font-family:var(--mono);font-size:14px;color:var(--ink);background:var(--sunk);border-radius:8px;padding:10px 14px;justify-self:start}
 
@@ -175,12 +179,13 @@ nav ul a:hover{color:var(--ink)}
 .cell p{color:var(--muted);max-width:40ch}
 .c1{grid-column:span 4;grid-row:span 2;background:var(--accent);color:var(--accent-ink)}
 .c1 p{color:var(--accent-ink);opacity:.86}
-.c2{grid-column:span 2;background:var(--surface);border:1.5px solid var(--accent)}
+.c2{grid-column:span 2;background:var(--accent-soft);border:1.5px solid var(--accent)}
+.c2 .n{color:var(--accent)}
 .c3{grid-column:span 2;background:var(--sunk);border:1.5px dashed var(--muted)}
 .c2 .n,.c3 .n{font-size:clamp(48px,5vw,64px)}
 
 /* promises: two-column list */
-.promises{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:clamp(32px,6vw,96px);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(28px,5vw,64px)}
+.promises{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:clamp(32px,6vw,96px);background:var(--accent-soft);border-radius:16px;padding:clamp(28px,5vw,64px)}
 .plist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 48px}
 .plist div{display:grid;gap:6px}
 .plist p{color:var(--muted);font-size:15.5px}
@@ -196,7 +201,11 @@ nav ul a:hover{color:var(--ink)}
 .req{color:var(--muted);font-size:15px}
 
 /* closing */
-.final{text-align:center;display:grid;justify-items:center;gap:28px}
+.final{text-align:center;display:grid;justify-items:center;gap:28px;background:var(--accent-deep);background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.14) 1px,transparent 0);background-size:22px 22px;color:#fff;border-radius:16px;padding:clamp(56px,8vw,104px) clamp(20px,4vw,48px);margin-block:clamp(40px,6vw,80px)}
+.final .cmd{background:#fff;color:#14132b}
+.final .copy{background:var(--accent-deep);color:#fff}
+.final .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+.final .btn:hover{border-color:#fff}
 .final h2{font-size:clamp(40px,6vw,72px);letter-spacing:-.04em;max-width:14ch}
 footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
 
@@ -210,7 +219,7 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
 
 @media (max-width:1099px){
   .hero{grid-template-columns:minmax(0,1fr)}
-  .hero .chat{max-width:620px}
+  .hero .stage{max-width:680px}
 }
 @media (max-width:1023px){
   .flow,.install,.promises{grid-template-columns:minmax(0,1fr)}
@@ -261,6 +270,7 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
       <a class="btn" href="#how">How it works</a>
     </div>
   </div>
+  <div class="stage">
   <div class="chat" aria-label="Example conversation with Sofia">
     <div class="chat-bar"><span></span><span></span><span></span><em>noa-pilates</em></div>
     <div class="chat-body">
@@ -279,6 +289,7 @@ footer{border-top:1px solid var(--line);padding-block:28px;display:flex;justify-
       </ul>
       <div class="opts"><span>Fix your 5</span><span>Blockers only</span><span>Not now</span></div>
     </div>
+  </div>
   </div>
 </header>
 
@@ -465,7 +476,7 @@ const key = process.env.PAY_KEY</span></div>
   </div>
 </section>
 
-<section class="final">
+<section class="final reveal">
   <h2>Launch when it's actually ready.</h2>
   <div class="cmd"><code id="c-final">/plugin marketplace add avivalushai/sofia</code><button class="copy" type="button" data-copy="c-final">Copy</button></div>
   <a class="btn" href="https://github.com/avivalushai/sofia">View on GitHub</a>

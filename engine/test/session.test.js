@@ -119,7 +119,8 @@ test("a second fix, then undoing only the first one", async () => {
 test("muting a category changes the score and persists across sessions", async () => {
   const before = (await lc("summary")).out;
   const { out } = await lc("decide", "privacy", "--action", "mute", "--scope", "category", "--reason", "Personal project");
-  assert.notEqual(out.scoreAfter, before.score);
+  // with 175 checks a small category can move the score by less than a point; it can never lower it
+  assert.ok(out.scoreAfter >= before.score, `${out.scoreAfter} < ${before.score}`);
   // a new process, a new "session": the decision is still there and still counts
   const later = (await lc("summary")).out;
   assert.equal(later.score, out.scoreAfter);
@@ -131,6 +132,12 @@ test("muting a category changes the score and persists across sessions", async (
   const un = await lc("decide", "privacy", "--action", "unmute", "--scope", "category");
   assert.equal(un.code, 0);
   assert.ok((await lc("summary")).out.buckets.user.includes("privacy.policy"));
+  // a category with real weight does move the score, and unmuting brings it back
+  const base = (await lc("summary")).out.score;
+  const forms = await lc("decide", "forms", "--action", "mute", "--scope", "category", "--reason", "No forms yet");
+  assert.ok(forms.out.scoreAfter > base, `${forms.out.scoreAfter} should be above ${base}`);
+  await lc("decide", "forms", "--action", "unmute", "--scope", "category");
+  assert.equal((await lc("summary")).out.score, base);
 });
 
 test("accept and defer are per finding, with a reason", async () => {

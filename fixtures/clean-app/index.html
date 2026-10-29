@@ -25,7 +25,11 @@
       <input type="text" name="website" tabindex="-1" autocomplete="off" hidden aria-hidden="true">
       <button type="submit">Get updates</button>
     </form>
-    <p><a href="/blog.html">Blog</a> · <a href="/login.html">Log in</a> · <a href="/mobile.html">Why Tidy</a> · <a href="/pricing.html">Pricing</a> · <a href="/features.html">Features</a></p>
+    <p><a href="/blog.html">Blog</a> · <a href="/login.html">Log in</a> · <a href="/mobile.html">Why Tidy</a> · <a href="/pricing.html">Pricing</a> · <a href="/features.html">Features</a> · <a href="/terms.html">Terms</a></p>
+    <div class="cookies" style="margin-top:24px;padding:16px;border:1px solid #ddd">We use cookies to improve Tidy.
+      <button type="button" style="padding:12px 28px;border:1px solid #222;background:#fff;font-size:16px">Accept all</button>
+      <button type="button" style="padding:12px 28px;border:1px solid #222;background:#fff;font-size:16px">Reject all</button></div>
   </main>
+  <script>navigator.sendBeacon("/api/event", JSON.stringify({ n: "pageview", u: location.href }));</script>
 </body>
 </html>

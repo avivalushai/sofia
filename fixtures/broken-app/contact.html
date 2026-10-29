@@ -12,7 +12,7 @@
     <h1>Contact us</h1>
     <!-- forms.input-types: phone as plain text; forms.autocomplete: no autocomplete; forms.enterkey: no enterkeyhint; forms.spam: no trap or challenge -->
     <form action="/api/contact" method="post">
-      <label>Full name <input type="text" name="name"></label>
+      <label>Full name <input type="text" name="name" pattern="[A-Za-z ]+"></label>
       <label>Email <input type="text" name="email"></label>
       <label>Phone <input type="text" name="phone"></label>
       <label>Message <textarea name="message"></textarea></label>

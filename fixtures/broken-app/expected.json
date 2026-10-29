@@ -4,7 +4,8 @@
     "auth": true,
     "forms": true,
     "dark": true,
-    "mail": true
+    "mail": true,
+    "ai": true
   },
   "expect": [
     {
@@ -341,6 +342,76 @@
       "checkId": "run.domain-expiry",
       "status": "skip",
       "note": "local address (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "privacy.terms",
+      "status": "fail",
+      "note": "no terms page"
+    },
+    {
+      "checkId": "privacy.session-replay",
+      "status": "fail",
+      "note": "Hotjar with nothing masked; a password field on the login page"
+    },
+    {
+      "checkId": "analytics.internal",
+      "status": "fail",
+      "note": "analytics with no filter for your own visits"
+    },
+    {
+      "checkId": "ai.limits",
+      "status": "fail",
+      "note": "api/ai.js: no max_tokens, no timeout"
+    },
+    {
+      "checkId": "leftover.duplicate-files",
+      "status": "fail",
+      "note": "src/Toolbar copy.jsx"
+    },
+    {
+      "checkId": "leftover.dead-code",
+      "status": "fail",
+      "note": "src/legacy-banner.js, unused images"
+    },
+    {
+      "checkId": "privacy.cookie-reject",
+      "status": "fail",
+      "note": "a big Accept button and a tiny Reject link"
+    },
+    {
+      "checkId": "analytics.double-fire",
+      "status": "fail",
+      "note": "two page_view hits per load"
+    },
+    {
+      "checkId": "behave.refresh",
+      "status": "fail",
+      "note": "contact form loses 4 fields on refresh"
+    },
+    {
+      "checkId": "behave.back-button",
+      "status": "fail",
+      "note": "the Blog link replaces history"
+    },
+    {
+      "checkId": "behave.slow-network",
+      "status": "fail",
+      "note": "the home page is invisible until a 700 KB script loads"
+    },
+    {
+      "checkId": "behave.extreme-input",
+      "status": "fail",
+      "note": "contact name pattern [A-Za-z ]+"
+    },
+    {
+      "checkId": "analytics.installed",
+      "status": "pass",
+      "note": "a page view is sent on load"
+    },
+    {
+      "checkId": "analytics.pixels",
+      "status": "skip",
+      "note": "no ads"
     }
   ]
 }
