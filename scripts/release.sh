@@ -22,7 +22,7 @@ fi
 trap 'git worktree remove --force "$OUT" >/dev/null 2>&1 || true' EXIT
 
 # Start from an empty tree, then copy what ships.
-git -C "$OUT" rm -rq --ignore-unmatch . >/dev/null
+git -C "$OUT" read-tree --empty
 find "$OUT" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 
 SHIP=(
