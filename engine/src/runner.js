@@ -290,6 +290,13 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     }
 
     const state = await readState(root);
+    // results from checks that were deprecated since the last scan
+    for (const id of catalog.deprecated ?? []) {
+      delete state.checks[id];
+      for (const [fid, f] of Object.entries(state.findings)) if (f.checkId === id) delete state.findings[fid];
+      state.reviewTasks = state.reviewTasks.filter((t) => t.checkId !== id);
+    }
+    state.pending.fix = state.pending.fix.filter((fid) => state.findings[fid]);
     const runId = makeRunId(startedAt, new Set(state.runs.map((r) => r.id)));
     const scoreBefore = state.current?.score ?? null;
 
