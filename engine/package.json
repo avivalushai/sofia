@@ -11,14 +11,16 @@
     "node": ">=20.1"
   },
   "scripts": {
-    "test": "node --test --test-concurrency=3 test/*.test.js"
+    "test": "node test/helpers/seed-dictionary.js && SOFIA_CACHE_DIR=\"$PWD/test/.cache\" node --test --test-concurrency=3 test/*.test.js"
   },
   "dependencies": {
     "axe-core": "^4.14.0",
     "dictionary-en": "^4.0.0",
-    "dictionary-he": "^2.0.0",
     "htmlparser2": "^12.0.0",
     "hunspell-asm": "^4.0.2",
     "playwright-core": "^1.64.1"
+  },
+  "devDependencies": {
+    "dictionary-he": "^2.0.0"
   }
 }

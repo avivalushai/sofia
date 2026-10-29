@@ -7,6 +7,7 @@ How findings are worded everywhere (from the product brief, docs/06).
 ```
 .launch-check/state.json        source of truth
 .launch-check/report.md         human-readable report, regenerated after every change
+.launch-check/report.html       the report page as one file (screenshots inside), regenerated with report.md
 .launch-check/shots/            screenshots
 .launch-check/server.json       dashboard port and pid
 ```

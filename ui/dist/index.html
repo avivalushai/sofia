@@ -10,20 +10,20 @@
 <body>
   <div id="banner" class="banner" hidden></div>
   <header class="top">
-    <div class="brand">
-      <span class="logo" aria-hidden="true">S</span>
-      <div>
-        <h1>Sofia report <span id="project" class="muted"></span></h1>
-        <p id="meta" class="muted small"></p>
+    <div class="top-in">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">S</span>
+        <div class="brand-text">
+          <h1>Sofia report <span id="project" class="muted"></span></h1>
+          <p id="meta" class="muted small"></p>
+        </div>
       </div>
-    </div>
-    <div class="status">
       <span id="pill" class="pill">Loading…</span>
     </div>
   </header>
 
   <main id="app" class="wrap" aria-live="polite">
-    <section class="hero">
+    <section class="hero card">
       <div class="dial-wrap">
         <svg class="dial" viewBox="0 0 120 120" aria-hidden="true">
           <circle class="dial-track" cx="60" cy="60" r="52"></circle>
@@ -34,10 +34,10 @@
       <div class="hero-text">
         <p id="verdict" class="verdict"></p>
         <p id="since" class="muted"></p>
+        <div id="bar" class="bar" aria-hidden="true"></div>
+        <nav class="tally" id="tally" aria-label="Filter by result"></nav>
       </div>
     </section>
-
-    <nav class="tally" id="tally" aria-label="Filter by result"></nav>
 
     <section class="fixers" id="fixers" aria-label="Who can handle what"></section>
 
@@ -71,6 +71,7 @@
     <div id="detail"></div>
   </aside>
   <div id="scrim" class="scrim" hidden></div>
+  <dialog id="zoom" class="zoom" aria-label="Screenshot"><img alt=""><button class="icon-btn" aria-label="Close">✕</button></dialog>
 
   <footer class="wrap foot muted small">Updates live while Sofia works · nothing here changes your app</footer>
   <script type="module" src="app.js"></script>

@@ -5,10 +5,8 @@ import { watch } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { STATE_DIR, readState, statePath } from "./state.js";
-import { buildSummary } from "./summary.js";
+import { UI_DIR, pageData } from "./report-html.js";
 
-/** The prebuilt page, shipped with the plugin (docs/05: no build step at install time). */
-const UI_DIR = fileURLToPath(new URL("../../ui/dist/", import.meta.url));
 const PREFERRED_PORT = 4319;
 const IDLE_MS = 30 * 60 * 1000;
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml", ".json": "application/json" };
@@ -58,12 +56,7 @@ export async function ensureServer(root) {
 export async function runServer(root, catalog) {
   const clients = new Set();
   let lastActivity = Date.now();
-  const checks = catalog.checks.map(({ id, title, category, categoryTitle, layer, severity, fixer, v1, appliesWhen }) => ({ id, title, category, categoryTitle, layer, severity, fixer, v1, appliesWhen }));
-
-  async function stateBody() {
-    const state = await readState(root);
-    return { state, summary: state.runs.length ? buildSummary(catalog, state) : null, catalog: checks, project: path.basename(root) };
-  }
+  const stateBody = async () => pageData(catalog, await readState(root), root);
 
   const server = createServer(async (req, res) => {
     lastActivity = Date.now();
