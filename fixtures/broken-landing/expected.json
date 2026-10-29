@@ -84,6 +84,12 @@
     { "checkId": "sec.exposed-paths",           "status": "pass", "note": "harness returns 404 for /admin and friends" },
     { "checkId": "sec.idor",                    "status": "skip", "note": "no login detected" },
 
+    { "checkId": "seo.description",            "status": "fail", "note": "neither page has a description" },
+    { "checkId": "seo.share-image",            "status": "pass", "note": "no share image to check (seo.share-tags covers that)" },
+    { "checkId": "seo.single-h1",              "status": "pass", "note": "one h1 per page" },
+    { "checkId": "seo.sitemap",                "status": "fail", "note": "two pages, no sitemap" },
+    { "checkId": "seo.canonical",              "status": "fail", "note": "no canonical on either page" },
+    { "checkId": "seo.ssr",                    "status": "pass", "note": "plain HTML: the content is in the page" },
     { "checkId": "seo.title",                  "status": "fail", "note": "both pages share the same title" },
     { "checkId": "seo.share-tags",             "status": "fail", "note": "no share tags" },
     { "checkId": "seo.robots",                 "status": "pass" },
@@ -106,6 +112,13 @@
     { "checkId": "launch.staging-urls",         "status": "pass" },
 
     { "checkId": "mail.auth",                  "status": "skip", "note": "no email sending detected" },
-    { "checkId": "shop.checkout-flow",         "status": "skip", "note": "no payments detected" }
+    { "checkId": "shop.checkout-flow",         "status": "skip", "note": "no payments detected" },
+    { "checkId": "agent.semantic",             "status": "pass", "note": "pages have <main> and <nav>" },
+    { "checkId": "agent.schema",               "status": "fail", "note": "no JSON-LD" },
+    { "checkId": "agent.llms-txt",             "status": "fail", "note": "no /llms.txt" },
+    { "checkId": "agent.crawler-policy",       "status": "fail", "note": "robots.txt has no rules for AI crawlers" },
+    { "checkId": "agent.prices-text",          "status": "pass", "note": "prices are text on the pricing page" },
+    { "checkId": "agent.forms-fillable",       "status": "pass", "note": "the sign-up form has a submit button" },
+    { "checkId": "agent.bot-wall",             "status": "skip", "note": "local address" }
   ]
 }

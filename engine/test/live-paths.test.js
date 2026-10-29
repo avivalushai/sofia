@@ -57,3 +57,16 @@ test("sec.source-maps on a live site: a map the page points to that downloads fa
   delete routes["https://tidy.example/assets/app.js.map"];
   assert.equal((await run("sec.source-maps", routes, { pages }))[0].status, "pass", "a map that 404s is fine");
 });
+
+test("agent.bot-wall on a live site: AI assistants turned away fail; a machine that's blocked anyway is \"couldn't tell\"", async () => {
+  const byAgent = (blockAgents, blockAll = false) => (o) => {
+    const ua = o.headers?.["user-agent"] ?? "";
+    const agent = /ChatGPT-User|Claude-User|Perplexity-User/.test(ua);
+    return blockAll || (agent && blockAgents) ? { status: 403, headers: {} } : { status: 200, headers: {} };
+  };
+  const walled = await run("agent.bot-wall", { [TARGET]: byAgent(true) });
+  assert.equal(walled[0].status, "fail");
+  assert.match(walled[0].evidence, /ChatGPT got 403; Claude got 403; Perplexity got 403/);
+  assert.equal((await run("agent.bot-wall", { [TARGET]: byAgent(false) }))[0].status, "pass");
+  assert.equal((await run("agent.bot-wall", { [TARGET]: byAgent(false, true) }))[0].status, "uncertain");
+});

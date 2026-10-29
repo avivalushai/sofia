@@ -108,6 +108,14 @@
     - Spacing flags odd pixel values (5, 7, 13, 21…), not values off a 4px grid, because Tailwind's own steps include 6, 10 and 14. The browser's default heading and paragraph margins are ignored.
     - Dark mode turns on the system setting, a `dark` class and a saved theme. A site that stays light under all three gets "couldn't tell", since its dark mode needs a toggle.
     - **Decision (mine): `design.focus-hover` checks the mouse only.** Keyboard focus belongs to `a11y.focus-visible`, so one problem doesn't produce two findings.
+  - Sharing and search, 6 of 6 (mechanical):
+    - The checks: `seo.description`, `seo.share-image` (reads the size from the file's first bytes), `seo.single-h1` (on the rendered page when the browser runs), `seo.sitemap` (every listed address is opened), `seo.canonical` (missing on every page, several pages claiming one address, or a test address on a live site), `seo.ssr` (words as sent vs. after scripts).
+    - On a local copy, the sitemap and the share image point to the live domain, so the same paths are opened on the local copy instead.
+  - AI agents, 7 of 7:
+    - `agent.semantic`, `agent.schema`, `agent.llms-txt` and `agent.crawler-policy` (the choice: allow AI answers but not training, allow everything, or block everything).
+    - In the browser: `agent.prices-text` and `agent.forms-fillable` (no submit button, fake fields, gestures).
+    - `agent.bot-wall` opens the live site as ChatGPT-User, Claude-User and Perplexity-User. When an ordinary request is blocked too, the result is "couldn't tell".
+    - New check flag `expectsBlocks`: for this check, a challenge page is the answer itself, not a reason to give up.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:

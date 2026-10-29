@@ -115,7 +115,8 @@ async function runOne(c, ctx) {
     const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000)));
     const items = await Promise.race([c.check.run(ctx), timeout]).finally(() => clearTimeout(timer));
     if (!Array.isArray(items)) throw new CheckBug(`${c.id}: run() must return an array`);
-    if (ctx.blocked.size) {
+    // checks about bot protection itself read the challenge as their answer
+    if (ctx.blocked.size && !c.check.expectsBlocks) {
       // what the check saw was the host's challenge page, not the site: no pass, no fail
       const who = [...new Set(ctx.blocked.values())][0] ?? "the host's bot protection";
       const local = who === UNAVAILABLE;

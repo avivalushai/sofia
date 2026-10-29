@@ -88,3 +88,8 @@ Local copies (scratch folder, originals untouched), the 22 checks added so far i
   - Type sizes 1px apart (11/12/13/14), odd spacing values, and 7 corner roundings are true observations about a dense editor UI. They're polish-level "choice" findings that the owner can keep.
   - The 5 icon sets come from the component libraries the product shows on purpose. The finding offers "They're there on purpose", as `design.ui-libraries` does.
 - **Rubric fix:** two reviewers disagreed on whether a request with no `catch` counts as "error swallowed". The rubric now says it does. Two fresh reviewers then matched on every question.
+
+### Sharing, search and AI agents (same day)
+No false alarms.
+- **NehoRace:** no `<main>`, no structured data, no llms.txt and no robots.txt. All true.
+- **Blockout:** its single-page app sends an empty page (0 words as sent, 240 after scripts). Its description is 195 characters, it has no `<h1>`, and /llms.txt answers with the app's home page. All true. The pre-rendering finding offers "Keep it as it is".

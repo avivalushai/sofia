@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tidy.example/</loc></url>
+  <url><loc>https://tidy.example/login.html</loc></url>
+  <url><loc>https://tidy.example/contact.html</loc></url>
+  <url><loc>https://tidy.example/mobile.html</loc></url>
+  <url><loc>https://tidy.example/app.html</loc></url>
+  <url><loc>https://tidy.example/pricing.html</loc></url>
+  <url><loc>https://tidy.example/features.html</loc></url>
+</urlset>

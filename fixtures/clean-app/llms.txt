@@ -1,0 +1,7 @@
+# Tidy
+
+> Shared notes for small teams: meeting notes, decisions and checklists in one place.
+
+- [Features](https://tidy.example/features.html)
+- [Pricing](https://tidy.example/pricing.html)
+- [Contact](https://tidy.example/contact.html)

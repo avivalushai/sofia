@@ -98,6 +98,59 @@
     {
       "checkId": "content.file-names",
       "status": "pass"
+    },
+    {
+      "checkId": "seo.description",
+      "status": "pass"
+    },
+    {
+      "checkId": "seo.share-image",
+      "status": "pass"
+    },
+    {
+      "checkId": "seo.single-h1",
+      "status": "pass"
+    },
+    {
+      "checkId": "seo.sitemap",
+      "status": "pass"
+    },
+    {
+      "checkId": "seo.canonical",
+      "status": "pass"
+    },
+    {
+      "checkId": "seo.ssr",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.semantic",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.schema",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.llms-txt",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.crawler-policy",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.prices-text",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.forms-fillable",
+      "status": "pass"
+    },
+    {
+      "checkId": "agent.bot-wall",
+      "status": "skip",
+      "note": "local address: bot protection only exists on the live site (live path: live-paths.test.js)"
     }
   ]
 }

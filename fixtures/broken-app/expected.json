@@ -120,6 +120,71 @@
       "checkId": "content.file-names",
       "status": "fail",
       "note": "images/Screenshot 2026-03-14… and images/IMG_4821.png"
+    },
+    {
+      "checkId": "seo.description",
+      "status": "fail",
+      "note": "short and repeated descriptions"
+    },
+    {
+      "checkId": "seo.share-image",
+      "status": "fail",
+      "note": "share.png is 300×300"
+    },
+    {
+      "checkId": "seo.single-h1",
+      "status": "fail",
+      "note": "pricing.html has two <h1>"
+    },
+    {
+      "checkId": "seo.sitemap",
+      "status": "fail",
+      "note": "no sitemap on a 7-page site"
+    },
+    {
+      "checkId": "seo.canonical",
+      "status": "fail",
+      "note": "every page's canonical is the home page"
+    },
+    {
+      "checkId": "seo.ssr",
+      "status": "fail",
+      "note": "features.html is drawn by a script"
+    },
+    {
+      "checkId": "agent.semantic",
+      "status": "fail",
+      "note": "mobile.html, pricing.html and features.html have no <main>"
+    },
+    {
+      "checkId": "agent.schema",
+      "status": "fail",
+      "note": "no JSON-LD"
+    },
+    {
+      "checkId": "agent.llms-txt",
+      "status": "fail",
+      "note": "no /llms.txt"
+    },
+    {
+      "checkId": "agent.crawler-policy",
+      "status": "fail",
+      "note": "no robots.txt"
+    },
+    {
+      "checkId": "agent.prices-text",
+      "status": "fail",
+      "note": "pricing.html: prices only in an image"
+    },
+    {
+      "checkId": "agent.forms-fillable",
+      "status": "fail",
+      "note": "features.html: waitlist form with no submit button"
+    },
+    {
+      "checkId": "agent.bot-wall",
+      "status": "skip",
+      "note": "local address: bot protection only exists on the live site (live path: live-paths.test.js)"
     }
   ]
 }
