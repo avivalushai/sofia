@@ -1,14 +1,22 @@
 {
-  "name": "sofia-local",
+  "name": "sofia",
   "owner": {
-    "name": "Aviv Alush"
+    "name": "Aviv Alush",
+    "url": "https://github.com/avivalushai"
   },
+  "description": "Sofia checks your app before launch and tells you, in plain words, what's broken.",
   "plugins": [
     {
       "name": "sofia",
-      "source": "./",
-      "description": "Sofia — checks your app before launch (development copy from this folder)."
+      "source": {
+        "source": "github",
+        "repo": "avivalushai/sofia",
+        "ref": "release"
+      },
+      "description": "Checks your app before launch, reports what's broken in plain words, talks it through with you, and fixes only what you approve.",
+      "homepage": "https://github.com/avivalushai/sofia",
+      "license": "MIT",
+      "keywords": ["launch", "checklist", "qa", "security", "accessibility", "hebrew", "rtl"]
     }
-  ],
-  "description": "Local development copy of Sofia, straight from this folder."
+  ]
 }
