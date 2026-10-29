@@ -22,7 +22,7 @@ async function embedShots(root, state) {
     for (const src of [f.shots?.before, f.shots?.after]) {
       if (!src || shots[src]) continue;
       try {
-        const body = await readFile(path.join(root, STATE_DIR, src.replace(/^shots\//, "shots/")));
+        const body = await readFile(path.join(root, STATE_DIR, src));
         shots[src] = `data:image/png;base64,${body.toString("base64")}`;
       } catch {}
     }

@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 26,
-  "nextNoteNum": 32,
+  "nextNum": 27,
+  "nextNoteNum": 33,
   "features": [
     {
       "key": "ALL-1",
@@ -1085,6 +1085,44 @@
           "text": "Created — review"
         }
       ]
+    },
+    {
+      "key": "ALL-26",
+      "title": "Saved report after every run (report.html, one file)",
+      "type": "feature",
+      "status": "review",
+      "note": "Run Sofia on any app, then open .launch-check/report.html by double-clicking it: everything from the live page is there (score, findings, screenshots, muted/skipped, all checks) with no server running",
+      "doneWhen": [],
+      "steps": [],
+      "files": [
+        "engine/src/report-html.js",
+        "ui/dist/app.js",
+        "engine/src/report.js",
+        "ui/dist/app.css",
+        "ui/dist/index.html"
+      ],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T12:43:00Z",
+      "updatedAt": "2026-10-29T12:52:25Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-29T12:43:00Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-29T12:43:00Z",
+          "by": "claude",
+          "text": "Moved to review — Run Sofia on any app, then open .launch-check/report.html by double-clicking it: everything from the live page is there (score, findings, screenshots, muted/skipped, all checks) with no server running"
+        },
+        {
+          "at": "2026-10-29T12:52:25Z",
+          "by": "claude",
+          "text": "Files: ui/dist/app.css, ui/dist/index.html"
+        }
+      ]
     }
   ],
   "notes": [
@@ -1688,6 +1726,24 @@
       "steps": [],
       "createdAt": "2026-10-29T12:29:36Z",
       "updatedAt": "2026-10-29T12:29:36Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N32",
+      "kind": "decision",
+      "title": "The saved report is the live page itself with the results built in, written after every run",
+      "body": "Not a separate design: same ui/dist page, data and screenshots embedded, so the two can't drift apart. Written automatically next to report.md, so there's no Export button.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-26"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T12:43:00Z",
+      "updatedAt": "2026-10-29T12:43:00Z",
       "updatedBy": "claude"
     }
   ],

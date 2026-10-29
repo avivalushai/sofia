@@ -163,6 +163,19 @@ test("report.md is written with the six parts", async () => {
   assert.match(report, /## Skipped/);
 });
 
+test("report.html is one self-contained file: the page, the results and the screenshots inside it", async () => {
+  const html = await readFile(path.join(dir, ".launch-check", "report.html"), "utf8");
+  assert.doesNotMatch(html, /<link rel="stylesheet"|<script[^>]+src=/, "nothing loaded from outside the file");
+  const json = html.match(/<script id="sofia-data" type="application\/json">(.*?)<\/script>/s)?.[1];
+  assert.ok(json, "results are embedded");
+  const data = JSON.parse(json);
+  assert.equal(data.state.runs.length, JSON.parse(await readFile(path.join(dir, ".launch-check", "state.json"), "utf8")).runs.length);
+  assert.ok(data.summary.score >= 0 && data.catalog.length > 100);
+  const shot = Object.values(data.state.findings).find((f) => f.status !== "fixed" && f.shots?.before)?.shots.before;
+  assert.ok(shot, "the fixture has at least one screenshot");
+  assert.match(data.shots[shot], /^data:image\/png;base64,/);
+});
+
 test("fixing the site and re-running marks findings fixed, saves after.png, and reopens if it comes back", async () => {
   const html = path.join(dir, "index.html");
   const css = path.join(dir, "assets", "style.css");

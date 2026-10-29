@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { STATE_DIR } from "./state.js";
 import { isCheckMuted } from "./score.js";
+import { writeHtmlReport } from "./report-html.js";
 
 const SEVERITY = {
   blocker: ["Blockers", "will lose you users, money or data"],
@@ -96,4 +97,5 @@ export function renderReport(catalog, state) {
 
 export async function writeReport(root, catalog, state) {
   await writeFile(path.join(root, STATE_DIR, "report.md"), renderReport(catalog, state));
+  await writeHtmlReport(root, catalog, state);
 }

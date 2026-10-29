@@ -1,4 +1,5 @@
 // Sofia report page: reads /api/state, re-renders on every change (Server-Sent Events). Read-only.
+// The saved copy (.launch-check/report.html) carries its data and screenshots inside the page instead.
 
 const $ = (sel) => document.querySelector(sel);
 const SEVERITY = { blocker: "Blockers", important: "Important", polish: "Polish" };
@@ -15,6 +16,8 @@ const VERDICT_COLOR = { "Not ready": "var(--notready)", Almost: "var(--almost)",
 
 const ui = { tab: "findings", severity: null, group: "severity", search: "", open: null };
 let data = null;
+const EMBEDDED = document.getElementById("sofia-data");
+const shotSrc = (src) => (EMBEDDED ? data.shots?.[src] ?? "" : `/${src}`);
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -23,6 +26,8 @@ function esc(s) {
 const t = (s) => `<span dir="auto">${esc(s)}</span>`;
 
 function ago(iso) {
+  // a saved report is read later: "5 min ago" would go stale
+  if (EMBEDDED) return new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
   const s = Math.round((Date.now() - Date.parse(iso)) / 1000);
   if (s < 60) return "just now";
   if (s < 3600) return `${Math.round(s / 60)} min ago`;
@@ -69,8 +74,8 @@ function render() {
   const pill = $("#pill");
   pill.className = "pill" + (fixing ? " busy" : "");
   const reviewing = state.reviewTasks.filter((r) => r.status === "pending").length;
-  pill.textContent = fixing ? `Sofia is fixing ${fixing} item${fixing > 1 ? "s" : ""}` : reviewing ? `Code review · ${reviewing} waiting` : approved ? `Approved to fix · ${approved}` : "Idle";
-  pill.className = "pill" + (fixing || reviewing ? " busy" : "");
+  pill.textContent = EMBEDDED ? `Saved ${ago(data.savedAt)}` : fixing ? `Sofia is fixing ${fixing} item${fixing > 1 ? "s" : ""}` : reviewing ? `Code review · ${reviewing} waiting` : approved ? `Approved to fix · ${approved}` : "Idle";
+  pill.className = "pill" + (!EMBEDDED && (fixing || reviewing) ? " busy" : "");
 
   // score
   const score = summary.score;
@@ -96,12 +101,17 @@ function render() {
     ["skipped", "Skipped", c.skipped],
   ];
   $("#tally").innerHTML = tally
-    .map(([k, label, n]) => `<button class="t-${k}" data-filter="${k}" aria-pressed="${ui.severity === k}"><b>${n}</b> ${label}</button>`)
+    .map(([k, label, n]) => `<button class="t-${k}" data-filter="${k}" aria-pressed="${ui.severity === k}"><i></i><b>${n}</b> ${label}</button>`)
     .join("");
+  // how the checks that ran split up; skipped ones didn't run, so they're not in the bar
+  const ran = c.blocker + c.important + c.polish + c.passed;
+  $("#bar").innerHTML = ran
+    ? tally.filter(([k, , n]) => k !== "skipped" && n).map(([k, , n]) => `<span class="t-${k}" style="flex-grow:${n}"></span>`).join("")
+    : "";
 
   // fixer cards
   $("#fixers").innerHTML = ["claude", "choice", "user"]
-    .map((k) => `<div class="card"><h3><span class="chip fx-${k}">${k === "claude" ? "Sofia" : k === "choice" ? "Choice" : "You"}</span>${FIXER_CARD[k][0]}</h3><div class="num">${summary.buckets[k].length}</div><p class="muted small">${FIXER_CARD[k][1]}</p></div>`)
+    .map((k) => `<div class="card fixer fixer-${k}"><div class="num">${summary.buckets[k].length}</div><div><h3>${FIXER_CARD[k][0]}</h3><p class="muted small">${FIXER_CARD[k][1]}</p></div></div>`)
     .join("");
 
   renderFindings();
@@ -132,19 +142,20 @@ function renderFindings() {
   }
   const heading = (k) =>
     ui.group === "severity" ? `${SEVERITY[k]} <span>· ${SEVERITY_NOTE[k]}</span>` : ui.group === "fixer" ? FIXER[k] : esc(k);
-  let html = [...groups].map(([k, its]) => `<div class="group"><h2>${heading(k)}</h2>${its.map(row).join("")}</div>`).join("");
-  if (uncertain.length) html += `<div class="group"><h2>Couldn't tell <span>· not problems, just not checkable from here</span></h2>${uncertain.map(row).join("")}</div>`;
+  const count = (n) => `<em class="count">${n}</em>`;
+  let html = [...groups].map(([k, its]) => `<div class="group"><h2>${heading(k)}${count(its.length)}</h2>${its.map(row).join("")}</div>`).join("");
+  if (uncertain.length) html += `<div class="group"><h2>Couldn't tell <span>· not problems, just not checkable from here</span>${count(uncertain.length)}</h2>${uncertain.map(row).join("")}</div>`;
   $("#list").innerHTML = html || `<div class="empty">Nothing here${ui.search ? " matches your search" : " — all clear"}.</div>`;
 }
 
 function row(it) {
-  const places = it.findings.length > 1 ? `<span class="chip layer">${it.findings.length} places</span>` : "";
+  const places = it.findings.length > 1 ? `<span class="places">${it.findings.length} places</span>` : "";
   const status = it.status !== "open" ? `<span class="chip st-${it.status}">${it.status === "fixing" ? "Sofia is fixing" : it.status === "uncertain" ? "Couldn't tell" : it.status}</span>` : "";
   const layer = catalogEntry(it.checkId)?.layer;
   return `<button class="row sev-${it.severity}" data-check="${esc(it.checkId)}">
     <span class="stripe"></span>
     <span><span class="title">${t(it.title)}</span><div class="impact">${t(it.impact)}</div></span>
-    <span class="meta">${status}${places}${it.status === "uncertain" ? "" : `<span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span>`}<span class="chip layer">${esc(LAYER[layer] ?? layer ?? "")}</span></span>
+    <span class="meta">${status}${places}${it.status === "uncertain" ? "" : `<span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span>`}<span class="layer">${esc(LAYER[layer] ?? layer ?? "")}</span></span>
   </button>`;
 }
 
@@ -212,18 +223,18 @@ function openDetail(checkId, focus = true) {
     : "";
   const instances = it.findings
     .map((f) => {
-      const shots = [f.shots?.before && ["Before", f.shots.before], f.shots?.after && ["After", f.shots.after]].filter(Boolean);
+      const shots = [f.shots?.before && ["Before", f.shots.before], f.shots?.after && ["After", f.shots.after]].filter((s) => s && shotSrc(s[1]));
       return `<div class="instance">
         <div class="where small">${where(f.location ?? {})}${f.status === "fixed" ? ' · <span class="chip st-fixed">fixed</span>' : ""}</div>
         <div>${t(f.evidence)}</div>
         ${f.quotes?.length ? `<div class="quotes">${f.quotes.map((q) => `<div class="quote"><span class="mono muted" dir="ltr">${esc(q.file)}:${q.line}</span><code dir="auto">${esc(q.text.trim())}</code></div>`).join("")}</div>` : ""}
-        ${shots.length ? `<div class="shots${shots.length === 1 ? " one" : ""}">${shots.map(([cap, src]) => `<figure><img loading="lazy" src="/${esc(src)}" alt="${cap} screenshot"><figcaption>${cap}</figcaption></figure>`).join("")}</div>` : ""}
+        ${shots.length ? `<div class="shots${shots.length === 1 ? " one" : ""}">${shots.map(([cap, src]) => `<figure><img loading="lazy" title="Click to enlarge" src="${esc(shotSrc(src))}" alt="${cap} screenshot"><figcaption>${cap}</figcaption></figure>`).join("")}</div>` : ""}
       </div>`;
     })
     .join("");
   $("#detail").innerHTML = `
-    <span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span>
-    <h2 style="margin-top:10px">${t(it.title)}</h2>
+    <div class="detail-tags"><span class="sev sev-${it.severity}">${SEVERITY[it.severity].replace(/s$/, "")}</span><span class="chip fx-${it.fixer}">${FIXER[it.fixer]}</span></div>
+    <h2>${t(it.title)}</h2>
     <p class="impact">${t(it.impact)}</p>
     ${catalogEntry(it.checkId)?.layer === "judgment" ? `<p class="note small">Found by a separate reviewer that read the code against a written checklist, without seeing your conversation. It's a judgment — the quotes below show exactly what it relied on.</p>` : ""}
     <div class="part"><h3>Where and what was found</h3>${instances}</div>
@@ -244,6 +255,10 @@ function closeDetail() {
 
 // --- events ---
 document.addEventListener("click", (e) => {
+  const img = e.target.closest(".shots img");
+  if (img) return zoom(img);
+  const zoomEl = e.target.closest("#zoom");
+  if (zoomEl) return zoomEl.close();
   const rowEl = e.target.closest(".row");
   if (rowEl) return openDetail(rowEl.dataset.check);
   const f = e.target.closest("[data-filter]");
@@ -256,7 +271,14 @@ document.addEventListener("click", (e) => {
   if (tab) return setTab(tab.dataset.tab);
   if (e.target.closest("#close") || e.target.id === "scrim") closeDetail();
 });
-document.addEventListener("keydown", (e) => e.key === "Escape" && closeDetail());
+document.addEventListener("keydown", (e) => e.key === "Escape" && !$("#zoom").open && closeDetail());
+
+function zoom(img) {
+  const d = $("#zoom");
+  d.querySelector("img").src = img.src;
+  d.querySelector("img").alt = img.alt;
+  d.showModal();
+}
 $("#search").addEventListener("input", (e) => {
   ui.search = e.target.value.trim();
   renderFindings();
@@ -303,5 +325,11 @@ function flash(text) {
   setTimeout(() => (b.hidden = true), 2500);
 }
 
-load().catch(() => ($("#verdict").textContent = "Couldn't load the report"));
-connect();
+if (EMBEDDED) {
+  data = JSON.parse(EMBEDDED.textContent);
+  $(".foot").textContent = "A saved copy of the report, written after Sofia's last scan · ask Sofia in the chat to check again";
+  render();
+} else {
+  load().catch(() => ($("#verdict").textContent = "Couldn't load the report"));
+  connect();
+}

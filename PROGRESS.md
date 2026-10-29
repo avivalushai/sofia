@@ -2,6 +2,15 @@
 
 ## Done
 
+### Saved report after every run (2026-10-29)
+- Every time Sofia writes `report.md` (after a scan, a code review, a decision), she now also writes `.launch-check/report.html`: the same report page as the live one, in one file, with its styles, the results and the screenshots inside it. It opens from disk with no server and nothing loaded from the internet, so it can be sent to someone (~1.8 MB on fixtures/broken-app).
+- One page, two modes: `ui/dist/app.js` reads the results built into the page when they're there, and otherwise loads them from the local server as before. The saved copy shows dates instead of "5 min ago" and "Saved <date>" instead of the live status.
+- Screenshots are included only for findings that still appear on the page.
+- In chat, after the scan, Sofia adds `✓ Saved a copy: .launch-check/report.html`.
+- New test in `fixture.test.js`. 423 tests, all pass.
+- This is docs/05 "Export"; there's no "Export report" button yet, because the file is written automatically.
+- Look refreshed, on the live page and the saved copy alike: a sticky top bar; one summary card with the score, the verdict, a bar showing how the results split, and the filters; smaller "who fixes" cards; a count on each group; quieter labels on each finding; a severity label in the details panel; screenshots that open full size on click; and a print layout with the whole report. Checked at desktop width and at phone width in dark mode, with no sideways scrolling.
+
 ### M7, judgment checks: a separate reviewer reads the code (2026-10-25)
 - 7 rubrics in `skills/check/references/rubrics/`: `leftover.mock-data`, `leftover.unwired-ui`, `qa.empty-states`, `content.terms`, `sec.server-authz`, `sec.rate-limit` and `ai.output-as-code`. A rubric is a set of numbered yes/no questions with pass and fail examples. A judgment check counts as "built" once its rubric exists.
 - The engine doesn't judge. In a full scan it prepares a **review task** for each judgment check that applies: the rubric plus the files worth reading. When a check reads wording, the task also gets the pages' visible text (`.launch-check/review/pages.txt`). A fingerprint of the rubric and the files means unchanged code keeps its earlier review. A check with nothing to read is skipped and the reason is stated.
