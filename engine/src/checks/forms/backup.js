@@ -1,6 +1,7 @@
 import { codeKeys } from "../../lib/code.js";
 
-const SENDS_EMAIL = /resend|sendgrid|@sendgrid|nodemailer|postmark|mailgun|brevo|sendinblue|emailjs|sendMail\(|emails\.send\(|ses\.send|SendEmailCommand/i;
+// a mail service actually used in code (imported, or called by its address), not the word in a sentence
+const SENDS_EMAIL = /(from\s+|require\(\s*)["'](resend|@sendgrid\/mail|nodemailer|postmark|mailgun\.js|mailgun-js|@getbrevo\/brevo|sib-api-v3-sdk|@emailjs\/browser|emailjs-com|@aws-sdk\/client-ses)["']|api\.(resend\.com|sendgrid\.com|postmarkapp\.com|mailgun\.net|brevo\.com)|api\.emailjs\.com|emailjs\.send(Form)?\(/;
 const STORES = /\.insert\(|\.create\(|\.upsert\(|\.save\(|insertOne|insertMany|addDoc\(|setDoc\(|\.set\(\{|\.push\(\)|INSERT INTO|appendRow|values\.append|spreadsheets|airtable|\.from\(["'][^"']+["']\)\s*\.insert|kv\.(set|lpush|hset)|redis\.(set|lpush|hset)|put\(|writeFile|appendFile|db\.|prisma\./i;
 const FORMISH = /contact|lead|subscribe|signup|sign-up|newsletter|waitlist|enquir|inquir|message|form|booking|order|צור.?קשר|הרשמה/i;
 
@@ -18,7 +19,8 @@ export default {
       if (STORES.test(text.replace(/import[^\n]*\n/g, ""))) continue;
       const lines = text.split("\n");
       const at = (re) => lines.findIndex((l) => re.test(l) && !/^\s*(import|\/\/|\*)/.test(l));
-      const i = at(/\.send\(|sendMail\(|\.sendForm\(|SendEmailCommand/) >= 0 ? at(/\.send\(|sendMail\(|\.sendForm\(|SendEmailCommand/) : at(SENDS_EMAIL);
+      const SEND_CALL = /\.send\(|sendMail\(|\.sendForm\(|SendEmailCommand|fetch\(/;
+      const i = at(SEND_CALL) >= 0 ? at(SEND_CALL) : 0;
       const line = i >= 0 ? i + 1 : 1;
       results.push(ctx.fail({
         key: key(file, lines[line - 1] ?? ""),

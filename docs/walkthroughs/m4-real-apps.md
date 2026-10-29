@@ -61,3 +61,20 @@ After one scan, Vercel's firewall challenged every request from this machine, ev
 
 ## Lesson: spelling and wording are the owner's call
 `שלחח` was flagged and I labeled it a real typo without asking. It's intentional slang. A checker can only say "this looks unusual". Whether it's a mistake is the owner's decision. Proposed (awaiting the owner's OK): spelling and placeholder findings move from "I'll fix this" to "Your choice", one word at a time, with "it's intentional" as an option that mutes that word.
+
+## M9 checks on the same apps (2026-10-29)
+Local copies (scratch folder, originals untouched), the 22 checks added so far in M9: security, forms, data, mobile.
+
+**NehoRace:** no false alarms.
+- No forms and no login, so the form and login checks skip.
+- `sec.headers` says "couldn't tell" on the local copy, because there's no host settings file.
+- The code reviewer read 13 files for `sec.xss-output` and found no problem. Player names are shown as plain text (`textContent`), and the address bar is only used to look up rooms. Its quotes checked out against the code.
+
+**Blockout:** 4 false alarms, all fixed and covered in `engine/test/realworld.test.js`.
+
+| Finding | Cause | Fix |
+|---|---|---|
+| 23 forms "with no spam protection", 10 "without Enter-key hints" | Editor panels and component demos were counted as forms | These checks now count only forms whose content goes somewhere: a form address, a POST, a database write, a form service or a sign-in |
+| 2 password fields "without autofill" | Demo fields, one of them read-only | Read-only and disabled fields are skipped, and only forms that send something count |
+| "Form submissions only exist as an email" | The word "Resend" in a template sentence | A mail service now has to be imported, or called by its address |
+| Buttons "overlapping" on tablets | Items scrolled out of view inside a side panel, under the welcome dialog | An overlap counts only where one of the two buttons is really visible at that spot |

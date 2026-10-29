@@ -668,7 +668,7 @@
       "title": "Distribute Sofia: public marketplace others can install from",
       "type": "feature",
       "status": "active",
-      "note": "Waiting on docs check, then marketplace.json + packaging deps",
+      "note": "Owner: approve creating public repo avivalushai/sofia and pushing main+release; decide whether .board and real-app names stay public",
       "doneWhen": [],
       "steps": [
         {
@@ -677,11 +677,11 @@
         },
         {
           "text": "Ship deps without npm install (bundle or vendored release branch)",
-          "done": false
+          "done": true
         },
         {
           "text": "Handle missing Node for non-developers",
-          "done": false
+          "done": true
         },
         {
           "text": "User README, LICENSE, privacy note",
@@ -694,11 +694,13 @@
       ],
       "files": [],
       "links": [
-        "40c6f03"
+        "40c6f03",
+        "https://superclaude.netlify.app",
+        "b2ab26e"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T09:53:24Z",
+      "updatedAt": "2026-10-29T10:00:33Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -730,6 +732,51 @@
           "at": "2026-10-29T09:53:24Z",
           "by": "claude",
           "text": "Note: Waiting on docs check, then marketplace.json + packaging deps"
+        },
+        {
+          "at": "2026-10-29T09:57:11Z",
+          "by": "claude",
+          "text": "Proof: https://superclaude.netlify.app"
+        },
+        {
+          "at": "2026-10-29T10:00:26Z",
+          "by": "claude",
+          "text": "Step done: Public GitHub repo + real marketplace.json (not sofia-local)"
+        },
+        {
+          "at": "2026-10-29T10:00:26Z",
+          "by": "claude",
+          "text": "Step done: Ship deps without npm install (bundle or vendored release branch)"
+        },
+        {
+          "at": "2026-10-29T10:00:26Z",
+          "by": "claude",
+          "text": "Step done: Handle missing Node for non-developers"
+        },
+        {
+          "at": "2026-10-29T10:00:26Z",
+          "by": "claude",
+          "text": "Proof: b2ab26e"
+        },
+        {
+          "at": "2026-10-29T10:00:26Z",
+          "by": "claude",
+          "text": "Note: Owner: approve creating public repo avivalushai/sofia and pushing main+release; decide whether .board and real-app names stay public"
+        },
+        {
+          "at": "2026-10-29T10:00:29Z",
+          "by": "claude",
+          "text": "Step reopened: Ship deps without npm install (bundle or vendored release branch)"
+        },
+        {
+          "at": "2026-10-29T10:00:33Z",
+          "by": "claude",
+          "text": "Step done: Ship deps without npm install (bundle or vendored release branch)"
+        },
+        {
+          "at": "2026-10-29T10:00:33Z",
+          "by": "claude",
+          "text": "Step reopened: Public GitHub repo + real marketplace.json (not sofia-local)"
         }
       ]
     },

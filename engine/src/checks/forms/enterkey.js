@@ -1,5 +1,5 @@
 import { codeKeys } from "../../lib/code.js";
-import { isLoginOrSearch, literal, sourceForms, typed } from "../../lib/fields.js";
+import { isLoginOrSearch, literal, sendsSomewhere, sourceForms, typed } from "../../lib/fields.js";
 
 /** @type {import("../../types.js").Check} */
 export default {
@@ -8,8 +8,9 @@ export default {
   async run(ctx) {
     const key = codeKeys();
     const results = [];
-    for (const { file, forms } of await sourceForms(ctx.project)) {
+    for (const { file, forms, code } of await sourceForms(ctx.project)) {
       for (const form of forms) {
+        if (!sendsSomewhere(form, code)) continue;
         const fields = form.fields.filter((f) => f.tag === "input" && typed(f));
         // one-field forms and login/search forms already get a sensible key
         if (fields.length < 2 || isLoginOrSearch(form)) continue;

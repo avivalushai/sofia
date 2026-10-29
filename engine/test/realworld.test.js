@@ -121,3 +121,64 @@ test("Amplitude counts as tracking, and challenges are recognised by header or p
   assert.ok(isChallenge({ status: 403, headers: {}, body: "<title>Just a moment...</title>" }));
   assert.ok(!isChallenge({ status: 403, headers: {}, body: "Forbidden" }), "a plain 403 is the site's own answer");
 });
+
+test("Blockout: editor panels and component demos aren't forms people submit", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "lc-demos-"));
+  try {
+    await mkdir(path.join(dir, "src"), { recursive: true });
+    await writeFile(path.join(dir, "package.json"), JSON.stringify({ name: "demos", dependencies: { react: "18.0.0" } }));
+    // a component showcase: a demo sign-in form that goes nowhere, with a read-only password
+    await writeFile(path.join(dir, "src", "Blocks.jsx"), `export const Demo = () => (
+  <form className="demo">
+    <Input placeholder="Full name" />
+    <Input placeholder="Email" />
+    <Input type="password" readOnly />
+    <Button>Sign in</Button>
+  </form>
+);`);
+    // an editor's properties panel: fields that change the screen, not send anything
+    await writeFile(path.join(dir, "src", "Inspector.jsx"), `export const Inspector = ({ box, set }) => (
+  <div>
+    <input value={box.title} onChange={(e) => set({ title: e.target.value })} />
+    <input value={box.subtitle} onChange={(e) => set({ subtitle: e.target.value })} />
+  </div>
+);`);
+    // the word "Resend" in a sentence isn't an email service
+    await writeFile(path.join(dir, "src", "templates.js"), `export const verify = { body: "We sent a code to your email. Didn't get it? Resend.", form: "contact" };`);
+    const s = await site({ "/": { body: PAGE() } });
+    const r = await lc(dir, "run", "--target", s.url, "--mode", "quick", "--only", "forms.spam,forms.enterkey,forms.autocomplete,forms.backup");
+    await s.close();
+    assert.equal(r.code, 0, r.err);
+    const st = await state(dir);
+    for (const id of ["forms.spam", "forms.enterkey", "forms.autocomplete", "forms.backup"]) assert.equal(st.checks[id].status, "pass", id);
+    // the same demo without the password (so not a login form), now sending somewhere: a real form
+    await writeFile(path.join(dir, "src", "Blocks.jsx"), (await readFile(path.join(dir, "src", "Blocks.jsx"), "utf8")).replace('<form className="demo">', '<form className="demo" onSubmit={(e) => fetch("/api/join", { method: "POST", body: new FormData(e.target) })}>').replace('<Input type="password" readOnly />', ""));
+    const s2 = await site({ "/": { body: PAGE() } });
+    await lc(dir, "run", "--target", s2.url, "--mode", "quick", "--only", "forms.spam,forms.enterkey");
+    await s2.close();
+    assert.equal((await state(dir)).checks["forms.spam"].status, "fail");
+    assert.equal((await state(dir)).checks["forms.enterkey"].status, "fail");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Blockout: buttons overlapping only inside a scrolled panel or under a dialog aren't reported", async () => {
+  const panel = `<div style="height:120px;overflow:auto;width:300px"><div style="height:600px"></div><button style="display:block;width:200px">Hidden one</button></div>
+<button style="position:relative;top:-40px;width:200px">Visible one</button>`;
+  const dialog = `<button id="a" style="width:200px">Under</button><button style="margin-top:-24px;display:block;width:200px">Also under</button>
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.5)"></div>`;
+  for (const [name, html] of [["panel", panel], ["dialog", dialog]]) {
+    const s = await site({ "/": { body: PAGE(html) } });
+    const dir = await mkdtemp(path.join(tmpdir(), "lc-overlap-"));
+    try {
+      const r = await lc(dir, "run", "--target", s.url, "--mode", "full", "--only", "resp.tablet");
+      assert.equal(r.code, 0, r.err);
+      const st = await state(dir);
+      assert.equal(st.checks["resp.tablet"].status, "pass", `${name}: ${Object.values(st.findings).map((f) => f.evidence).join(" | ")}`);
+    } finally {
+      await s.close();
+      await rm(dir, { recursive: true, force: true });
+    }
+  }
+});
