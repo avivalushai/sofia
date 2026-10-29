@@ -13,6 +13,9 @@
     "ads": false
   },
   "expect": [
+    { "checkId": "qa.external-links",          "status": "pass", "note": "no links to other sites" },
+    { "checkId": "qa.anchors",                 "status": "pass", "note": "no links to page sections" },
+    { "checkId": "qa.orphan-pages",            "status": "pass", "note": "both pages are linked" },
     { "checkId": "qa.broken-links",            "status": "fail", "note": "about.html is linked from both pages and doesn't exist" },
     { "checkId": "qa.missing-assets",          "status": "fail", "note": "assets/team.jpg doesn't exist" },
     { "checkId": "qa.failed-requests",         "status": "fail", "note": "team.jpg and favicon 404" },
@@ -34,6 +37,14 @@
     { "checkId": "resp.touch-targets",         "status": "fail", "note": ".cta is about 26px tall" },
     { "checkId": "resp.mobile-menu",            "status": "pass", "note": "the nav links stay visible at 375px; no menu button needed" },
     
+    { "checkId": "perf.cls",                   "status": "pass", "note": "nothing loads late above the text" },
+    { "checkId": "perf.inp",                   "status": "pass", "note": "no slow tap handlers" },
+    { "checkId": "perf.images-format",         "status": "pass", "note": "no oversized images" },
+    { "checkId": "perf.lazy-load",             "status": "pass", "note": "no images far down the page" },
+    { "checkId": "perf.bundle-size",           "status": "pass", "note": "one small script" },
+    { "checkId": "perf.fonts",                 "status": "pass", "note": "system fonts" },
+    { "checkId": "perf.cache",                 "status": "skip", "note": "local address" },
+    { "checkId": "perf.third-party",           "status": "pass", "note": "no scripts from other services" },
     { "checkId": "perf.images-weight",          "status": "pass", "note": "no image over the limit; team.jpg 404s and is qa.missing-assets' business" },
     { "checkId": "perf.lcp",                    "status": "pass", "note": "two tiny local pages" },
 
@@ -56,6 +67,12 @@
     { "checkId": "content.spelling",            "status": "pass", "note": "repeated names (פילאטיס, נועה) are not typos; Lorem ipsum is left to content.placeholders" },
     { "checkId": "content.alt-text",            "status": "pass", "note": "team.jpg has alt=\"\", the standard decorative marker; only a missing alt fails" },
 
+    { "checkId": "a11y.keyboard",              "status": "pass", "note": "every control is a real link or button" },
+    { "checkId": "a11y.focus-visible",         "status": "pass", "note": "the browser's focus ring is left in place" },
+    { "checkId": "a11y.headings",              "status": "pass", "note": "no skipped levels" },
+    { "checkId": "a11y.zoom",                  "status": "pass", "note": "zoom isn't blocked" },
+    { "checkId": "a11y.motion",                "status": "pass", "note": "no animations" },
+    { "checkId": "a11y.statement",             "status": "fail", "note": "Hebrew site with no accessibility statement" },
     { "checkId": "a11y.contrast",              "status": "fail", "note": "#999 on white in .hero p" },
     { "checkId": "a11y.form-labels",           "status": "fail", "note": "#email has only a placeholder" },
     { "checkId": "a11y.lang",                  "status": "fail", "note": "index.html has no lang; pricing.html is fine" },
@@ -95,6 +112,13 @@
     { "checkId": "seo.robots",                 "status": "pass" },
     { "checkId": "seo.noindex",                "status": "pass" },
 
+    { "checkId": "rtl.icons",                  "status": "pass", "note": "no directional arrows" },
+    { "checkId": "rtl.mixed-text",             "status": "fail", "note": "the English Lorem ipsum paragraph in the Hebrew hero: its punctuation lands on the wrong side" },
+    { "checkId": "rtl.switcher",               "status": "skip", "note": "one language" },
+    { "checkId": "rtl.hreflang",               "status": "skip", "note": "one language" },
+    { "checkId": "rtl.dates",                  "status": "pass", "note": "no dates" },
+    { "checkId": "rtl.currency",               "status": "pass", "note": "one consistent shekel format" },
+    { "checkId": "rtl.phone",                  "status": "pass", "note": "no phone field" },
     { "checkId": "rtl.dir",                    "status": "pass" },
     { "checkId": "rtl.components",              "status": "pass", "note": "text follows the page direction" },
     { "checkId": "rtl.font",                    "status": "pass", "note": "system font stack (Arial); no web font to fall back from" },

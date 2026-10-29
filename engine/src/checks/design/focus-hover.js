@@ -45,7 +45,8 @@ export default {
           const before = await p.evaluate(look, c.selector);
           const ok = await el.hover({ timeout: 2000 }).then(() => true, () => false);
           if (!ok) continue;
-          await p.page.waitForTimeout(350); // let transitions finish
+          // let a hover transition finish, if there is one
+          await p.page.waitForTimeout(await p.evaluate((sel) => Math.min(350, parseFloat(getComputedStyle(document.querySelector(sel)).transitionDuration) * 1000 || 0), c.selector));
           const after = await p.evaluate(look, c.selector);
           const cursor = await p.evaluate((sel) => getComputedStyle(document.querySelector(sel)).cursor, c.selector);
           // a hand cursor is feedback too; only an element where nothing at all changes is reported

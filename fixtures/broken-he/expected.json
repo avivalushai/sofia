@@ -1,0 +1,49 @@
+{
+  "about": "A small Hebrew site with an English version, with one planted problem for each Hebrew/RTL and language check listed here. clean-he is the same site fixed.",
+  "detected": {
+    "he": true,
+    "i18n": true
+  },
+  "expect": [
+    {
+      "checkId": "rtl.icons",
+      "status": "fail",
+      "note": "'הבא →' points right"
+    },
+    {
+      "checkId": "rtl.mixed-text",
+      "status": "fail",
+      "note": "'Sign up today!' in a right-to-left paragraph"
+    },
+    {
+      "checkId": "rtl.switcher",
+      "status": "fail",
+      "note": "pricing.html: 'English' goes to /en/"
+    },
+    {
+      "checkId": "rtl.hreflang",
+      "status": "fail",
+      "note": "no hreflang"
+    },
+    {
+      "checkId": "rtl.dates",
+      "status": "fail",
+      "note": "03/14/2026"
+    },
+    {
+      "checkId": "rtl.currency",
+      "status": "fail",
+      "note": "₪49 and 420 ₪, and 1.250 ₪"
+    },
+    {
+      "checkId": "rtl.phone",
+      "status": "fail",
+      "note": "American pattern and example on the phone field"
+    },
+    {
+      "checkId": "a11y.statement",
+      "status": "fail",
+      "note": "no accessibility statement"
+    }
+  ]
+}

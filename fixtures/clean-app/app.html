@@ -12,10 +12,13 @@
     .tabs { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: #fff; border-top: 1px solid #ddd; display: flex; justify-content: space-around; align-items: center; }
     main { padding: 0 24px; }
     @media (max-height: 500px) { body { padding: 0; } header, .tabs { position: static; height: auto; } }
+    button { cursor: pointer; }
+    button:hover { filter: brightness(0.92); }
   </style>
 </head>
 <body>
-  <header><h1>Your notes</h1></header>
+  <header><h1>Your notes</h1>
+    <button type="button" class="menu-toggle" onclick="document.querySelector('.tabs').hidden = !document.querySelector('.tabs').hidden">Menu</button></header>
   <main>
     <p>Weekly sync: agenda and decisions.</p>
     <p>Launch checklist: copy, images, pricing.</p>

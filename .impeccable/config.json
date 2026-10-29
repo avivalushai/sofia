@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-10-29T11:13:13.616Z",
+        "reason": "claude: .cell/.promises use clamp(24-64px) padding the static detector can't evaluate; .cmd nests a 36px Copy pill 5px inside a 46px pill on purpose"
+      }
+    ]
+  }
+}

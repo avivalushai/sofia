@@ -11,7 +11,7 @@
     "node": ">=20.1"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test --test-concurrency=3 test/*.test.js"
   },
   "dependencies": {
     "axe-core": "^4.14.0",

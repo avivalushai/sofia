@@ -8,7 +8,7 @@
     "granularity": "normal"
   },
   "nextNum": 22,
-  "nextNoteNum": 25,
+  "nextNoteNum": 28,
   "features": [
     {
       "key": "ALL-1",
@@ -596,11 +596,13 @@
         "engine/src/server.js"
       ],
       "links": [
-        "http://127.0.0.1:4319"
+        "http://127.0.0.1:4319",
+        "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM",
+        "http://localhost:4330"
       ],
       "area": "",
       "createdAt": "2026-10-19T14:23:14Z",
-      "updatedAt": "2026-10-19T14:28:54Z",
+      "updatedAt": "2026-10-29T11:00:26Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -612,6 +614,16 @@
           "at": "2026-10-19T14:28:54Z",
           "by": "claude",
           "text": "Proof: http://127.0.0.1:4319"
+        },
+        {
+          "at": "2026-10-29T10:43:40Z",
+          "by": "claude",
+          "text": "Proof: https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM"
+        },
+        {
+          "at": "2026-10-29T11:00:26Z",
+          "by": "claude",
+          "text": "Proof: http://localhost:4330"
         }
       ]
     },
@@ -667,13 +679,13 @@
       "key": "ALL-18",
       "title": "Distribute Sofia: public marketplace others can install from",
       "type": "feature",
-      "status": "active",
-      "note": "Owner: approve creating public repo avivalushai/sofia and pushing main+release; decide whether .board and real-app names stay public",
+      "status": "review",
+      "note": "Install in your own Claude Code: /plugin marketplace add avivalushai/sofia then /plugin install sofia@sofia; merge branch distribute into main when the checks session is at a clean point",
       "doneWhen": [],
       "steps": [
         {
           "text": "Public GitHub repo + real marketplace.json (not sofia-local)",
-          "done": false
+          "done": true
         },
         {
           "text": "Ship deps without npm install (bundle or vendored release branch)",
@@ -689,18 +701,19 @@
         },
         {
           "text": "claude plugin validate + fresh install on a clean machine",
-          "done": false
+          "done": true
         }
       ],
       "files": [],
       "links": [
         "40c6f03",
         "https://superclaude.netlify.app",
-        "b2ab26e"
+        "b2ab26e",
+        "https://github.com/avivalushai/sofia"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T10:00:33Z",
+      "updatedAt": "2026-10-29T10:40:07Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -777,6 +790,26 @@
           "at": "2026-10-29T10:00:33Z",
           "by": "claude",
           "text": "Step reopened: Public GitHub repo + real marketplace.json (not sofia-local)"
+        },
+        {
+          "at": "2026-10-29T10:40:06Z",
+          "by": "claude",
+          "text": "Step done: Public GitHub repo + real marketplace.json (not sofia-local)"
+        },
+        {
+          "at": "2026-10-29T10:40:06Z",
+          "by": "claude",
+          "text": "Step done: claude plugin validate + fresh install on a clean machine"
+        },
+        {
+          "at": "2026-10-29T10:40:07Z",
+          "by": "claude",
+          "text": "Moved to review — Install in your own Claude Code: /plugin marketplace add avivalushai/sofia then /plugin install sofia@sofia; merge branch distribute into main when the checks session is at a clean point"
+        },
+        {
+          "at": "2026-10-29T10:40:07Z",
+          "by": "claude",
+          "text": "Proof: https://github.com/avivalushai/sofia"
         }
       ]
     },
@@ -784,21 +817,67 @@
       "key": "ALL-19",
       "title": "Landing page for Sofia",
       "type": "feature",
-      "status": "active",
-      "note": "Owner picks a direction from the inspiration scan",
+      "status": "review",
+      "note": "Owner reviews the Taste-skill version at http://localhost:4330",
       "doneWhen": [],
       "steps": [],
-      "files": [],
-      "links": [],
+      "files": [
+        "site/index.html",
+        ".claude/launch.json",
+        "site/img"
+      ],
+      "links": [
+        "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM"
+      ],
       "area": "",
       "createdAt": "2026-10-29T09:24:57Z",
-      "updatedAt": "2026-10-29T09:24:57Z",
+      "updatedAt": "2026-10-29T11:12:36Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-29T09:24:57Z",
           "by": "claude",
           "text": "Created — active"
+        },
+        {
+          "at": "2026-10-29T10:43:16Z",
+          "by": "claude",
+          "text": "Proof: https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM"
+        },
+        {
+          "at": "2026-10-29T10:43:16Z",
+          "by": "claude",
+          "text": "Note: Owner reviews the draft; open: real screenshots, testimonials once there are users, English version, where the site is hosted"
+        },
+        {
+          "at": "2026-10-29T10:43:17Z",
+          "by": "claude",
+          "text": "Moved to review — Open the draft: copy, before/after examples, numbers (63 v1 / 175 catalog), install commands that only work once avivalushai/sofia is public"
+        },
+        {
+          "at": "2026-10-29T10:46:06Z",
+          "by": "claude",
+          "text": "Note: Owner reviews the English draft"
+        },
+        {
+          "at": "2026-10-29T11:00:31Z",
+          "by": "claude",
+          "text": "Files: .claude/launch.json"
+        },
+        {
+          "at": "2026-10-29T11:00:31Z",
+          "by": "claude",
+          "text": "Note: Owner reviews the English draft at http://localhost:4330 (launch config: landing)"
+        },
+        {
+          "at": "2026-10-29T11:12:36Z",
+          "by": "claude",
+          "text": "Files: site/img"
+        },
+        {
+          "at": "2026-10-29T11:12:36Z",
+          "by": "claude",
+          "text": "Note: Owner reviews the Taste-skill version at http://localhost:4330"
         }
       ]
     },
@@ -1336,6 +1415,60 @@
       "steps": [],
       "createdAt": "2026-10-29T09:52:16Z",
       "updatedAt": "2026-10-29T09:52:16Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N25",
+      "kind": "decision",
+      "title": "Sofia landing page: cool off-white paper, near-black ink, one ink-blue accent; Frank Ruhl Libre display, IBM Plex Sans Hebrew body, Plex Mono for commands",
+      "body": "Impeccable/Taste-style restraint: type carries the personality, color only marks state (red blocker, amber important, green pass), matching the report page's severity and fixer-chip shapes. Hebrew-first faces from Google Fonts.",
+      "considered": "Warm cream + serif + terracotta; near-black with acid-green pop (both generic AI-page looks); Rubik/Heebo as display (too neutral)",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T10:43:51Z",
+      "updatedAt": "2026-10-29T10:43:51Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N26",
+      "kind": "decision",
+      "title": "Sofia landing page is in English (left-to-right); Hebrew support is shown as a feature, not the page language",
+      "body": "Owner asked for English. Body face switched to IBM Plex Sans; display and colors unchanged.",
+      "considered": "Hebrew-only page; bilingual toggle",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T10:46:06Z",
+      "updatedAt": "2026-10-29T10:46:06Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N27",
+      "kind": "decision",
+      "title": "Sofia landing page rebuilt with the Taste skill: Geist sans (no serif), Sofia's own indigo, real screenshots from a scan of fixtures/broken-app instead of drawn mockups",
+      "body": "Taste bans div-based fake screenshots, serif-by-default, 3 equal cards, eyebrows on every section, em-dashes. Images: report page and finding drawer (light/dark) and a real before/after of the sideways-scroll fix, taken from a scan of a scratch copy of fixtures/broken-app. Accent matches the report page so the site and product read as one brand.",
+      "considered": "Frank Ruhl Libre serif + ink-blue accent (previous draft); hand-drawn HTML mockups",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T11:12:35Z",
+      "updatedAt": "2026-10-29T11:12:35Z",
       "updatedBy": "claude"
     }
   ],

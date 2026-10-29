@@ -185,6 +185,86 @@
       "checkId": "agent.bot-wall",
       "status": "skip",
       "note": "local address: bot protection only exists on the live site (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "a11y.keyboard",
+      "status": "fail",
+      "note": "app.html: a 'Menu' div that only reacts to clicks"
+    },
+    {
+      "checkId": "a11y.focus-visible",
+      "status": "fail",
+      "note": "pricing.html: outline: none on links, buttons and fields"
+    },
+    {
+      "checkId": "a11y.headings",
+      "status": "fail",
+      "note": "mobile.html: h1 then h4"
+    },
+    {
+      "checkId": "a11y.zoom",
+      "status": "fail",
+      "note": "login.html: user-scalable=no"
+    },
+    {
+      "checkId": "a11y.motion",
+      "status": "fail",
+      "note": "mobile.html: @keyframes, no prefers-reduced-motion"
+    },
+    {
+      "checkId": "qa.external-links",
+      "status": "fail",
+      "note": "blog.html links to a domain that doesn't exist"
+    },
+    {
+      "checkId": "qa.anchors",
+      "status": "fail",
+      "note": "blog.html: #comments doesn't exist"
+    },
+    {
+      "checkId": "qa.orphan-pages",
+      "status": "fail",
+      "note": "old-landing.html isn't linked from anywhere"
+    },
+    {
+      "checkId": "perf.cls",
+      "status": "fail",
+      "note": "blog.html: a big image with no size above the text"
+    },
+    {
+      "checkId": "perf.inp",
+      "status": "fail",
+      "note": "blog.html: 'Show more' blocks for 400ms (1.6s on a slow phone)"
+    },
+    {
+      "checkId": "perf.images-format",
+      "status": "fail",
+      "note": "blog.html: a 1600px PNG shown at 390px"
+    },
+    {
+      "checkId": "perf.lazy-load",
+      "status": "fail",
+      "note": "blog.html: an image 2400px down, not lazy"
+    },
+    {
+      "checkId": "perf.bundle-size",
+      "status": "fail",
+      "note": "src/vendor.js on the home page"
+    },
+    {
+      "checkId": "perf.fonts",
+      "status": "fail",
+      "note": "blog.html: font-display: block"
+    },
+    {
+      "checkId": "perf.cache",
+      "status": "skip",
+      "note": "local address: caching is set by the host"
+    },
+    {
+      "checkId": "perf.third-party",
+      "status": "pass",
+      "note": "no scripts from other services; measuring is covered by the real-app pass"
     }
   ]
 }

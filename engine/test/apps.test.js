@@ -11,20 +11,21 @@ import { copyFixture, FIXTURES, serveFixture } from "./helpers/serve.js";
 
 const BIN = fileURLToPath(new URL("../bin/launch-check.js", import.meta.url));
 const exec = promisify(execFile);
-const APPS = ["broken-app", "clean-app"];
+const APPS = ["broken-app", "clean-app", "broken-he", "clean-he"];
 const expected = Object.fromEntries(await Promise.all(APPS.map(async (a) => [a, JSON.parse(await readFile(path.join(FIXTURES, a, "expected.json"), "utf8"))])));
 const results = {};
 const cleanup = [];
 
 before(async () => {
-  await Promise.all(APPS.map(async (app) => {
+  // one app at a time: four Chromes at once, next to the other test files, starve each other
+  for (const app of APPS) await (async () => {
     const dir = await copyFixture(app);
     const site = await serveFixture(dir);
     cleanup.push(async () => (await site.close(), await rm(dir, { recursive: true, force: true })));
     const only = expected[app].expect.map((r) => r.checkId).join(",");
     const { stdout } = await exec(process.execPath, [BIN, "run", "--target", site.url, "--mode", "full", "--only", only, "--json"], { cwd: dir });
     results[app] = { out: JSON.parse(stdout), state: JSON.parse(await readFile(path.join(dir, ".launch-check", "state.json"), "utf8")) };
-  }));
+  })();
 });
 
 after(async () => {

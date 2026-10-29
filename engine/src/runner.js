@@ -110,6 +110,16 @@ export async function detectOnly({ root, target }) {
  * @returns {Promise<{ entry: any, status: string, reason?: string, items: any[], error?: string }>}
  */
 async function runOne(c, ctx) {
+  const started = Date.now();
+  try {
+    return await runOneTimed(c, ctx);
+  } finally {
+    // LC_TIMINGS=1: how long each check took, for finding the slow ones
+    if (process.env.LC_TIMINGS) process.stderr.write(`${String(Date.now() - started).padStart(6)} ms  ${c.id}\n`);
+  }
+}
+
+async function runOneTimed(c, ctx) {
   try {
     let timer;
     const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000)));

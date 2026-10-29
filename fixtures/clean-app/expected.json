@@ -151,6 +151,72 @@
       "checkId": "agent.bot-wall",
       "status": "skip",
       "note": "local address: bot protection only exists on the live site (live path: live-paths.test.js)"
+    },
+    {
+      "checkId": "a11y.keyboard",
+      "status": "pass"
+    },
+    {
+      "checkId": "a11y.focus-visible",
+      "status": "pass"
+    },
+    {
+      "checkId": "a11y.headings",
+      "status": "pass"
+    },
+    {
+      "checkId": "a11y.zoom",
+      "status": "pass"
+    },
+    {
+      "checkId": "a11y.motion",
+      "status": "pass"
+    },
+    {
+      "checkId": "qa.external-links",
+      "status": "pass"
+    },
+    {
+      "checkId": "qa.anchors",
+      "status": "pass"
+    },
+    {
+      "checkId": "qa.orphan-pages",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.cls",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.inp",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.images-format",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.lazy-load",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.bundle-size",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.fonts",
+      "status": "pass"
+    },
+    {
+      "checkId": "perf.cache",
+      "status": "skip",
+      "note": "local address: caching is set by the host"
+    },
+    {
+      "checkId": "perf.third-party",
+      "status": "pass",
+      "note": "no scripts from other services; measuring is covered by the real-app pass"
     }
   ]
 }

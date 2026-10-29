@@ -1,0 +1,41 @@
+{
+  "about": "broken-he with every planted problem fixed. Every row must pass.",
+  "detected": {
+    "he": true,
+    "i18n": true
+  },
+  "expect": [
+    {
+      "checkId": "rtl.icons",
+      "status": "pass"
+    },
+    {
+      "checkId": "rtl.mixed-text",
+      "status": "pass"
+    },
+    {
+      "checkId": "rtl.switcher",
+      "status": "pass"
+    },
+    {
+      "checkId": "rtl.hreflang",
+      "status": "pass"
+    },
+    {
+      "checkId": "rtl.dates",
+      "status": "pass"
+    },
+    {
+      "checkId": "rtl.currency",
+      "status": "pass"
+    },
+    {
+      "checkId": "rtl.phone",
+      "status": "pass"
+    },
+    {
+      "checkId": "a11y.statement",
+      "status": "pass"
+    }
+  ]
+}

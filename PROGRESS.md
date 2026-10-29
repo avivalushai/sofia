@@ -116,6 +116,25 @@
     - In the browser: `agent.prices-text` and `agent.forms-fillable` (no submit button, fake fields, gestures).
     - `agent.bot-wall` opens the live site as ChatGPT-User, Claude-User and Perplexity-User. When an ordinary request is blocked too, the result is "couldn't tell".
     - New check flag `expectsBlocks`: for this check, a challenge page is the answer itself, not a reason to give up.
+  - Accessibility, 6 of 6:
+    - Browser: `a11y.keyboard` (Tab traps, and click-only controls), `a11y.focus-visible` (the look before and after focus).
+    - Mechanical: `a11y.headings`, `a11y.zoom`, `a11y.motion`, `a11y.statement` (required by Israeli law; the fix lists what the statement must contain).
+  - Hebrew and other languages, 7 of 7:
+    - `rtl.icons` (forward and back arrows pointing the left-to-right way, unless flipped) and `rtl.mixed-text` (an English sentence in a right-to-left block, or a Hebrew sentence forced left to right).
+    - `rtl.switcher`: flagged only when the other language actually has the same page.
+    - `rtl.hreflang`: the language versions must point to each other.
+    - `rtl.dates`, `rtl.currency` (NIS in Hebrew text, a dot for thousands, ₪ on both sides) and `rtl.phone` (the field must accept 0501234567 and 050-1234567).
+    - New test apps `fixtures/broken-he` and `fixtures/clean-he`: a Hebrew site with an English version.
+  - Quality, 3 of 3:
+    - `qa.external-links`: dead means the domain doesn't exist or the page answers 404/410. Social sites that block bots are skipped. When nothing answers, it first checks whether this machine is online.
+    - `qa.anchors` and `qa.orphan-pages`. Thank-you, admin, auth and similar pages count as unlinked on purpose.
+  - Performance, 8 of 8:
+    - On a slow phone (Slow 4G, CPU ×4): `perf.cls` and `perf.inp`.
+    - `perf.images-format`: dimensions measured at desktop width, plus heavy PNG photos.
+    - `perf.lazy-load`, `perf.bundle-size` (compressed; skipped on a local dev server, which doesn't bundle), `perf.fonts` (text hidden until the font loads; file count and weight), `perf.cache` (live only), `perf.third-party`.
+    - Chrome marks load-time layout shifts as "after input" under touch emulation, so `perf.cls` ignores that flag.
+  - Tests run 3 files at a time (`--test-concurrency=3`), and the test apps are scanned one after another. With everything in parallel, Chrome instances starved each other and checks timed out.
+  - `LC_TIMINGS=1` prints how long each check took.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog — Tidy</title>
+  <meta name="description" content="Notes from the Tidy team on running short meetings, writing useful notes and keeping a small team in sync.">
+  <link rel="canonical" href="https://tidy.example/blog.html">
+  <style>
+    @font-face { font-family: "Brand"; src: url("/fonts/brand.woff2") format("woff2"); font-display: swap; }
+    body { margin: 0; font-family: "Brand", system-ui, sans-serif; }
+    main { padding: 0 16px; }
+    img { max-width: 100%; }
+    .spacer { height: 2400px; }
+    button { cursor: pointer; }
+    button:hover { filter: brightness(0.92); }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/images/hero.webp" alt="Our team at work" width="1200" height="630" style="width:100%;height:auto">
+    <h1>How we run meetings</h1>
+    <p>We keep every meeting under thirty minutes and write the notes as we go.</p>
+    <button type="button" id="more" onclick="this.textContent = 'Shown'">Show more</button>
+    <p><a href="#comments">Jump to comments</a></p>
+    <div class="spacer"></div>
+    <img src="/images/team-photo.png" alt="The team" width="1200" height="400" loading="lazy" style="width:100%;height:auto">
+    <section id="comments"><h2>Comments</h2><p>No comments yet.</p></section>
+  </main>
+</body>
+</html>

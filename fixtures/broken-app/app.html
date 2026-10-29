@@ -15,7 +15,9 @@
   </style>
 </head>
 <body>
-  <header><h1>Your notes</h1></header>
+  <header><h1>Your notes</h1>
+    <!-- a11y.keyboard: opens the menu on click only; not a button, not reachable with Tab -->
+    <div class="menu-toggle" onclick="document.querySelector('.tabs').hidden = !document.querySelector('.tabs').hidden" style="cursor:pointer">Menu</div></header>
   <main>
     <p>Weekly sync: agenda and decisions.</p>
     <p>Launch checklist: copy, images, pricing.</p>

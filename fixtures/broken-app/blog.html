@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog — Tidy</title>
+  <meta name="description" content="Notes from the Tidy team.">
+  <style>
+    /* perf.fonts: text stays invisible until the font arrives */
+    @font-face { font-family: "Brand"; src: url("/fonts/brand.woff2") format("woff2"); font-display: block; }
+    body { margin: 0; font-family: "Brand", system-ui, sans-serif; }
+    main { padding: 0 16px; }
+    img { max-width: 100%; }
+    .spacer { height: 2400px; }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- perf.cls: a tall image with no size: the text below jumps when it arrives -->
+    <img src="/images/cover.png" alt="A meeting room" style="width:100%">
+    <h1>How we run meetings</h1>
+    <p>We keep every meeting under thirty minutes and write the notes as we go.</p>
+    <!-- perf.inp: this button blocks the page for a moment on every tap -->
+    <button type="button" id="more" onclick="const t = Date.now(); while (Date.now() - t < 400) {} this.textContent = 'Shown'">Show more</button>
+    <!-- qa.anchors: a link to a section that doesn't exist -->
+    <p><a href="#comments">Jump to comments</a></p>
+    <!-- perf.images-format: a 1600px-wide, 1.4 MB PNG photo shown at phone width -->
+    <img src="/images/hero-large.png" alt="Our team at work" width="1600" height="300" style="width:100%;height:auto">
+    <div class="spacer"></div>
+    <!-- perf.lazy-load: far down the page, downloaded straight away -->
+    <img src="/images/team-wide.png" alt="The team" width="1200" height="400" style="width:100%;height:auto">
+    <!-- qa.external-links: a site that no longer exists -->
+    <p>Inspired by <a href="https://dead-link-for-sofia.example/meetings">this article</a>.</p>
+  </main>
+</body>
+</html>

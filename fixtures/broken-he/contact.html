@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>צור קשר — יוגה שקטה</title>
+  <meta name="description" content="צרו קשר עם הסטודיו.">
+</head>
+<body>
+  <header><nav><a href="/">בית</a> <a href="/pricing.html">מחירים</a> <a href="/contact.html">צור קשר</a> <a href="/en/">English</a></nav></header>
+  <main>
+    <h1>צור קשר</h1>
+    <form action="/api/contact" method="post">
+      <label>שם <input name="name" autocomplete="name"></label>
+      <!-- rtl.phone: an American pattern and example -->
+      <label>טלפון <input type="tel" name="phone" autocomplete="tel" pattern="\d{3}-\d{3}-\d{4}" placeholder="(555) 555-5555"></label>
+      <button type="submit">שליחת הפרטים</button>
+    </form>
+  </main>
+  <footer><p>כל הזכויות שמורות</p></footer>
+</body>
+</html>

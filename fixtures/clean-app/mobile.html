@@ -7,6 +7,9 @@
   <link rel="canonical" href="https://tidy.example/mobile.html">
   <meta name="description" content="Why teams pick Tidy: notes people actually read, a weekly summary by email, and an app that works on any phone.">
   <style>
+    @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .hero h1 { animation: rise 1.2s ease-out; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; }
     .hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 24px 24px; box-sizing: border-box; background: #f3f0ea; }
     .hero a { display: inline-block; padding: 14px 20px; background: #222; color: #fff; text-decoration: none; }
@@ -23,6 +26,7 @@
     <a href="/login.html">Start free</a>
   </section>
   <nav><a href="/">Home</a><a href="/contact.html">Contact</a><a href="/app.html">App</a></nav>
+  <h2>Built for small teams</h2>
   <p>Tidy keeps your team's notes in one place.</p>
   <p class="fine">Tidy stores your notes on servers in the EU. Plans renew every month until you cancel. Prices include VAT where it applies, and you can export your notes at any time from the settings page.</p>
 </main>
