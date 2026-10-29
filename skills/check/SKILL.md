@@ -19,8 +19,14 @@ Run it from the user's project root:
 LC="node ${CLAUDE_SKILL_DIR}/../../engine/bin/launch-check.js"
 ```
 
-If it fails with "Cannot find package", install its dependencies once (no browser download — it uses the user's Chrome):
+Installed copies ship with the engine's libraries. Only in a development copy, if it fails with "Cannot find package", install them once (no browser download — it uses the user's Chrome):
 `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --omit=dev --prefix "${CLAUDE_SKILL_DIR}/../../engine"`
+
+**If Node is missing or older than 20** (`node: command not found`, or the engine says it needs a newer Node), don't show the error. Say it plainly and offer to install it, for example: "To check your app I need a free tool called Node.js. Want me to install it? It takes about a minute." Install only after a yes:
+- macOS with Homebrew (`brew -v` works): `brew install node`
+- Windows: `winget install OpenJS.NodeJS.LTS`
+- Otherwise: send them to https://nodejs.org, tell them to download the LTS version and open it like any installer, then come back and say "done".
+Then check `node -v` and continue where you were.
 
 | Command | Use |
 |---|---|
