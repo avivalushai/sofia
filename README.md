@@ -29,6 +29,19 @@ In Claude Code, type:
 /plugin install sofia@sofia
 ```
 
+## Update
+
+Sofia doesn't update herself unless you turn that on. To get the newest version, run these in your terminal:
+
+```
+claude plugin marketplace update sofia
+claude plugin update sofia@sofia
+```
+
+Then restart Claude Code. Not comfortable with the terminal? Ask Claude: "update the Sofia plugin".
+
+To get new versions automatically: type `/plugin` in Claude Code, open **Marketplaces**, choose **sofia** and turn on auto-update.
+
 ## Use
 
 In your app's folder, ask Claude:
@@ -61,6 +74,8 @@ Sofia shows a summary in the chat and opens a full report page on your computer.
 שימוש: בתיקייה של האפליקציה, כתבו ל-Claude ״סופיה, תבדקי לי את האפליקציה״.
 
 צריך Google Chrome ו-Node.js בגרסה 20 ומעלה.
+
+עדכון לגרסה חדשה: הריצו בטרמינל את שתי הפקודות שבסעיף Update למעלה ואז הפעילו מחדש את Claude Code, או פשוט בקשו מ-Claude: ״תעדכן את התוסף של סופיה״. לעדכון אוטומטי: `/plugin` ← Marketplaces ← sofia ← הפעלת auto-update.
 
 ## License
 
