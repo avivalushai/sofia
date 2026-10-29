@@ -45,6 +45,26 @@
     {
       "checkId": "forms.backup",
       "status": "pass"
+    },
+    {
+      "checkId": "resp.text-size",
+      "status": "pass"
+    },
+    {
+      "checkId": "resp.orientation",
+      "status": "pass"
+    },
+    {
+      "checkId": "resp.safari-ios",
+      "status": "pass"
+    },
+    {
+      "checkId": "resp.fixed-overlap",
+      "status": "pass"
+    },
+    {
+      "checkId": "resp.tablet",
+      "status": "pass"
     }
   ]
 }

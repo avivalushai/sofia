@@ -23,6 +23,11 @@
     { "checkId": "qa.loading-states",           "status": "pass", "note": "no data is loaded after the page; nothing to wait for" },
     { "checkId": "qa.error-states",             "status": "pass", "note": "no data requests to fail" },
 
+    { "checkId": "resp.text-size",             "status": "pass", "note": "body text is readable on a phone" },
+    { "checkId": "resp.orientation",           "status": "pass", "note": "no floating bars; nothing scrolls sideways in landscape" },
+    { "checkId": "resp.safari-ios",            "status": "pass", "note": "no full-screen-height sections" },
+    { "checkId": "resp.fixed-overlap",         "status": "pass", "note": "no floating elements" },
+    { "checkId": "resp.tablet",                "status": "pass", "note": "nothing overlaps at 768 or 1024" },
     { "checkId": "resp.viewport",              "status": "pass" },
     { "checkId": "resp.no-horizontal-scroll",  "status": "fail", "note": ".pricing is 420px wide; fails at 375 and 390 on index only" },
     { "checkId": "resp.input-zoom",            "status": "fail", "note": "inputs are 14px" },

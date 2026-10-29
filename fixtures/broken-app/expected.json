@@ -54,6 +54,31 @@
       "checkId": "forms.backup",
       "status": "fail",
       "note": "api/contact.js only sends an email"
+    },
+    {
+      "checkId": "resp.text-size",
+      "status": "fail",
+      "note": "mobile.html: a paragraph at 10px"
+    },
+    {
+      "checkId": "resp.orientation",
+      "status": "fail",
+      "note": "app.html: fixed bars take 49% of a landscape phone screen"
+    },
+    {
+      "checkId": "resp.safari-ios",
+      "status": "fail",
+      "note": "mobile.html: hero is min-height: 100vh with its button at the bottom"
+    },
+    {
+      "checkId": "resp.fixed-overlap",
+      "status": "fail",
+      "note": "mobile.html: the chat button covers the Terms link at the bottom of the page"
+    },
+    {
+      "checkId": "resp.tablet",
+      "status": "fail",
+      "note": "mobile.html: menu items overlap between 768 and 1100px"
     }
   ]
 }
