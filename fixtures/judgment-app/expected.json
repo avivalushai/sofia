@@ -96,6 +96,31 @@
       ],
       "status": "fail",
       "note": "sign-up and login, but no way to delete the account or download the notes"
+    },
+    {
+      "checkId": "content.button-labels",
+      "files": [
+        "index.html",
+        ".launch-check/review/pages.txt"
+      ],
+      "status": "fail",
+      "note": "a 'לחצו כאן' link on the home page"
+    },
+    {
+      "checkId": "content.error-copy",
+      "files": [
+        "assets/home.js"
+      ],
+      "status": "fail",
+      "note": "the assistant shows only 'Error 500' when the request fails"
+    },
+    {
+      "checkId": "content.404-copy",
+      "files": [
+        "404.html"
+      ],
+      "status": "fail",
+      "note": "404.html says only '404 Not Found', with no link"
     }
   ]
 }

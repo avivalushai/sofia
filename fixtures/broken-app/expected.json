@@ -2,7 +2,8 @@
   "about": "A small app with login and API endpoints, with one planted problem for each check listed here (the M9 checks). clean-app is the same app with every one of them fixed. Used by engine/test/apps.test.js.",
   "detected": {
     "auth": true,
-    "forms": true
+    "forms": true,
+    "dark": true
   },
   "expect": [
     {
@@ -79,6 +80,46 @@
       "checkId": "resp.tablet",
       "status": "fail",
       "note": "mobile.html: menu items overlap between 768 and 1100px"
+    },
+    {
+      "checkId": "design.type-scale",
+      "status": "fail",
+      "note": "pricing.html: nine sizes, several a pixel apart"
+    },
+    {
+      "checkId": "design.spacing-scale",
+      "status": "fail",
+      "note": "pricing.html: paddings 5, 7, 9, 11, 13…"
+    },
+    {
+      "checkId": "design.radius-shadow",
+      "status": "fail",
+      "note": "pricing.html: six corner roundings, five shadows"
+    },
+    {
+      "checkId": "design.input-families",
+      "status": "fail",
+      "note": "pricing.html: pill fields and underline fields"
+    },
+    {
+      "checkId": "design.icon-sets",
+      "status": "fail",
+      "note": "Lucide in Toolbar.jsx, Font Awesome in Footer.jsx"
+    },
+    {
+      "checkId": "design.dark-mode",
+      "status": "fail",
+      "note": "pricing.html: plan cards stay white in dark mode"
+    },
+    {
+      "checkId": "design.focus-hover",
+      "status": "fail",
+      "note": "pricing.html: 'Choose Free' doesn't change under the mouse"
+    },
+    {
+      "checkId": "content.file-names",
+      "status": "fail",
+      "note": "images/Screenshot 2026-03-14… and images/IMG_4821.png"
     }
   ]
 }

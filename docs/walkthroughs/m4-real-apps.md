@@ -78,3 +78,13 @@ Local copies (scratch folder, originals untouched), the 22 checks added so far i
 | 2 password fields "without autofill" | Demo fields, one of them read-only | Read-only and disabled fields are skipped, and only forms that send something count |
 | "Form submissions only exist as an email" | The word "Resend" in a template sentence | A mail service now has to be imported, or called by its address |
 | Buttons "overlapping" on tablets | Items scrolled out of view inside a side panel, under the welcome dialog | An overlap counts only where one of the two buttons is really visible at that spot |
+
+### Content and design (same day)
+- **NehoRace:**
+  - The design checks all pass. There's no dark mode and no not-found page, so those two skip.
+  - The `content.button-labels` reviewer passed every question.
+  - The `content.error-copy` reviewer found 5 real places where a failure is silent or unhelpful. For example, a race that doesn't reach the champions board because the connection dropped, and an invite link that opens to nothing. Each comes with a "Keep it as it is" option, since the game is designed to work offline.
+- **Blockout:**
+  - Type sizes 1px apart (11/12/13/14), odd spacing values, and 7 corner roundings are true observations about a dense editor UI. They're polish-level "choice" findings that the owner can keep.
+  - The 5 icon sets come from the component libraries the product shows on purpose. The finding offers "They're there on purpose", as `design.ui-libraries` does.
+- **Rubric fix:** two reviewers disagreed on whether a request with no `catch` counts as "error swallowed". The rubric now says it does. Two fresh reviewers then matched on every question.

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pricing — Tidy</title>
+  <meta name="description" content="Plans for every team size.">
+  <style>
+    body { margin: 0; padding: 24px; font-family: system-ui, sans-serif; font-size: 16px; background: #fafafa; color: #222; }
+    /* design.dark-mode: the page goes dark, the plan cards stay white */
+    @media (prefers-color-scheme: dark) { body { background: #111; color: #eee; } }
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .plan { background: #fff; color: #222; }
+    /* design.type-scale: nine sizes, several a pixel apart */
+    .a { font-size: 13px; } .b { font-size: 14px; } .c { font-size: 15px; } .d { font-size: 17px; } .e { font-size: 18px; } .f { font-size: 22px; } .g { font-size: 26px; } .h { font-size: 30px; }
+    /* design.spacing-scale: padding off any grid; design.radius-shadow: six corners, five shadows */
+    .p1 { padding: 5px; border-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+    .p2 { padding: 7px 9px; border-radius: 5px; box-shadow: 0 2px 3px rgba(0,0,0,.15); }
+    .p3 { padding: 11px 13px; border-radius: 7px; box-shadow: 0 3px 6px rgba(0,0,0,.12); }
+    .p4 { padding: 15px 18px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,.2); }
+    .p5 { padding: 21px 23px; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+    .p6 { padding: 27px; border-radius: 20px; }
+    /* design.input-families: two field styles in real use */
+    .pill { border: 0; background: #eee; border-radius: 999px; height: 40px; padding: 0 16px; }
+    .line { border: 0; border-bottom: 2px solid #999; background: transparent; height: 32px; }
+    /* design.focus-hover: a button with no hover style and the default cursor */
+    .buy { background: #222; color: #fff; border: 0; padding: 12px 20px; cursor: default; }
+  </style>
+</head>
+<body>
+  <h1 class="h">Pricing</h1>
+  <div class="plans">
+    <div class="plan p4"><h2 class="g">Free</h2><p class="a">For one person.</p><p class="b">Up to 50 notes.</p><button class="buy">Choose Free</button></div>
+    <div class="plan p5"><h2 class="g">Team</h2><p class="a">For small teams.</p><p class="b">Unlimited notes.</p></div>
+    <div class="plan p6"><h2 class="f">Business</h2><p class="c">SSO and audit log.</p><p class="c">Priority help.</p></div>
+  </div>
+  <section class="p1"><p class="d">Questions?</p><p class="d">We answer within a day.</p></section>
+  <section class="p2"><p class="e">Billing</p><p class="e">Monthly or yearly.</p></section>
+  <section class="p3"><p class="f">Refunds within 30 days.</p></section>
+  <form action="/api/quote" method="post">
+    <input class="pill" name="company" placeholder="Company">
+    <input class="pill" name="seats" placeholder="Seats">
+    <input class="line" name="budget" placeholder="Budget">
+    <input class="line" name="notes" placeholder="Notes">
+  </form>
+</body>
+</html>

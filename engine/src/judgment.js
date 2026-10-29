@@ -29,6 +29,10 @@ const SOURCES = {
   "sec.login-limit": { server: true, match: (t, f) => /bcrypt|argon2|scrypt|pbkdf2|CredentialsProvider|Credentials\(|password|signIn|login|otp|verify-?code|reset/i.test(t) && (SERVER_PATH.test(f) || SERVER_CODE.test(t) || /(^|\/)(auth|lib)\//.test(f)) },
   "forms.thank-you": { match: (t) => /onSubmit|addEventListener\(\s*["']submit|<form\b|handleSubmit|action=\{/.test(t) },
   "data.delete-export": { pages: true, match: (t, f) => /account|settings|profile|delete|remove|export|download|חשבון|הגדרות|פרופיל|מחיקה|ייצוא/i.test(f) || ((SERVER_PATH.test(f) || SERVER_CODE.test(t)) && /user|account|profile/i.test(t)) || /deleteUser|auth\.admin\.deleteUser|delete-?account|export-?data/i.test(t) },
+  "content.button-labels": { pages: true, match: (t) => /<button|<Button|role=["']button|type=["']submit|<a\s[^>]*href/i.test(t) },
+  "content.error-copy": { match: (t) => /\.catch\(|catch\s*\(|toast\.error|setError|showError|alert\(|\berror\s*[:=]|errors?\.[a-z]+\s*=|!res\.ok|res\.status\((4|5)\d\d\)|שגיאה|נכשל/i.test(t) },
+  // Next's not-found, Astro/Gatsby/Next pages 404, SvelteKit +error, Nuxt error.vue, React Router NotFound
+  "content.404-copy": { match: (t, f) => /(^|\/)(404|not-found|NotFound|\+error)\.(html?|jsx?|tsx?|vue|svelte|astro|mdx?)$|(^|\/)error\.vue$/.test(f) },
   "ai.output-as-code": { match: (t) => /dangerouslySetInnerHTML|\.innerHTML\s*=|v-html=|\{@html|marked\(|markdown-it|rehype-raw|eval\(|new Function\(/.test(t) || PAID_CALL.test(t) && /openai|anthropic|generativelanguage|completion|messages\.create/i.test(t) },
 };
 
@@ -38,6 +42,9 @@ const NOTHING = {
   "sec.rate-limit": "no server endpoints that call paid services were found",
   "ai.output-as-code": "no code that shows model answers was found",
   "forms.thank-you": "no forms were found",
+  "content.button-labels": "no buttons or links were found",
+  "content.error-copy": "no error messages were found in the code",
+  "content.404-copy": "the site has no not-found page of its own (qa.custom-404 covers that)",
   "data.delete-export": "nothing to read",
   "sec.xss-output": "no code that inserts HTML or reads the address bar was found",
   "sec.login-limit": "no code that checks a password was found — sign-in is handled elsewhere",

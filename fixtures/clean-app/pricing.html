@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pricing — Tidy</title>
+  <meta name="description" content="Plans for every team size.">
+  <style>
+    body { margin: 0; padding: 24px; font-family: system-ui, sans-serif; font-size: 16px; background: #fafafa; color: #222; }
+    @media (prefers-color-scheme: dark) { body { background: #111; color: #eee; } .plan { background: #1c1c1c !important; color: #eee !important; } .field { background: #222; color: #eee; } }
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .plan { background: #fff; color: #222; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    h1 { font-size: 32px; margin: 0 0 24px; }
+    h2 { font-size: 24px; margin: 0 0 16px; }
+    p { margin: 0 0 8px; }
+    .small { font-size: 14px; }
+    section { padding: 16px 24px; border-radius: 12px; }
+    .field { border: 1px solid #bbb; background: #fff; border-radius: 4px; min-height: 40px; padding: 0 12px; box-sizing: border-box; }
+    .buy { background: #222; color: #fff; border: 0; padding: 12px 20px; border-radius: 4px; cursor: pointer; }
+    .buy:hover { background: #444; }
+  </style>
+</head>
+<body>
+  <h1>Pricing</h1>
+  <div class="plans">
+    <div class="plan"><h2>Free</h2><p class="small">For one person.</p><p>Up to 50 notes.</p><button class="buy">Choose Free</button></div>
+    <div class="plan"><h2>Team</h2><p class="small">For small teams.</p><p>Unlimited notes.</p></div>
+    <div class="plan"><h2>Business</h2><p class="small">SSO and audit log.</p><p>Priority help.</p></div>
+  </div>
+  <section><p>Questions?</p><p class="small">We answer within a day.</p></section>
+  <section><p>Billing</p><p class="small">Monthly or yearly.</p></section>
+  <form action="/api/quote" method="post">
+    <input class="field" name="company" placeholder="Company" autocomplete="organization" enterkeyhint="next">
+    <input class="field" name="seats" placeholder="Seats" type="number" enterkeyhint="send">
+    <input type="text" name="website" tabindex="-1" autocomplete="off" hidden aria-hidden="true">
+  </form>
+</body>
+</html>

@@ -2,7 +2,8 @@
   "about": "broken-app with every planted problem fixed. Every row must pass: this is the guard against false alarms.",
   "detected": {
     "auth": true,
-    "forms": true
+    "forms": true,
+    "dark": true
   },
   "expect": [
     {
@@ -64,6 +65,38 @@
     },
     {
       "checkId": "resp.tablet",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.type-scale",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.spacing-scale",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.radius-shadow",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.input-families",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.icon-sets",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.dark-mode",
+      "status": "pass"
+    },
+    {
+      "checkId": "design.focus-hover",
+      "status": "pass"
+    },
+    {
+      "checkId": "content.file-names",
       "status": "pass"
     }
   ]

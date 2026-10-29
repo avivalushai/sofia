@@ -17,6 +17,11 @@ document.getElementById("join").addEventListener("click", () => {
 document.getElementById("ask").addEventListener("click", async () => {
   const question = document.getElementById("question").value;
   const res = await fetch("/api/chat", { method: "POST", body: JSON.stringify({ question }) });
+  // content.error-copy — a status code is all the visitor gets
+  if (!res.ok) {
+    document.getElementById("answer").textContent = "Error " + res.status;
+    return;
+  }
   const { answer } = await res.json();
   document.getElementById("answer").innerHTML = answer;
 });

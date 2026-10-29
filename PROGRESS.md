@@ -99,6 +99,15 @@
     - Code review: `forms.thank-you`.
   - Data, 1 of 1: `data.delete-export` (code review).
   - Mobile, 5 of 5 (in the browser): `resp.text-size`, `resp.orientation` (a phone in landscape), `resp.safari-ios` (100vh sections whose bottom hides under Safari's bar), `resp.fixed-overlap` (links under a floating element, checked at the top and the bottom of the page, where scrolling can't uncover them), `resp.tablet` (768 and 1024: overlapping links and buttons, sideways scrolling at 1024). Cookie banners and full-screen menus aren't counted as floating elements.
+  - Content, 4 of 4:
+    - Mechanical: `content.file-names` (Screenshot…, IMG_1234, "(1)", final_v2, random hashes in published media).
+    - Code review: `content.button-labels`, `content.error-copy`, `content.404-copy`. The last one runs only when the site has its own not-found page; `qa.custom-404` covers sites without one.
+  - Design, 7 of 7:
+    - Browser: `design.type-scale`, `design.spacing-scale`, `design.radius-shadow`, `design.input-families`, `design.dark-mode`, `design.focus-hover`.
+    - Mechanical: `design.icon-sets`.
+    - Spacing flags odd pixel values (5, 7, 13, 21…), not values off a 4px grid, because Tailwind's own steps include 6, 10 and 14. The browser's default heading and paragraph margins are ignored.
+    - Dark mode turns on the system setting, a `dark` class and a saved theme. A site that stays light under all three gets "couldn't tell", since its dark mode needs a toggle.
+    - **Decision (mine): `design.focus-hover` checks the mouse only.** Keyboard focus belongs to `a11y.focus-visible`, so one problem doesn't produce two findings.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.
   - New test apps:

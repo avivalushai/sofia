@@ -1,0 +1,4 @@
+// design.icon-sets: Lucide here…
+import { Bold, Italic } from "lucide-react";
+
+export const Toolbar = () => (<div><Bold /><Italic /></div>);
