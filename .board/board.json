@@ -856,7 +856,7 @@
       "title": "Landing page for Sofia",
       "type": "feature",
       "status": "review",
-      "note": "Owner reviews the Night shift page; open: phone-width check, commit site/, real install once the repo is public",
+      "note": "Owner reviews; numbers on the page (63 live / 175) are out of date: catalog now says all 175 built, 8 deprecated, 167 active",
       "doneWhen": [],
       "steps": [],
       "files": [
@@ -864,11 +864,12 @@
         ".claude/launch.json"
       ],
       "links": [
-        "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM"
+        "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM",
+        "09eab5c"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:24:57Z",
-      "updatedAt": "2026-10-29T13:55:45Z",
+      "updatedAt": "2026-10-29T14:01:11Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -940,6 +941,16 @@
           "at": "2026-10-29T13:55:45Z",
           "by": "claude",
           "text": "Note: Owner reviews the Night shift page; open: phone-width check, commit site/, real install once the repo is public"
+        },
+        {
+          "at": "2026-10-29T14:01:11Z",
+          "by": "claude",
+          "text": "Proof: 09eab5c"
+        },
+        {
+          "at": "2026-10-29T14:01:11Z",
+          "by": "claude",
+          "text": "Note: Owner reviews; numbers on the page (63 live / 175) are out of date: catalog now says all 175 built, 8 deprecated, 167 active"
         }
       ]
     },
