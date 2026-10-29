@@ -1,0 +1,11 @@
+{
+  "about": "A small app with login and API endpoints, with one planted problem for each check listed here (the M9 checks). clean-app is the same app with every one of them fixed. Used by engine/test/apps.test.js.",
+  "detected": { "auth": true, "forms": true },
+  "expect": [
+    { "checkId": "sec.headers", "status": "fail", "note": "vercel.json sets no security headers" },
+    { "checkId": "sec.cookies", "status": "fail", "note": "api/session.js sets the session cookie with no HttpOnly, Secure or SameSite" },
+    { "checkId": "sec.cors", "status": "fail", "note": "api/profile.js copies back the caller's origin and allows credentials" },
+    { "checkId": "sec.source-maps", "status": "fail", "note": "vite.config.js: sourcemap: true" },
+    { "checkId": "sec.mixed-content", "status": "fail", "note": "http:// image and http:// form action on the home page" }
+  ]
+}

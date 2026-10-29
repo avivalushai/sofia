@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in — Tidy</title>
+  <meta name="description" content="Log in to Tidy.">
+</head>
+<body>
+  <main>
+    <h1>Log in</h1>
+    <form action="/api/session" method="post">
+      <label>Email <input type="email" name="email" autocomplete="email"></label>
+      <label>Password <input type="password" name="password" autocomplete="current-password"></label>
+      <button type="submit">Log in</button>
+    </form>
+  </main>
+</body>
+</html>

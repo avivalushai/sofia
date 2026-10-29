@@ -53,6 +53,11 @@
     { "checkId": "forms.validation",            "status": "fail", "note": "requires consent; no required fields, an empty email is sent" },
     { "checkId": "behave.double-submit",        "status": "fail", "note": "requires consent; two clicks send two requests" },
 
+    { "checkId": "sec.headers",                "status": "uncertain", "note": "local copy with no host settings file: the host may add headers; only a live scan can tell" },
+    { "checkId": "sec.cookies",                "status": "skip", "note": "no login" },
+    { "checkId": "sec.cors",                   "status": "pass", "note": "no API code" },
+    { "checkId": "sec.source-maps",            "status": "pass", "note": "no build settings that publish source maps" },
+    { "checkId": "sec.mixed-content",          "status": "pass", "note": "everything loads from the site itself" },
     { "checkId": "sec.client-secrets",         "status": "fail", "note": "sk_live_ pattern in assets/app.js (fake value)" },
     { "checkId": "sec.debug-logs",             "status": "fail", "note": "console.log of form data" },
     { "checkId": "sec.repo-secrets",            "status": "skip", "note": "the test copy of the fixture is not a git repository" },

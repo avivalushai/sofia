@@ -89,6 +89,17 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
+- **M9, the rest of the catalog (started 2026-10-29).** Order: security → forms → data → mobile → content → design → sharing & search → the rest.
+  - Security, 7 of 7 built:
+    - In code: `sec.headers`, `sec.cookies`, `sec.cors`, `sec.source-maps`.
+    - In the browser: `sec.mixed-content`.
+    - Code review: `sec.xss-output`, `sec.login-limit`.
+  - New test apps:
+    - `fixtures/broken-app/` has one planted problem for each new check.
+    - `fixtures/clean-app/` is the same app with every problem fixed, so every check must pass there; it guards against false alarms.
+    - Test: `engine/test/apps.test.js`.
+  - The parts that only run against a live site are tested with the network stubbed out (`engine/test/live-paths.test.js`).
+  - On a local copy, `sec.headers` reads the host settings files (vercel.json, netlify.toml, _headers, next.config…). When the project has none, the result is "couldn't tell", not "fail".
 - M4: false-positive pass over real apps. NehoRace and Blockout are done (`docs/walkthroughs/m4-real-apps.md`). Still to do: a live re-scan of both once Vercel stops challenging this machine, a third app (one with a form, login or database), and the `clean-landing` / `app-with-auth` fixtures.
 
 ## Dependencies (with reasons)

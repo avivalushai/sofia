@@ -44,7 +44,8 @@ test("the shipped checks folder loads and matches the catalog", async () => {
   const { implemented, notImplemented } = await loadChecks(catalog);
   assert.equal(implemented.length + notImplemented.length, 175);
   const mechanicalV1 = catalog.checks.filter((c) => c.v1 && c.layer === "mechanical").map((c) => c.id).sort();
-  assert.deepEqual(implemented.filter((c) => c.entry.layer === "mechanical").map((c) => c.id).sort(), mechanicalV1, "M1: every v1 mechanical check");
+  const have = new Set(implemented.map((c) => c.id));
+  assert.deepEqual(mechanicalV1.filter((id) => !have.has(id)), [], "M1: every v1 mechanical check");
 });
 
 test("a check file is matched to its catalog entry", async () => {

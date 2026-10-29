@@ -1,13 +1,85 @@
 {
   "about": "Judgment checks: what the review tasks must contain when Sofia scans this fixture, and what a correct review must conclude. Used by engine tests and the reviewer consistency run.",
-  "detected": { "forms": true, "auth": true, "ai": true, "he": true },
+  "detected": {
+    "forms": true,
+    "auth": true,
+    "ai": true,
+    "he": true
+  },
   "reviews": [
-    { "checkId": "leftover.mock-data", "files": ["assets/home.js", ".launch-check/review/pages.txt"], "status": "fail", "note": "1,247 customers typed in; invented testimonials" },
-    { "checkId": "leftover.unwired-ui", "files": ["assets/home.js", "assets/notes.js"], "status": "fail", "note": "join button only logs (TODO); reminders toggle not saved" },
-    { "checkId": "qa.empty-states", "files": ["assets/notes.js"], "status": "fail", "note": "notes list renders nothing when empty" },
-    { "checkId": "content.terms", "files": [".launch-check/review/pages.txt"], "status": "fail", "note": "הרשמה on the home page, הצטרפות on the login page, for the same action" },
-    { "checkId": "sec.server-authz", "files": ["api/notes.js"], "status": "fail", "note": "user id from the query string, no session check" },
-    { "checkId": "sec.rate-limit", "files": ["api/chat.js"], "status": "fail", "note": "paid model call with no limit and no sign-in" },
-    { "checkId": "ai.output-as-code", "files": ["assets/home.js"], "status": "fail", "note": "answer inserted with innerHTML" }
+    {
+      "checkId": "leftover.mock-data",
+      "files": [
+        "assets/home.js",
+        ".launch-check/review/pages.txt"
+      ],
+      "status": "fail",
+      "note": "1,247 customers typed in; invented testimonials"
+    },
+    {
+      "checkId": "leftover.unwired-ui",
+      "files": [
+        "assets/home.js",
+        "assets/notes.js"
+      ],
+      "status": "fail",
+      "note": "join button only logs (TODO); reminders toggle not saved"
+    },
+    {
+      "checkId": "qa.empty-states",
+      "files": [
+        "assets/notes.js"
+      ],
+      "status": "fail",
+      "note": "notes list renders nothing when empty"
+    },
+    {
+      "checkId": "content.terms",
+      "files": [
+        ".launch-check/review/pages.txt"
+      ],
+      "status": "fail",
+      "note": "הרשמה on the home page, הצטרפות on the login page, for the same action"
+    },
+    {
+      "checkId": "sec.server-authz",
+      "files": [
+        "api/notes.js"
+      ],
+      "status": "fail",
+      "note": "user id from the query string, no session check"
+    },
+    {
+      "checkId": "sec.rate-limit",
+      "files": [
+        "api/chat.js"
+      ],
+      "status": "fail",
+      "note": "paid model call with no limit and no sign-in"
+    },
+    {
+      "checkId": "ai.output-as-code",
+      "files": [
+        "assets/home.js"
+      ],
+      "status": "fail",
+      "note": "answer inserted with innerHTML"
+    },
+    {
+      "checkId": "sec.xss-output",
+      "files": [
+        "assets/notes.js"
+      ],
+      "status": "fail",
+      "note": "note titles from the database inserted with innerHTML (notes.js line 5)"
+    },
+    {
+      "checkId": "sec.login-limit",
+      "files": [
+        "api/login.js"
+      ],
+      "status": "fail",
+      "note": "bcrypt password check with no limit on failed attempts"
+    }
   ]
 }

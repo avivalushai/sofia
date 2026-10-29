@@ -1,0 +1,11 @@
+{
+  "about": "broken-app with every planted problem fixed. Every row must pass: this is the guard against false alarms.",
+  "detected": { "auth": true, "forms": true },
+  "expect": [
+    { "checkId": "sec.headers", "status": "pass" },
+    { "checkId": "sec.cookies", "status": "pass" },
+    { "checkId": "sec.cors", "status": "pass" },
+    { "checkId": "sec.source-maps", "status": "pass", "note": "sourcemap: \"hidden\" keeps maps out of the published site" },
+    { "checkId": "sec.mixed-content", "status": "pass" }
+  ]
+}

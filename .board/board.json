@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 18,
-  "nextNoteNum": 17,
+  "nextNum": 20,
+  "nextNoteNum": 22,
   "features": [
     {
       "key": "ALL-1",
@@ -619,8 +619,8 @@
       "key": "ALL-17",
       "title": "Judgment checks: a separate reviewer reads the code against written rubrics (M7)",
       "type": "feature",
-      "status": "active",
-      "note": "rubrics for the 7 v1 checks, review tasks in the engine, add-findings with quote checks, reviewer agent, judgment fixture",
+      "status": "review",
+      "note": "Open a finding from the reviewer on the report page and check the quote",
       "doneWhen": [
         "Reviewer findings include file+line quotes",
         "The same review twice gives the same pass/fail per rubric item on the fixture",
@@ -628,16 +628,106 @@
       ],
       "steps": [],
       "files": [
-        "engine/src/judgment.js"
+        "engine/src/judgment.js",
+        "skills/check/references/rubrics",
+        "agents/reviewer.md",
+        "fixtures/judgment-app"
       ],
-      "links": [],
+      "links": [
+        "151e110"
+      ],
       "area": "",
       "createdAt": "2026-10-25T11:23:18Z",
-      "updatedAt": "2026-10-25T11:25:49Z",
+      "updatedAt": "2026-10-25T11:42:19Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-25T11:23:18Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-10-25T11:42:19Z",
+          "by": "claude",
+          "text": "Files: skills/check/references/rubrics, agents/reviewer.md, fixtures/judgment-app"
+        },
+        {
+          "at": "2026-10-25T11:42:19Z",
+          "by": "claude",
+          "text": "Moved to review — Open a finding from the reviewer on the report page and check the quote"
+        },
+        {
+          "at": "2026-10-25T11:42:19Z",
+          "by": "claude",
+          "text": "Proof: 151e110"
+        }
+      ]
+    },
+    {
+      "key": "ALL-18",
+      "title": "Distribute Sofia: public marketplace others can install from",
+      "type": "feature",
+      "status": "idea",
+      "note": "Decide how to handle missing Node (detect + offer install) and how deps ship",
+      "doneWhen": [],
+      "steps": [
+        {
+          "text": "Public GitHub repo + real marketplace.json (not sofia-local)",
+          "done": false
+        },
+        {
+          "text": "Ship deps without npm install (bundle or vendored release branch)",
+          "done": false
+        },
+        {
+          "text": "Handle missing Node for non-developers",
+          "done": false
+        },
+        {
+          "text": "User README, LICENSE, privacy note",
+          "done": false
+        },
+        {
+          "text": "claude plugin validate + fresh install on a clean machine",
+          "done": false
+        }
+      ],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T09:23:56Z",
+      "updatedAt": "2026-10-29T09:29:49Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-29T09:23:56Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-10-29T09:29:49Z",
+          "by": "claude",
+          "text": "Note: Decide how to handle missing Node (detect + offer install) and how deps ship"
+        }
+      ]
+    },
+    {
+      "key": "ALL-19",
+      "title": "Landing page for Sofia",
+      "type": "feature",
+      "status": "active",
+      "note": "Owner picks a direction from the inspiration scan",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-10-29T09:24:57Z",
+      "updatedAt": "2026-10-29T09:24:57Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-29T09:24:57Z",
           "by": "claude",
           "text": "Created — active"
         }
@@ -981,6 +1071,94 @@
       "steps": [],
       "createdAt": "2026-10-19T14:29:00Z",
       "updatedAt": "2026-10-19T14:29:00Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N17",
+      "kind": "decision",
+      "title": "Reviewer: something that doesn't exist in the app = pass ('Doesn't apply'), not uncertain",
+      "body": "Came out of a consistency run where two reviewers split on this. Uncertain is only for something that exists but can't be decided.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-17"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-25T11:42:19Z",
+      "updatedAt": "2026-10-25T11:42:19Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N18",
+      "kind": "decision",
+      "title": "A reviewer's answer is accepted only if every quote is on the exact line in the code",
+      "body": "",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-17"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-25T11:42:19Z",
+      "updatedAt": "2026-10-25T11:42:19Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N19",
+      "kind": "reference",
+      "title": "Skill landing pages — inspiration scan",
+      "body": "Single-skill pages: impeccable.style (hero promise + before/after demos + 30 testimonials + 3-step install). Directories: skills.sh (ASCII logo, one install command, agent logo grid, install leaderboard), ui-skills.com (curated cards), claude.com/skills (benefit list, use-case groups, customer logos). Audience-match: VibeSafe / Nullsec (vibe-coder security scanners: plain English, score, 'here's what's broken, here's the fix').",
+      "considered": "",
+      "decidedBy": "",
+      "confirmedAt": "",
+      "url": "https://impeccable.style",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-10-29T09:24:57Z",
+      "updatedAt": "2026-10-29T09:24:57Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N20",
+      "kind": "decision",
+      "title": "Sofia's repo will be public",
+      "body": "Owner wants people to install it; public GitHub repo + marketplace.",
+      "considered": "",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-18"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T09:29:49Z",
+      "updatedAt": "2026-10-29T09:29:49Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N21",
+      "kind": "reference",
+      "title": "How Impeccable reached ~94k stars",
+      "body": "Facts: pbakaus/impeccable created 2025-11-16; 93.9k stars, 5.5k forks (gh, 2026-10-29). #1 GitHub Trending all languages in early March 2026 (~7k stars/week), 82 days on trending. Author Paul Bakaus: jQuery UI, Chrome DevTools, AMP, Google for Creators. Later a16z seed + bundled with GitHub Copilot app. My read (not sourced): known author, named a shared pain ('AI slop'), visual before/after proof, commands named as verbs (polish, bolder, critique, audit), works in every agent, free.",
+      "considered": "",
+      "decidedBy": "",
+      "confirmedAt": "",
+      "url": "https://www.star-history.com/pbakaus/impeccable/",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T09:31:28Z",
+      "updatedAt": "2026-10-29T09:31:28Z",
       "updatedBy": "claude"
     }
   ],
