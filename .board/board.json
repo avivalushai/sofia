@@ -8,7 +8,7 @@
     "granularity": "normal"
   },
   "nextNum": 26,
-  "nextNoteNum": 31,
+  "nextNoteNum": 32,
   "features": [
     {
       "key": "ALL-1",
@@ -593,7 +593,8 @@
       "doneWhen": [],
       "steps": [],
       "files": [
-        "engine/src/server.js"
+        "engine/src/server.js",
+        "engine/src/report-html.js"
       ],
       "links": [
         "http://127.0.0.1:4319",
@@ -602,7 +603,7 @@
       ],
       "area": "",
       "createdAt": "2026-10-19T14:23:14Z",
-      "updatedAt": "2026-10-29T11:00:26Z",
+      "updatedAt": "2026-10-29T12:34:46Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -680,7 +681,7 @@
       "title": "Distribute Sofia: public marketplace others can install from",
       "type": "feature",
       "status": "review",
-      "note": "v0.2.0 released: all 175 checks; installed fresh from GitHub and scanned",
+      "note": "v0.2.1 released (167 active checks, README update section); fresh install from GitHub verified",
       "doneWhen": [],
       "steps": [
         {
@@ -709,11 +710,12 @@
         "40c6f03",
         "https://superclaude.netlify.app",
         "b2ab26e",
-        "https://github.com/avivalushai/sofia"
+        "https://github.com/avivalushai/sofia",
+        "d1e67c3"
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T12:17:57Z",
+      "updatedAt": "2026-10-29T12:33:12Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -820,6 +822,16 @@
           "at": "2026-10-29T12:17:57Z",
           "by": "claude",
           "text": "Moved to review — v0.2.0 released: all 175 checks; installed fresh from GitHub and scanned"
+        },
+        {
+          "at": "2026-10-29T12:33:12Z",
+          "by": "claude",
+          "text": "Proof: d1e67c3"
+        },
+        {
+          "at": "2026-10-29T12:33:12Z",
+          "by": "claude",
+          "text": "Note: v0.2.1 released (167 active checks, README update section); fresh install from GitHub verified"
         }
       ]
     },
@@ -1649,17 +1661,33 @@
     {
       "id": "ALL-N30",
       "kind": "decision",
-      "title": "Checks that can't be verified from outside answer 'couldn't tell' with exact steps (guided checks)",
-      "body": "mail.spam-score, mail.system-emails, shop.checkout-flow, shop.test-purchase, shop.order-emails, launch.sitemap-submitted, run.uptime, run.backup. They pass only on evidence; 'couldn't tell' doesn't lower the score. Needs the owner's OK.",
+      "title": "Checks that can't be verified from outside are dropped (deprecated, ids kept)",
+      "body": "Owner decided 2026-10-29: drop them rather than answer 'couldn't tell'. mail.spam-score, mail.system-emails, shop.checkout-flow, shop.test-purchase, shop.order-emails, launch.sitemap-submitted, run.uptime, run.backup. 167 active checks.",
       "considered": "",
-      "decidedBy": "claude",
+      "decidedBy": "user",
       "confirmedAt": "",
       "url": "",
       "file": "",
       "cards": [],
       "steps": [],
       "createdAt": "2026-10-29T12:03:27Z",
-      "updatedAt": "2026-10-29T12:03:27Z",
+      "updatedAt": "2026-10-29T12:20:51Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N31",
+      "kind": "decision",
+      "title": "Hebrew dictionary: downloaded on first use, only for Hebrew apps",
+      "body": "Not shipped (AGPL). dictionary-he 2.0.0 from npm, sha512-verified, cached; English apps never download it; offline → Hebrew spelling 'couldn't tell'.",
+      "considered": "",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-10-29T12:29:36Z",
+      "updatedAt": "2026-10-29T12:29:36Z",
       "updatedBy": "claude"
     }
   ],

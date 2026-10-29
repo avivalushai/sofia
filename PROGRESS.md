@@ -243,7 +243,7 @@
 ## Open questions
 - **Scanning a live Vercel site trips Vercel's firewall for the scanning machine** (temporary). The probes are now minimal and run last, and the fix loop uses the local copy. Should live scans skip the probe checks unless the user asks (they'd become "local only")?
 - The walkthrough was done by me (Claude) following the skill inside this session, not by a fresh Claude Code session with the plugin installed. A fresh-session run would also test the skill's triggers. It runs a separate Claude session on your account, so I'd like your OK first.
-- **Hebrew dictionary licence.** The only good Hebrew dictionary (Hspell) is AGPL-3.0. Fine for development; before distributing (M8) decide between: ship it as-is (AGPL obligations may extend to the plugin), download it on first use, or drop Hebrew spell-checking.
+- ~~Hebrew dictionary licence~~: **decided 2026-10-29 (owner): download on first use, and only for apps with Hebrew text.** It isn't shipped with Sofia (a devDependency only, for the tests). On the first scan of a Hebrew app, the engine downloads dictionary-he 2.0.0 from npm (about 1 MB), checks it against a fixed sha512, and keeps it in the user's cache folder. An English app never downloads it. Offline, Hebrew spelling answers "couldn't tell" and English is still checked. Code: `engine/src/lib/hebrew-dictionary.js`.
 - `--target local` (start the dev server): proposed for M2.
 - From docs/07: final product name; whether `decisions` get committed by default; crawl page limit; whether quick mode runs automatically after UI edits.
 

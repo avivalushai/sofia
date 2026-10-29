@@ -1,20 +1,24 @@
 import { loadModule } from "hunspell-asm";
+import { DictionaryUnavailable, hebrewDictionary } from "./hebrew-dictionary.js";
 import { editDistance } from "./text.js";
 
 let factoryPromise;
 const spellers = new Map();
 
 /** Hunspell (WebAssembly) with the English or Hebrew dictionary, loaded once per process. */
-async function speller(lang) {
+async function speller(lang, options = {}) {
   if (!spellers.has(lang)) {
     spellers.set(lang, (async () => {
       factoryPromise ??= loadModule();
       const factory = await factoryPromise;
-      const { default: dict } = lang === "he" ? await import("dictionary-he") : await import("dictionary-en");
+      // Hebrew is downloaded on first use, and only for apps with Hebrew text (see hebrew-dictionary.js)
+      const dict = lang === "he" ? await hebrewDictionary(options) : (await import("dictionary-en")).default;
       const aff = factory.mountBuffer(dict.aff, `${lang}.aff`);
       const dic = factory.mountBuffer(dict.dic, `${lang}.dic`);
       return factory.create(aff, dic);
     })());
+    // a failed download can be tried again next time
+    spellers.get(lang).catch(() => spellers.delete(lang));
   }
   return spellers.get(lang);
 }
@@ -46,9 +50,10 @@ export function words(segment) {
  *  - it appears exactly once (repeated unknown words are names or brand terms), and
  *  - a known word one edit away exists (in the dictionary's suggestions or elsewhere on the site).
  * @param {string[]} segments  visible text pieces
+ * @param {{ onDownload?: (msg: string) => void, unavailable?: string[] }} [o]  unavailable collects why a language couldn't be checked
  * @returns {Promise<{ word: string, suggestion: string }[]>}
  */
-export async function findTypos(segments) {
+export async function findTypos(segments, { onDownload, unavailable = [] } = {}) {
   const counts = new Map();
   const lang = new Map();
   for (const seg of segments) {
@@ -64,7 +69,15 @@ export async function findTypos(segments) {
   const repeated = siteWords.filter((w) => counts.get(w) > 1 && lang.get(w) === "he").map(stripPrefixes);
   for (const [word, n] of [...counts].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     if (n !== 1) continue;
-    const s = await speller(lang.get(word));
+    let s;
+    try {
+      s = await speller(lang.get(word), { onDownload });
+    } catch (e) {
+      if (!(e instanceof DictionaryUnavailable)) throw e;
+      // no Hebrew dictionary on this machine: Hebrew words are left unchecked, and the caller says so
+      if (!unavailable.includes(e.message)) unavailable.push(e.message);
+      continue;
+    }
     if (s.spell(word)) continue;
     const near = siteWords.find((w) => w !== word && counts.get(w) > 1 && lang.get(w) === lang.get(word) && editDistance(w, word, 1) <= 1);
     if (lang.get(word) === "he") {
