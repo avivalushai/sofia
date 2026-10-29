@@ -50,6 +50,7 @@ export function validateCatalog(data) {
     if (!SEVERITIES.includes(c.severity)) problems.push(`${where}: unknown severity "${c.severity}"`);
     if (!FIXERS.includes(c.fixer)) problems.push(`${where}: unknown fixer "${c.fixer}"`);
     if (typeof c.v1 !== "boolean") problems.push(`${where}: v1 must be true or false`);
+    if (c.deprecated !== undefined && (typeof c.deprecated !== "string" || !c.deprecated)) problems.push(`${where}: deprecated must say why`);
     if (c.appliesWhen !== "always" && !facts.has(c.appliesWhen)) {
       problems.push(`${where}: appliesWhen "${c.appliesWhen}" is not a known fact`);
     }
@@ -73,7 +74,9 @@ export async function loadCatalog(file = CATALOG_PATH) {
   }
   const problems = validateCatalog(data);
   if (problems.length) throw new CatalogError("The check catalog is invalid", problems);
-  return { ...data, byId: new Map(data.checks.map((c) => [c.id, c])) };
+  // deprecated checks keep their ids reserved in the file, but nothing runs, counts or shows them
+  const active = data.checks.filter((c) => !c.deprecated);
+  return { ...data, checks: active, deprecated: new Set(data.checks.filter((c) => c.deprecated).map((c) => c.id)), byId: new Map(active.map((c) => [c.id, c])) };
 }
 
 /** `resp.no-horizontal-scroll` → `resp/no-horizontal-scroll.js` */
@@ -104,6 +107,10 @@ export async function loadChecks(catalog, dir = CHECKS_DIR, rubricsDir = RUBRICS
       continue;
     }
     const entry = catalog.byId.get(id);
+    if (!entry && catalog.deprecated?.has(id)) {
+      problems.push(`${rel}: "${id}" is deprecated; delete its file`);
+      continue;
+    }
     if (!entry) {
       problems.push(`${rel}: id "${id}" is not in catalog/checks.json`);
       continue;

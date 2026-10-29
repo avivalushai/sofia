@@ -55,21 +55,6 @@
       "checkId": "shop.invoices",
       "status": "uncertain",
       "note": "no invoicing found: steps for the user"
-    },
-    {
-      "checkId": "shop.checkout-flow",
-      "status": "uncertain",
-      "note": "needs a test purchase: steps for the user"
-    },
-    {
-      "checkId": "shop.test-purchase",
-      "status": "uncertain",
-      "note": "needs a test purchase: steps for the user"
-    },
-    {
-      "checkId": "shop.order-emails",
-      "status": "uncertain",
-      "note": "needs a test purchase: steps for the user"
     }
   ]
 }

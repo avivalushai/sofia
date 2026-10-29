@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 25,
-  "nextNoteNum": 30,
+  "nextNum": 26,
+  "nextNoteNum": 31,
   "features": [
     {
       "key": "ALL-1",
@@ -679,8 +679,8 @@
       "key": "ALL-18",
       "title": "Distribute Sofia: public marketplace others can install from",
       "type": "feature",
-      "status": "parked",
-      "note": "v0.1.2 public and installable. 0.2.0 waits until the checks session makes browser checks stable under load (tests flaky: speed 146-158s vs 55s, dead-buttons, two-run determinism)",
+      "status": "review",
+      "note": "v0.2.0 released: all 175 checks; installed fresh from GitHub and scanned",
       "doneWhen": [],
       "steps": [
         {
@@ -713,7 +713,7 @@
       ],
       "area": "",
       "createdAt": "2026-10-29T09:23:56Z",
-      "updatedAt": "2026-10-29T11:43:05Z",
+      "updatedAt": "2026-10-29T12:17:57Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -815,6 +815,11 @@
           "at": "2026-10-29T11:43:05Z",
           "by": "claude",
           "text": "Parked — v0.1.2 public and installable. 0.2.0 waits until the checks session makes browser checks stable under load (tests flaky: speed 146-158s vs 55s, dead-buttons, two-run determinism)"
+        },
+        {
+          "at": "2026-10-29T12:17:57Z",
+          "by": "claude",
+          "text": "Moved to review — v0.2.0 released: all 175 checks; installed fresh from GitHub and scanned"
         }
       ]
     },
@@ -1008,7 +1013,7 @@
       "title": "Browser checks give different answers on a busy computer",
       "type": "bug",
       "status": "idea",
-      "note": "Blocks release 0.2.0; handed to the checks session",
+      "note": "Tests passed twice in a row (440/440) once agent-runner was stopped; keep watching for flakiness under load",
       "doneWhen": [
         "npm test passes 3 times in a row, once under artificial load"
       ],
@@ -1026,13 +1031,46 @@
       "links": [],
       "area": "",
       "createdAt": "2026-10-29T11:43:05Z",
-      "updatedAt": "2026-10-29T11:43:05Z",
+      "updatedAt": "2026-10-29T12:17:57Z",
       "updatedBy": "claude",
       "log": [
         {
           "at": "2026-10-29T11:43:05Z",
           "by": "claude",
           "text": "Created"
+        },
+        {
+          "at": "2026-10-29T12:17:57Z",
+          "by": "claude",
+          "text": "Note: Tests passed twice in a row (440/440) once agent-runner was stopped; keep watching for flakiness under load"
+        }
+      ]
+    },
+    {
+      "key": "ALL-25",
+      "title": "Complete the catalog: the other 112 checks (M9)",
+      "type": "feature",
+      "status": "review",
+      "note": "",
+      "doneWhen": [
+        "All 175 checks built",
+        "Each check has a planted problem and a clean counterpart",
+        "False-alarm pass on real apps"
+      ],
+      "steps": [],
+      "files": [],
+      "links": [
+        "317b987"
+      ],
+      "area": "",
+      "createdAt": "2026-10-29T12:03:27Z",
+      "updatedAt": "2026-10-29T12:03:27Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-10-29T12:03:27Z",
+          "by": "claude",
+          "text": "Created — review"
         }
       ]
     }
@@ -1606,6 +1644,22 @@
       "steps": [],
       "createdAt": "2026-10-29T11:43:07Z",
       "updatedAt": "2026-10-29T11:43:07Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N30",
+      "kind": "decision",
+      "title": "Checks that can't be verified from outside answer 'couldn't tell' with exact steps (guided checks)",
+      "body": "mail.spam-score, mail.system-emails, shop.checkout-flow, shop.test-purchase, shop.order-emails, launch.sitemap-submitted, run.uptime, run.backup. They pass only on evidence; 'couldn't tell' doesn't lower the score. Needs the owner's OK.",
+      "considered": "",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-10-29T12:03:27Z",
+      "updatedAt": "2026-10-29T12:03:27Z",
       "updatedBy": "claude"
     }
   ],

@@ -8,8 +8,11 @@ import { makeRunId } from "../src/runner.js";
 
 const catalog = await loadCatalog();
 
-test("the real catalog is valid: 175 checks, 63 in v1", () => {
-  assert.equal(catalog.checks.length, 175);
+test("the real catalog is valid: 175 ids, 8 deprecated, 167 active", () => {
+  assert.equal(catalog.count, 175, "deprecated ids stay in the file, reserved");
+  assert.equal(catalog.checks.length, 167);
+  assert.equal(catalog.deprecated.size, 8);
+  assert.ok(!catalog.byId.has("run.uptime"), "a deprecated check can't be looked up, run or shown");
   assert.equal(catalog.checks.filter((c) => c.v1).length, 63);
 });
 
@@ -42,7 +45,7 @@ async function checksDir(files) {
 
 test("the shipped checks folder loads and matches the catalog", async () => {
   const { implemented, notImplemented } = await loadChecks(catalog);
-  assert.equal(implemented.length + notImplemented.length, 175);
+  assert.equal(implemented.length + notImplemented.length, 167);
   const mechanicalV1 = catalog.checks.filter((c) => c.v1 && c.layer === "mechanical").map((c) => c.id).sort();
   const have = new Set(implemented.map((c) => c.id));
   assert.deepEqual(mechanicalV1.filter((id) => !have.has(id)), [], "M1: every v1 mechanical check");
@@ -55,7 +58,7 @@ test("a check file is matched to its catalog entry", async () => {
   try {
     const { implemented, notImplemented } = await loadChecks(catalog, dir, dir);
     assert.deepEqual(implemented.map((c) => c.id), ["seo.robots"]);
-    assert.equal(notImplemented.length, 174);
+    assert.equal(notImplemented.length, 166);
     assert.ok(!notImplemented.includes("seo.robots"));
   } finally {
     await rm(dir, { recursive: true, force: true });
@@ -98,6 +101,15 @@ test("a rubric makes its judgment check implemented; a rubric for any other chec
     assert.deepEqual(implemented.map((c) => [c.id, c.check]), [["sec.rate-limit", null]]);
     await writeFile(path.join(dir, "seo.robots.md"), "1. ?");
     await assert.rejects(loadChecks(catalog, dir, dir), /not a judgment check/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("a file for a deprecated check stops startup", async () => {
+  const dir = await checksDir({ "run/uptime.js": 'export default { id: "run.uptime", layer: "mechanical", async run() { return []; } };' });
+  try {
+    await assert.rejects(loadChecks(catalog, dir, dir), /deprecated; delete its file/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

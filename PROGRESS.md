@@ -140,7 +140,11 @@
     - Live only: `launch.canonical-host`, `launch.dns` (including dangling CNAMEs), `launch.custom-domain`, `launch.redirects-old` (old addresses from the Internet Archive), `run.ssl-expiry` and `run.domain-expiry` (RDAP; .il domains give "couldn't tell"). All are tested with the network stubbed out.
     - `launch.staging-noindex` runs when the scanned address is a preview or staging address. From the real domain, how the host handles previews isn't visible.
     - Code review: `shop.vat` (18% since January 2025; consumer prices must include VAT). Planted in `judgment-app`: a 17% rate.
-  - **Guided checks (a decision for you to confirm):** some checks can't be verified from outside, or need a real email or purchase: `mail.spam-score`, `mail.system-emails`, `shop.checkout-flow`, `shop.test-purchase`, `shop.order-emails`, `launch.sitemap-submitted`, `run.uptime`, `run.backup`. They answer "couldn't tell", with exact steps for the user (`lib/guided.js`). They pass only when there's evidence: a Search Console verification tag, an uptime monitor named in the project, a backup job, or an invoicing service in the code. "Couldn't tell" doesn't lower the score.
+  - **Owner decision 2026-10-29: checks that can't be verified from outside are dropped.**
+    - Deprecated (ids kept, so they're never reused): `mail.spam-score`, `mail.system-emails`, `shop.checkout-flow`, `shop.test-purchase`, `shop.order-emails`, `launch.sitemap-submitted`, `run.uptime`, `run.backup`.
+    - In `catalog/checks.json` they carry `"deprecated": "<why>"`. Nothing runs, counts or shows them, and a scan clears out their old results.
+    - 167 checks are active.
+    - `shop.invoices` stays: it passes when an invoicing service is in the code, and otherwise it says "couldn't tell", with steps.
   - Detection now recognises mail and payment libraries imported in code (not only listed in package.json), and Israeli payment providers.
   - Without Chrome (quick mode), browser checks that don't apply are now recorded as "doesn't apply" instead of being left out.
   - `perf.cls` also checks the cause, images and videos near the top with no reserved space, so its answer no longer depends on how fast the machine is.
@@ -149,7 +153,7 @@
     - Browser: `privacy.cookie-reject`, `analytics.installed`, `analytics.double-fire`, `analytics.pixels`.
     - Behaviour, in the browser: `behave.refresh`, `behave.back-button`, `behave.slow-network` (Slow 3G; text faded out or hidden doesn't count as shown) and `behave.extreme-input` (Hebrew and accented names against strict patterns; a long word breaking the layout).
     - Code review: `privacy.policy-matches`, `privacy.licenses`, `privacy.third-party-data`, `analytics.conversions`, `ai.prompt-injection`, `cost.per-load`, `cost.free-tier`. Each was planted in `judgment-app` and run twice with real reviewers; both matched on every question.
-  - **All 175 checks in the catalog are built.**
+  - **All 175 checks in the catalog are built; 8 were later deprecated at the owner's request, leaving 167 active.**
   - A lesson from `deps.vulnerable`: lodash 4.17.21, long "the safe version", has a HIGH advisory fixed in 4.18.0. Its test depends on live data and says so.
   - `add-findings` now accepts a reviewer reply wrapped in a Markdown code fence.
   - Every new code-review check was run twice with real reviewers on `fixtures/judgment-app`. The answers matched question by question, and the quotes passed verification.

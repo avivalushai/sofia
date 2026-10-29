@@ -40,7 +40,7 @@ test("detect works before any target is chosen", async () => {
   const { out } = await lc("detect");
   assert.equal(out.detected.forms.value, true);
   assert.equal(out.detected.he.value, true);
-  assert.equal(out.skippedChecks.shop, 6);
+  assert.equal(out.skippedChecks.shop, 3, "israeli-payment, invoices and vat; the other three were deprecated");
   assert.equal(out.local.how, "serve the HTML folder");
   assert.equal(out.git, true);
 });
@@ -119,7 +119,7 @@ test("a second fix, then undoing only the first one", async () => {
 test("muting a category changes the score and persists across sessions", async () => {
   const before = (await lc("summary")).out;
   const { out } = await lc("decide", "privacy", "--action", "mute", "--scope", "category", "--reason", "Personal project");
-  // with 175 checks a small category can move the score by less than a point; it can never lower it
+  // with 167 checks a small category can move the score by less than a point; it can never lower it
   assert.ok(out.scoreAfter >= before.score, `${out.scoreAfter} < ${before.score}`);
   // a new process, a new "session": the decision is still there and still counts
   const later = (await lc("summary")).out;
@@ -230,4 +230,16 @@ test("the report page: one server per project, state over HTTP, a live update wi
 
   const info = JSON.parse(await readFile(path.join(dir, ".launch-check", "server.json"), "utf8"));
   process.kill(info.pid);
+});
+
+test("results of a check that was deprecated since the last scan disappear on the next one", async () => {
+  const file = path.join(dir, ".launch-check", "state.json");
+  const st = await state();
+  st.checks["run.uptime"] = { status: "uncertain", lastRun: st.runs.at(-1).id };
+  st.findings["f_run.uptime_site"] = { checkId: "run.uptime", status: "uncertain", title: "Get an alert when the site goes down", history: [{ at: "2026-10-29T00:00:00Z", event: "opened" }] };
+  await writeFile(file, JSON.stringify(st));
+  await lc("run", "--target", "local", "--mode", "quick");
+  const after = await state();
+  assert.equal(after.checks["run.uptime"], undefined);
+  assert.equal(after.findings["f_run.uptime_site"], undefined);
 });
