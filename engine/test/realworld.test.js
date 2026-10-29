@@ -182,3 +182,35 @@ test("Blockout: buttons overlapping only inside a scrolled panel or under a dial
     }
   }
 });
+
+test("NehoRace: test traffic marked by hostname, a separate server folder, and a font preconnect aren't false alarms", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "lc-neho-"));
+  try {
+    await mkdir(path.join(dir, "src"), { recursive: true });
+    await mkdir(path.join(dir, "live"), { recursive: true });
+    // analytics that marks visits from localhost and test browsers
+    await writeFile(path.join(dir, "src", "analytics.js"), 'const isTest = /^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname) || !!navigator.webdriver;\ngtag("event", "page_view", { is_test: isTest });\n');
+    await writeFile(path.join(dir, "src", "main.js"), 'import "./analytics.js";\n');
+    // a separate server with its own package.json
+    await writeFile(path.join(dir, "live", "package.json"), '{"name":"live"}');
+    await writeFile(path.join(dir, "live", "room.js"), "export class Room {}\n");
+    const page = PAGE('<link rel="preconnect" href="https://fonts.googleapis.com"><script type="module" src="/src/main.js"></script>');
+    const s = await site({ "/": { body: page }, "/src/main.js": { body: 'import "./analytics.js";', headers: { "content-type": "text/javascript" } }, "/src/analytics.js": { body: "", headers: { "content-type": "text/javascript" } } });
+    const r = await lc(dir, "run", "--target", s.url, "--mode", "full", "--only", "analytics.internal,leftover.dead-code,perf.fonts");
+    await s.close();
+    assert.equal(r.code, 0, r.err);
+    const st = await state(dir);
+    for (const id of ["analytics.internal", "leftover.dead-code", "perf.fonts"]) assert.equal(st.checks[id].status, "pass", `${id}: ${Object.values(st.findings).map((f) => f.evidence).join(" | ")}`);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Blockout: speed isn't measured on a local dev server, and dev-only libraries aren't counted as shipped", async () => {
+  const { onDevServer } = await import("../src/lib/dev-server.js");
+  assert.equal(onDevServer({ isLocalTarget: true, project: { pkg: { scripts: { dev: "vite" } } } }), true);
+  assert.equal(onDevServer({ isLocalTarget: false, project: { pkg: { scripts: { dev: "vite" } } } }), false, "the live site is measured");
+  assert.equal(onDevServer({ isLocalTarget: true, project: { pkg: null } }), false, "a plain HTML folder is served as it is");
+  const src = await readFile(fileURLToPath(new URL("../src/checks/deps/vulnerable.js", import.meta.url)), "utf8");
+  assert.match(src, /Object\.keys\(project\.pkg\?\.dependencies \?\? \{\}\)/, "only dependencies that ship are looked up");
+});

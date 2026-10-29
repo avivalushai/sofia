@@ -21,7 +21,8 @@ export default {
         sizes: list.map((u) => performance.getEntriesByName(u)[0]?.encodedBodySize || 0),
         // faces that hide the text until the font arrives
         hidden: [...document.fonts].filter((f) => f.display === "block" || f.display === "auto").map((f) => f.family.replace(/["']/g, "")),
-        googleNoSwap: [...document.querySelectorAll('link[href*="fonts.googleapis.com"]')].filter((l) => !/display=(swap|optional|fallback)/.test(l.href)).length,
+        // the stylesheet link, not a preconnect hint to the same host
+        googleNoSwap: [...document.querySelectorAll('link[rel~="stylesheet"][href*="fonts.googleapis.com"]')].filter((l) => !/display=(swap|optional|fallback)/.test(l.href)).length,
       }), files);
       return { files, ...info };
     };

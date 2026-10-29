@@ -3,7 +3,8 @@ const SERIOUS = new Set(["HIGH", "CRITICAL"]);
 
 /** Installed versions of the project's own dependencies, from the lockfile. */
 async function installed(project) {
-  const direct = Object.keys({ ...project.pkg?.dependencies, ...project.pkg?.devDependencies });
+  // what ships with the site; dev tools (devDependencies) never reach visitors
+  const direct = Object.keys(project.pkg?.dependencies ?? {});
   const lockText = await project.read("package-lock.json");
   if (lockText) {
     const lock = JSON.parse(lockText);

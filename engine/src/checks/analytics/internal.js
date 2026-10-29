@@ -1,6 +1,6 @@
 const ANALYTICS = /gtag\(|googletagmanager\.com|google-analytics\.com|["']@vercel\/analytics["']|plausible\.io|posthog|mixpanel|amplitude|segment\.(com|io)|umami|fathom|clarity\.ms|hotjar/i;
 // ways to keep the owner's own visits out of the numbers
-const FILTERED = /internal_traffic|traffic_type|debug_mode|opt_?out_?capturing|optOut\(|plausible_ignore|localStorage\.setItem\(\s*["']plausible_ignore|umami\.disabled|ignore[-_]?(me|internal)|exclude[-_]?(internal|me)|isInternal|location\.hostname\s*[!=]==?\s*["'](localhost|127\.0\.0\.1)|NODE_ENV\s*[!=]==?\s*["']production|VERCEL_ENV|import\.meta\.env\.PROD|process\.env\.NODE_ENV/;
+const FILTERED = /location\.hostname[^;\n]{0,80}localhost|localhost[^;\n]{0,80}location\.hostname|\bis_?test\b|navigator\.webdriver|internal_?user|internal_traffic|traffic_type|debug_mode|opt_?out_?capturing|optOut\(|plausible_ignore|localStorage\.setItem\(\s*["']plausible_ignore|umami\.disabled|ignore[-_]?(me|internal)|exclude[-_]?(internal|me)|isInternal|location\.hostname\s*[!=]==?\s*["'](localhost|127\.0\.0\.1)|NODE_ENV\s*[!=]==?\s*["']production|VERCEL_ENV|import\.meta\.env\.PROD|process\.env\.NODE_ENV/;
 
 /** @type {import("../../types.js").Check} */
 export default {

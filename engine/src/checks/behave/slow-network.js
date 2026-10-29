@@ -1,3 +1,4 @@
+import { DEV_SERVER_SKIP, onDevServer } from "../../lib/dev-server.js";
 import { PAGE_HELPERS } from "../../lib/page-helpers.js";
 
 // a weak cellular connection (DevTools' "Slow 3G")
@@ -9,6 +10,7 @@ export default {
   id: "behave.slow-network",
   layer: "browser",
   async run(ctx) {
+    if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const [home] = await ctx.crawl.browserPages();
     if (!home) return [ctx.pass()];
     const context = await ctx.browser.newContext(390);

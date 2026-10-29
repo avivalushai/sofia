@@ -1,3 +1,4 @@
+import { DEV_SERVER_SKIP, onDevServer } from "../../lib/dev-server.js";
 import { onSlowPhone } from "../../lib/throttle.js";
 
 const SLOW_MS = 200;
@@ -8,6 +9,7 @@ export default {
   id: "perf.inp",
   layer: "browser",
   async run(ctx) {
+    if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const results = [];
     for (const page of (await ctx.crawl.browserPages()).slice(0, 3)) {
       const m = await onSlowPhone(ctx.browser, page.url, async (p) => {

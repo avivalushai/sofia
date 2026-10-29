@@ -1,3 +1,4 @@
+import { DEV_SERVER_SKIP, onDevServer } from "../../lib/dev-server.js";
 import { formatBytes } from "../../lib/text.js";
 import { onSlowPhone } from "../../lib/throttle.js";
 
@@ -9,6 +10,7 @@ export default {
   id: "perf.third-party",
   layer: "browser",
   async run(ctx) {
+    if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const [home] = await ctx.crawl.browserPages();
     if (!home) return [ctx.pass()];
     const own = ctx.targetUrl.hostname.replace(/^www\./, "");

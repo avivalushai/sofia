@@ -10,7 +10,9 @@ export default {
   id: "leftover.dead-code",
   layer: "mechanical",
   async run(ctx) {
-    const files = ctx.project.files.filter((f) => !/(^|\/)(node_modules|dist|build|\.next|fixtures?)\//.test(f));
+    // a folder with its own package.json (a separate server, a worker) is a project of its own
+    const subprojects = ctx.project.files.filter((f) => /\/package\.json$/.test(f)).map((f) => f.slice(0, -"package.json".length));
+    const files = ctx.project.files.filter((f) => !/(^|\/)(node_modules|dist|build|\.next|fixtures?)\//.test(f) && !subprojects.some((d) => f.startsWith(d)));
     const code = files.filter((f) => CODE.test(f));
     const texts = new Map();
     for (const f of [...code, ...files.filter((f) => /\.(html?|css|scss|md|json)$/.test(f))]) texts.set(f, (await ctx.project.read(f)) ?? "");

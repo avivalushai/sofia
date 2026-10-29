@@ -89,7 +89,7 @@
 - `engine/` CLI, catalog validation on every start, atomic state writes, test harness serving `fixtures/broken-landing/` on a free port with a plain default 404.
 
 ## In progress
-- **M9, the rest of the catalog (started 2026-10-29): all 112 built.** Still to do: a full scan of the real apps with every check. Order: security → forms → data → mobile → content → design → sharing & search → the rest.
+- **M9, the rest of the catalog (started 2026-10-29): all 112 built.** Every check was run on copies of NehoRace and Blockout; 5 false alarms were fixed (see `docs/walkthroughs/m4-real-apps.md`). Order: security → forms → data → mobile → content → design → sharing & search → the rest.
   - Security, 7 of 7 built:
     - In code: `sec.headers`, `sec.cookies`, `sec.cors`, `sec.source-maps`.
     - In the browser: `sec.mixed-content`.

@@ -1,3 +1,4 @@
+import { DEV_SERVER_SKIP, onDevServer } from "../../lib/dev-server.js";
 import { gzipSync } from "node:zlib";
 import { all, attr } from "../../lib/html.js";
 import { formatBytes } from "../../lib/text.js";
@@ -10,7 +11,7 @@ export default {
   layer: "mechanical",
   async run(ctx) {
     // a local dev server sends code unbundled and unminified: its size says nothing about the live site
-    if (ctx.isLocalTarget && ctx.project.pkg?.scripts?.dev) return [ctx.skip("a local dev server doesn't bundle code; scan the live site (or a production build) to measure it")];
+    if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const [home] = await ctx.crawl.pages();
     if (!home) return [ctx.pass()];
     const urls = new Set();

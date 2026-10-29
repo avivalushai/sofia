@@ -93,3 +93,20 @@ Local copies (scratch folder, originals untouched), the 22 checks added so far i
 No false alarms.
 - **NehoRace:** no `<main>`, no structured data, no llms.txt and no robots.txt. All true.
 - **Blockout:** its single-page app sends an empty page (0 words as sent, 240 after scripts). Its description is 195 characters, it has no `<h1>`, and /llms.txt answers with the app's home page. All true. The pre-rendering finding offers "Keep it as it is".
+
+### Every check, on both apps (end of M9)
+Local copies. These are the categories not run on the real apps before: accessibility, Hebrew, quality, performance, email, shop, launch, operations, privacy, analytics, AI, cost, libraries, leftovers and behaviour.
+
+**True findings, for example:**
+- NehoRace: zoom is blocked (`user-scalable=no`); there's no accessibility statement, privacy policy or terms; the name field shows no keyboard focus; `tools/catalog.html` and `tools/images.html` are public but not linked.
+- Blockout: 6 pieces of text are too faint; Amplitude runs before consent; a wrong address returns the home page with 200.
+
+**5 false alarms, fixed and covered in `engine/test/realworld.test.js`:**
+
+| Finding | Cause | Fix |
+|---|---|---|
+| NehoRace: "your own visits are counted" | It marks test traffic by hostname and `navigator.webdriver` (`is_test`), a form the check didn't recognise | Hostname-based checks, `is_test` and `navigator.webdriver` now count |
+| NehoRace: "text hidden until the Google font arrives" | The `preconnect` hint to fonts.googleapis.com was read as the stylesheet | Only stylesheet links count |
+| NehoRace: "live/room.js isn't used" | `live/` is a separate server with its own package.json | Folders with their own package.json are left out |
+| Blockout: 4 speed checks crashed, and "blank on a slow connection" | The local copy runs on Vite's dev server, which sends hundreds of unbundled files | Speed and slow-network checks skip on a local dev server, with the reason given |
+| Blockout: "vite has a known security hole" | Vite is a dev tool (devDependency) and never reaches visitors | Only `dependencies` are looked up |

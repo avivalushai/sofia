@@ -1,3 +1,4 @@
+import { DEV_SERVER_SKIP, onDevServer } from "../../lib/dev-server.js";
 const SLOW_MS = 4000;
 const RUNS = 3;
 /** "Slow 4G" as Chrome DevTools defines it */
@@ -33,6 +34,7 @@ export default {
   id: "perf.lcp",
   layer: "browser",
   async run(ctx) {
+    if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const pages = (await ctx.crawl.browserPages()).slice(0, 3);
     const results = [];
     for (const page of pages) {
