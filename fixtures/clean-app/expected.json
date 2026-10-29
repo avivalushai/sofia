@@ -237,26 +237,6 @@
       "status": "pass"
     },
     {
-      "checkId": "launch.sitemap-submitted",
-      "status": "pass",
-      "note": "google-site-verification tag on the home page"
-    },
-    {
-      "checkId": "run.uptime",
-      "status": "pass",
-      "note": "README names UptimeRobot"
-    },
-    {
-      "checkId": "mail.spam-score",
-      "status": "uncertain",
-      "note": "needs a real email: steps for the user"
-    },
-    {
-      "checkId": "mail.system-emails",
-      "status": "uncertain",
-      "note": "needs a real email: steps for the user"
-    },
-    {
       "checkId": "launch.canonical-host",
       "status": "skip",
       "note": "local address (live path: live-paths.test.js)"

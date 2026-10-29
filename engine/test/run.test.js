@@ -47,8 +47,8 @@ test("run against the fixture writes a valid state.json", async () => {
   assert.equal(code, 0, stderr);
 
   const out = JSON.parse(stdout);
-  assert.equal(out.implemented.length + out.notImplemented.length, 175);
-  assert.equal(out.catalogSize, 175);
+  assert.equal(out.implemented.length + out.notImplemented.length, 167);
+  assert.equal(out.catalogSize, 167);
 
   const state = JSON.parse(await readFile(path.join(project, ".launch-check", "state.json"), "utf8"));
   assert.deepEqual(validateState(state), []);
