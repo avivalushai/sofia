@@ -12,6 +12,7 @@ const PIXELS = [
 export default {
   id: "analytics.pixels",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const [home] = await ctx.crawl.browserPages();
     if (!home) return [ctx.pass()];

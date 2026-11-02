@@ -26,6 +26,7 @@ async function liveMotion(ctx) {
 export default {
   id: "a11y.motion",
   layer: "mechanical",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (ctx.siteOnly) return liveMotion(ctx);
     const files = ctx.project.files.filter((f) => /\.(css|scss|sass|less|jsx?|tsx?|mjs|vue|svelte|astro|html?)$/.test(f) && !/\.(test|spec|stories)\.|(^|\/)(tests?|docs?|scripts)\//.test(f));

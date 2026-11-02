@@ -6,6 +6,7 @@ const TRACKING_COOKIE = /^(_ga|_gid|_gat|_fbp|_fbc|_gcl_|_hj|_clck|_clsk|_ttp|_u
 export default {
   id: "privacy.cookie-blocks",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const [home] = await ctx.crawl.browserPages();
     const origin = new URL(ctx.target).origin;

@@ -6,6 +6,7 @@ const BEACON = /google-analytics\.com\/(g\/)?collect|analytics\.google\.com\/g\/
 export default {
   id: "analytics.installed",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const [home] = await ctx.crawl.browserPages();
     if (!home) return [ctx.pass()];

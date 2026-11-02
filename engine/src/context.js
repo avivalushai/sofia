@@ -83,6 +83,8 @@ export function makeContext({ entry, project, crawl, http, browser = null, targe
   return {
     /** The check is over: its shared page may be closed now. */
     done: () => pages?.release(),
+    /** Time this check spent waiting for shared pages, which doesn't count towards its time limit. */
+    waitedMs: () => pages?.waited() ?? 0,
     entry,
     project,
     crawl,

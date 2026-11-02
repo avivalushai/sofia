@@ -24,6 +24,7 @@ const countVisibleNavLinks = () =>
 export default {
   id: "resp.mobile-menu",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const width = ctx.viewports.mobile[0];
     const [home] = await ctx.crawl.browserPages();

@@ -7,6 +7,7 @@ const FORM_SERVICES = /formspree\.io|getform\.io|formsubmit\.co|basin\.|netlify|
 export default {
   id: "forms.destination",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (!(await ctx.consent.has("submit-forms"))) return [ctx.skip(ctx.consent.why("submit-forms"), { needs: "submit-forms" })];
     const origin = new URL(ctx.target).origin;

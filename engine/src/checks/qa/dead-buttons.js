@@ -18,6 +18,7 @@ function listClickables() {
 export default {
   id: "qa.dead-buttons",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const results = [];
     const tested = new Set();

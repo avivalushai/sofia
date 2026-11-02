@@ -9,6 +9,7 @@ const WAIT_MS = 3000;
 export default {
   id: "behave.slow-network",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const [home] = await ctx.crawl.browserPages();

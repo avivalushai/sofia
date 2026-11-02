@@ -15,6 +15,7 @@ function switchers(labelSrc) {
 export default {
   id: "rtl.switcher",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     // the switcher only shows its problem on an inner page: on the home page "go home" is right
     const inner = (await ctx.crawl.browserPages()).filter((p) => bare(new URL(p.url).pathname) !== "/").slice(0, 3);

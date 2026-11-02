@@ -35,6 +35,7 @@ async function coveredAtEnds(fixedElements) {
 export default {
   id: "resp.fixed-overlap",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const results = [];
     const width = ctx.viewports.mobile[0];

@@ -4,6 +4,7 @@ import { fillForm, findForms } from "../../lib/browser-checks.js";
 export default {
   id: "behave.double-submit",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const forms = await findForms(ctx);
     if (!forms.length) return [ctx.pass()]; // nothing to submit, nothing to ask

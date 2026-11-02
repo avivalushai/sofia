@@ -8,6 +8,7 @@ const MAX_CLICKS = 6;
 export default {
   id: "perf.inp",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const results = [];

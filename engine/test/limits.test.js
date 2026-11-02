@@ -1,6 +1,6 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { launchBrowser } from "../src/browser.js";
@@ -17,7 +17,7 @@ let browser;
 before(async () => {
   dir = await mkdtemp(path.join(tmpdir(), "sofia-limits-"));
   await writeFile(path.join(dir, "dot.png"), PIXEL);
-  for (const name of ["a", "b", "c"]) await writeFile(path.join(dir, `${name}.html`), `<!doctype html><title>${name}</title><img id="i" src="dot.png">`);
+  for (const name of ["a", "b", "c", "d", "e"]) await writeFile(path.join(dir, `${name}.html`), `<!doctype html><title>${name}</title><img id="i" src="dot.png">`);
   site = await serveFixture(dir);
   browser = await launchBrowser({ maxOpen: 2 });
 });
@@ -74,4 +74,39 @@ test("the scan server answers who it is, can be found and stopped, and stops its
   await server.close();
   assert.equal(await findScanServer(port), null);
   assert.equal(await stopScanServer(port), null, "nothing to stop");
+});
+
+test("checks that want the same page share one load, and the page most of them wait for loads first", async () => {
+  // both slots busy: everything after this waits its turn
+  const one = browser.lease();
+  const two = browser.lease();
+  await one.open(url("a"), { width: 390 });
+  await two.open(url("b"), { width: 390 });
+  const before = browser.stats().loads;
+  const order = [];
+  const lone = browser.lease();
+  const many = [browser.lease(), browser.lease(), browser.lease()];
+  const waits = [
+    lone.open(url("d"), { width: 390 }).then(() => order.push("d")),
+    ...many.map((l) => l.open(url("e"), { width: 390 }).then(() => order.push("e"))),
+  ];
+  one.release();
+  await Promise.all(waits.slice(1));
+  two.release();
+  await waits[0];
+  assert.deepEqual(order, ["e", "e", "e", "d"], "three checks wait for e, one for d");
+  assert.equal(browser.stats().loads - before, 2, "e is loaded once for all three");
+  for (const l of [lone, ...many]) l.release();
+});
+
+test("every check that opens pages of its own is marked isolated, so it never runs beside the others", async () => {
+  const dir = new URL("../src/checks/", import.meta.url);
+  for (const area of await readdir(dir, { withFileTypes: true })) {
+    if (!area.isDirectory()) continue;
+    for (const file of await readdir(new URL(`${area.name}/`, dir))) {
+      const source = await readFile(new URL(`${area.name}/${file}`, dir), "utf8");
+      const ownPages = /\.fresh\(|newContext\(|onSlowPhone\(/.test(source);
+      assert.equal(/^  isolated: true,/m.test(source), ownPages, `${area.name}/${file}`);
+    }
+  }
 });

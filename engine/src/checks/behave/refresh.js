@@ -6,6 +6,7 @@ const LONG_FORM = 3;
 export default {
   id: "behave.refresh",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const results = [];
     // a refresh mid-way through a long form: nothing is sent, so no consent is needed

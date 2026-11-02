@@ -32,6 +32,7 @@ function candidates(max) {
 export default {
   id: "design.focus-hover",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     // keyboard focus is a11y.focus-visible's; this check is about the pointer
     const flat = [];

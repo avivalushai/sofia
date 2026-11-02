@@ -49,8 +49,11 @@ export function parseTarget(target) {
 
 /** Which layers each mode runs. Judgment checks are never run by the engine (docs/02). */
 const MODE_LAYERS = { quick: new Set(["mechanical"]), full: new Set(["mechanical", "browser", "judgment"]) };
-// one browser check at a time: a check uses up to two Chrome pages (a shared one and one of its own),
-// which is the whole page budget (PAGE_LIMIT). More of them at once froze a Mac. LC_BROWSER_CHECKS overrides.
+// Browser checks that only read shared pages all run together: when several want the same page it's
+// loaded once for all of them, and Chrome still has at most PAGE_LIMIT pages open. Checks that open
+// pages of their own (isolated: clicks, types, throttles) run after, one at a time: one uses up to
+// two pages, the whole budget, and timing checks measure the site, not a busy machine.
+// LC_BROWSER_CHECKS lets more isolated checks run at once.
 const BROWSER_LIMIT = Math.max(1, Number(process.env.LC_BROWSER_CHECKS) || 1);
 // every running check must be able to get its two pages, or they'd wait on each other for ever
 const MAX_PAGES_OPEN = Math.max(PAGE_LIMIT, BROWSER_LIMIT + 1);
@@ -129,9 +132,14 @@ async function runOne(c, ctx) {
 
 async function runOneTimed(c, ctx) {
   try {
+    // the limit is for the check's own work: browser checks share pages and wait their turn for them
+    const limit = CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000;
+    const started = Date.now();
     let timer;
-    const timeout = new Promise((_, rej) => (timer = setTimeout(() => rej(new HttpError(ctx.target, { name: "check timed out" })), CHECK_TIMEOUT_MS[c.entry.layer] ?? 60_000)));
-    const items = await Promise.race([c.check.run(ctx), timeout]).finally(() => clearTimeout(timer));
+    const timeout = new Promise((_, rej) => {
+      timer = setInterval(() => Date.now() - started - (ctx.waitedMs?.() ?? 0) > limit && rej(new HttpError(ctx.target, { name: "check timed out" })), 1000);
+    });
+    const items = await Promise.race([c.check.run(ctx), timeout]).finally(() => clearInterval(timer));
     if (!Array.isArray(items)) throw new CheckBug(`${c.id}: run() must return an array`);
     // checks about bot protection itself read the challenge as their answer
     if (ctx.blocked.size && !c.check.expectsBlocks) {
@@ -353,7 +361,8 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       ...(await earlyResults),
       ...(await runSet(layer("mechanical"), 8)),
       // without Chrome (quick mode) browser checks don't run, but the ones that don't apply are still recorded as such
-      ...(browser ? await runSet(layer("browser"), BROWSER_LIMIT) : await runSet(layer("browser").filter((c) => !applicable(c)), 3)),
+      ...(browser ? await runSet(layer("browser").filter((c) => !c.check.isolated), Infinity) : []),
+      ...(browser ? await runSet(layer("browser").filter((c) => c.check.isolated), BROWSER_LIMIT) : await runSet(layer("browser").filter((c) => !applicable(c)), 3)),
       ...(await runSet(selected.filter((c) => isProbe(c) && (c.entry.layer !== "browser" || browser)), 1)),
     ];
     // keep catalog order so state and report don't depend on which check finished first
@@ -409,6 +418,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       catalogSize: catalog.checks.length,
     };
   } finally {
+    if (process.env.LC_TIMINGS && browser) process.stderr.write(`${String(browser.stats().loads).padStart(6)} pages loaded in Chrome\n`);
     await browser?.close();
     await local?.stop();
   }

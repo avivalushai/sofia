@@ -7,6 +7,7 @@ const POOR = 0.1;
 export default {
   id: "perf.cls",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const results = [];

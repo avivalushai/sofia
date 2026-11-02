@@ -9,6 +9,7 @@ function look(el) {
 export default {
   id: "a11y.focus-visible",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const bad = [];
     for (const page of await ctx.crawl.browserPages()) {

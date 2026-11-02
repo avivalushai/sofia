@@ -9,6 +9,7 @@ const MANY_HOSTS = 8;
 export default {
   id: "perf.third-party",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (onDevServer(ctx)) return [ctx.skip(DEV_SERVER_SKIP)];
     const [home] = await ctx.crawl.browserPages();

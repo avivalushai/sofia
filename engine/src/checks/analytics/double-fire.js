@@ -10,6 +10,7 @@ const PAGEVIEW = [
 export default {
   id: "analytics.double-fire",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const pages = (await ctx.crawl.browserPages()).slice(0, 3);
     const doubled = [];

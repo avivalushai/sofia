@@ -27,6 +27,7 @@ function strictNames([sel, names]) {
 export default {
   id: "behave.extreme-input",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const results = [];
     for (const form of await findForms(ctx)) {

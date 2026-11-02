@@ -5,6 +5,7 @@ import { skippedNote } from "../../lib/browser-checks.js";
 export default {
   id: "qa.error-states",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const origin = new URL(ctx.target).origin;
     const results = [];

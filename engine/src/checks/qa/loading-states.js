@@ -19,6 +19,7 @@ function hasLoadingIndicator() {
 export default {
   id: "qa.loading-states",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const origin = new URL(ctx.target).origin;
     const results = [];

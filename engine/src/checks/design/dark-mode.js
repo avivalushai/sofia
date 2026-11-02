@@ -54,6 +54,7 @@ async function forceDark(page) {
 export default {
   id: "design.dark-mode",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const results = [];
     let switched = 0;

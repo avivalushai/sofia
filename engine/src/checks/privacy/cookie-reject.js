@@ -24,6 +24,7 @@ const filled = (b) => !/rgba\(0, 0, 0, 0\)|transparent/.test(b.bg);
 export default {
   id: "privacy.cookie-reject",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const [home] = await ctx.crawl.browserPages();
     if (!home) return [ctx.pass()];

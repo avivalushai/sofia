@@ -58,24 +58,36 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
   const cache = new Map(); // key → Promise<LoadedPage>, in least-recently-used order
   /** key → how many checks are using that page right now; those are never closed under them */
   const holds = new Map();
+  /** keys whose page has loaded (or failed): only those can be closed to make room */
+  const settled = new Set();
   /** URLs the host's bot protection challenged, across every page loaded this run */
   const blocked = new Map();
 
-  // a slot per open context (each holds one page); a context waits for one to come free
+  // a slot per open context (each holds one page). Pages that wait for one queue up; when a slot
+  // comes free, the page the most checks are waiting for loads next, so they all read one load.
   let used = 0;
+  /** @type {{ demand: () => number, start: () => void }[]} */
   const waiting = [];
+  let loads = 0;
   const freeSlot = () => {
-    used--;
-    waiting.shift()?.();
+    if (!waiting.length) return void used--;
+    let best = 0;
+    for (let i = 1; i < waiting.length; i++) if (waiting[i].demand() > waiting[best].demand()) best = i;
+    waiting.splice(best, 1)[0].start(); // the slot passes straight on
   };
+  async function slot(demand) {
+    if (used < maxOpen && !waiting.length) return void used++;
+    const ready = new Promise((start) => waiting.push({ demand, start }));
+    trim(); // idle shared pages make way
+    await ready;
+  }
 
-  /** A browser context of its own, counted against maxOpen: idle shared pages make way first. */
-  async function newContext(width, extra = {}) {
-    while (used >= maxOpen) {
-      if (!trim(used - maxOpen + 1)) await new Promise((r) => waiting.push(r));
-      else await new Promise((r) => setTimeout(r, 20)); // the closed page frees its slot
-    }
-    used++;
+  /**
+   * A browser context of its own, counted against maxOpen: idle shared pages make way first.
+   * @param {number} width @param {object} [extra] @param {() => number} [demand] how many are waiting for it
+   */
+  async function newContext(width, extra = {}, demand = () => 1) {
+    await slot(demand);
     let context;
     try {
       context = await browser.newContext({
@@ -97,6 +109,7 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
 
   /** Loads a URL and records everything a check might ask about afterwards. */
   async function load(context, url, { beforeGoto, waitUntil = "load", idle = true, settleMs = SETTLE_MS, readOnly = false } = {}) {
+    loads++;
     const page = await context.newPage();
     const log = { console: [], pageErrors: [], requests: [], failed: [], responses: new Map(), blocked: new Set(), pageBlocked: false };
     // requests this scan chose not to load: they didn't fail, so they aren't logged as failed
@@ -201,8 +214,10 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
     let closed = 0;
     for (const [key, loaded] of cache) {
       if (closed >= atLeast && cache.size <= maxOpen) break;
-      if (holds.has(key)) continue;
+      // a page still waiting for its slot holds none, so closing it makes no room
+      if (holds.has(key) || !settled.has(key)) continue;
       cache.delete(key);
+      settled.delete(key);
       closed++;
       loaded.then((p) => p.page.context().close()).catch(() => {});
     }
@@ -218,7 +233,7 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
       return { key, loaded: hit };
     }
     const loaded = (async () => {
-      const context = await newContext(width);
+      const context = await newContext(width, {}, () => holds.get(key) ?? 0);
       try {
         return await load(context, url, { readOnly });
       } catch (err) {
@@ -227,7 +242,7 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
       }
     })();
     cache.set(key, loaded);
-    loaded.catch(() => cache.delete(key));
+    loaded.then(() => settled.add(key), () => cache.delete(key));
     return { key, loaded };
   }
 
@@ -237,6 +252,7 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
    */
   function lease() {
     let held = null;
+    let waited = 0;
     const letGo = (key) => {
       const n = holds.get(key) - 1;
       if (n) holds.set(key, n);
@@ -255,8 +271,11 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
         if (held) letGo(held);
         held = key;
         trim();
-        return loaded;
+        const since = Date.now();
+        return loaded.finally(() => (waited += Date.now() - since));
       },
+      /** Time spent waiting for pages (their turn and their loading), in ms. */
+      waited: () => waited,
       release() {
         if (held) letGo(held);
         held = null;
@@ -269,6 +288,8 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
     blocked,
     /** Shared, already-loaded pages: lease().open(url, { width }), then release() when done. */
     lease,
+    /** How many pages were loaded so far. */
+    stats: () => ({ loads }),
 
     /**
      * An isolated page for interactive checks. Closed when fn returns.

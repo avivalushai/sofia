@@ -4,6 +4,7 @@ import { ERROR_WORDS, fillForm, findForms, interceptWrites, newVisibleText, subm
 export default {
   id: "forms.success-truth",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     if (!(await ctx.consent.has("submit-forms"))) return [ctx.skip(ctx.consent.why("submit-forms"), { needs: "submit-forms" })];
     const results = [];

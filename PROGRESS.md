@@ -259,7 +259,15 @@
 - Chrome is closed in `finally`, including on errors, and also on Ctrl-C, kill or a closed terminal (`engine/src/lib/stop.js`). The same goes for an app started with `--target local`.
 - `scan-server`: reuses a running one instead of starting a second, `scan-server --stop` stops it, and it stops by itself after 30 idle minutes or when the terminal or session that started it goes away.
 - `npm run e2e` (in `engine/`) is the committed version of the end-to-end test: it always ends (when the scan is done or fails, on a signal, after 15 minutes, when its parent goes away) and takes Chrome and its servers with it.
-- Measured on fixtures/broken-landing (2 pages), same findings check by check: average CPU 275% → 82%, peak 560% → 277%, open pages 11+ → 2. **Slower:** 21 s → 105 s, and a 9-page site takes about 7 minutes (was 1:09). The real fix for both speed and CPU is to load each page once and run every check on it, instead of every check loading every page (ALL-32).
+- Measured on fixtures/broken-landing (2 pages), same findings check by check: average CPU 275% → 82%, peak 560% → 277%, open pages 11+ → 2. Slower at first: 21 s → 105 s, a 9-page site about 9 minutes. Then:
+
+### Each page loaded once for all the checks that read it (2026-11-02)
+- Browser checks that only read shared pages now run together. When several want the same page at the same width, it's loaded once for all of them. When a slot frees, the page most checks are waiting for loads next. Still at most 2 pages open.
+- Checks that open pages of their own (click, type, throttle) are marked `isolated: true` (31 of them; documented in docs/03, enforced by a test) and run after, one at a time. This keeps them inside the 2-page budget and keeps timing checks off a busy machine.
+- A check's time limit no longer counts the time it waits for a page.
+- `LC_TIMINGS=1` also prints how many pages Chrome loaded.
+- Measured, same result for every check: fixtures/clean-app (9 pages) 561 s → 253 s, 449 → 278 page loads; broken-landing (2 pages) 105 s → 77 s. "Full mode finishes in under 2 minutes" (M2) passes again.
+- What's left is mostly the isolated checks: on broken-landing they take ~59 of the ~75 seconds, perf.lcp/inp/cls alone ~23 s. They can't share pages by nature.
 - Tests: `engine/test/limits.test.js` (page limit, waiting, reuse, blocking without false "broken", server ping/stop/idle).
 - Not done yet: the public server with abuse protection (stage 2), tuning on real sites (stage 3). Some fix texts still speak as Sofia in a chat ("Tell me what the site collects").
 

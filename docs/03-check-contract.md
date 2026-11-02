@@ -9,6 +9,9 @@ Path mirrors the id: `engine/src/checks/resp/no-horizontal-scroll.js` for `resp.
 export default {
   id: "resp.no-horizontal-scroll",      // must exist in catalog/checks.json
   layer: "browser",                     // mechanical | browser | judgment
+  // isolated: true                     // only for checks that open pages of their own (browser.fresh,
+                                        // browser.newContext, onSlowPhone): they run alone, after the
+                                        // checks that share pages. A test enforces it.
   // severity, fixer, appliesWhen, title come from the catalog; override only with a reason
   async run(ctx) {
     const results = [];

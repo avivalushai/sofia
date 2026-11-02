@@ -7,6 +7,7 @@ const MAX_BYTES = 300 * 1024;
 export default {
   id: "perf.fonts",
   layer: "browser",
+  isolated: true, // opens pages of its own; runs alone (runner.js)
   async run(ctx) {
     const pages = await ctx.crawl.browserPages();
     const home = pages[0];
