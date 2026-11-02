@@ -25,6 +25,9 @@ const PAGE_EXT = /(\/|\.html?|\.php|\.aspx?|\/[^./]+)$/i;
 export function createCrawler({ target, http, limit = 30 }) {
   let result;
   let rendered;
+  let readSoFar = 0;
+  /** @type {((count: number) => void) | null} */
+  let onRendered = null;
   let browser = null;
   const origin = new URL(target).origin;
 
@@ -73,37 +76,50 @@ export function createCrawler({ target, http, limit = 30 }) {
     const texts = new Set();
     const queue = [normalize(target)];
     const seen = new Set(queue);
-    while (queue.length && pages.length < limit) {
-      const url = queue.shift();
-      let p;
-      try {
-        p = await browser.open(url, { width: 1280 });
-      } catch {
-        continue;
-      }
-      if (p.status !== 200) continue;
-      const { text, links, finalUrl } = await p.evaluate(() => ({
-        text: window.__lc.visibleText(),
-        links: [...document.querySelectorAll("a[href]")].map((a) => a.href),
-        finalUrl: location.href,
-      }));
-      const fingerprint = createHash("sha1").update(text).digest("hex");
-      if (texts.has(fingerprint)) continue;
-      texts.add(fingerprint);
-      const u = new URL(finalUrl);
-      pages.push({ url: finalUrl, path: u.pathname + u.search, links });
-      for (const href of links) {
-        let next;
+    // two pages at a time (each is a Chrome tab); and a site full of near-identical links can't keep it going for ever
+    let tries = limit * 3;
+    while (queue.length && pages.length < limit && tries > 0) {
+      const batch = queue.splice(0, Math.min(2, tries));
+      tries -= batch.length;
+      const opened = await Promise.all(batch.map(async (url) => {
+        const reader = browser.lease();
         try {
-          next = normalize(href);
+          const p = await reader.open(url, { width: 1280, readOnly: true });
+          if (p.status !== 200) return null;
+          return await p.evaluate(() => ({
+            text: window.__lc.visibleText(),
+            links: [...document.querySelectorAll("a[href]")].map((a) => a.href),
+            finalUrl: location.href,
+          }));
         } catch {
-          continue;
+          return null;
+        } finally {
+          reader.release();
         }
-        const nu = new URL(next);
-        if (nu.origin !== origin || seen.has(next) || !/^https?:$/.test(nu.protocol) || !PAGE_EXT.test(nu.pathname)) continue;
-        seen.add(next);
-        queue.push(next);
+      }));
+      for (const found of opened) {
+        if (!found || pages.length >= limit) continue;
+        const { text, links, finalUrl } = found;
+        const fingerprint = createHash("sha1").update(text).digest("hex");
+        if (texts.has(fingerprint)) continue;
+        texts.add(fingerprint);
+        const u = new URL(finalUrl);
+        pages.push({ url: finalUrl, path: u.pathname + u.search, links });
+        for (const href of links) {
+          let next;
+          try {
+            next = normalize(href);
+          } catch {
+            continue;
+          }
+          const nu = new URL(next);
+          if (nu.origin !== origin || seen.has(next) || !/^https?:$/.test(nu.protocol) || !PAGE_EXT.test(nu.pathname)) continue;
+          seen.add(next);
+          queue.push(next);
+        }
       }
+      readSoFar = pages.length;
+      onRendered?.(readSoFar);
     }
     return pages;
   }
@@ -118,18 +134,28 @@ export function createCrawler({ target, http, limit = 30 }) {
      * Pages as Chrome renders them (url, path, links). Browser checks iterate these.
      * @returns {Promise<{ url: string, path: string, links: string[] }[]>}
      */
-    async browserPages() {
+    /** @param {{ onPage?: (count: number) => void }} [o] told how many pages are read so far, whoever started the reading */
+    async browserPages({ onPage } = {}) {
       if (!browser) throw new Error("browserPages() needs the browser (full mode)");
+      if (onPage) {
+        onRendered = onPage;
+        onPage(readSoFar);
+      }
       rendered ??= renderedCrawl();
       return rendered;
     },
     /** Rendered pages with their visible text, one line per block. */
     async browserPagesWithText() {
       const out = [];
-      for (const p of await this.browserPages()) {
-        const page = await browser.open(p.url, { width: 1280 });
-        const text = await page.evaluate(() => (document.body?.innerText ?? "").split("\n").map((l) => l.trim()).filter(Boolean));
-        out.push({ path: p.path, segments: text });
+      const reader = browser.lease();
+      try {
+        for (const p of await this.browserPages()) {
+          const page = await reader.open(p.url, { width: 1280, readOnly: true });
+          const text = await page.evaluate(() => (document.body?.innerText ?? "").split("\n").map((l) => l.trim()).filter(Boolean));
+          out.push({ path: p.path, segments: text });
+        }
+      } finally {
+        reader.release();
       }
       return out;
     },

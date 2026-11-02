@@ -243,6 +243,26 @@
 - The form checks never send test data to a different address on the developer's machine than the site itself.
 - The "Chrome not found" message isn't covered by an automated test (it would need a machine without Chrome).
 
+## Site scan from a web address (stage 1, 2026-11-01)
+- `launch-check scan <url> [--out folder] [--max-pages 30]` runs the 110 checks that need only an address and writes `report.html`. List and reasons: `engine/src/site-scan.js`. The other 57 stay in the report as skipped, with why.
+- Rendered pages, own stylesheets and file names stand in for the source, so the existing checks read them unchanged. Findings point at addresses, not files.
+- A normal scan from a folder with no code now skips the checks that need code, instead of passing them.
+- `launch-check scan-server` serves the landing page with the scan form and loading widget on 127.0.0.1:4331, one scan at a time. The form stays hidden where no scan server answers, so the static site is unchanged.
+- After submitting, the form goes straight to `/reports/<id>/`: a loading screen that says what's happening, a "See what's found so far" button once there are findings, then the report filling in under a live progress bar until the score arrives at the end.
+- Reading pages in Chrome: at most 3× the page limit in visits, with a live "N pages read" count. If the scanner stops answering, the report page says so instead of freezing on the last number.
+- Quick checks start right away and findings show in the widget as they appear.
+
+### Resource limits, after the scanner froze the owner's Mac (2026-11-02)
+- What happened: browser checks ran 3–6 at a time and kept 10–40 pages open, so Chrome had 12+ tabs at 20–40% CPU each. A test script (`e2e.mjs`, written ad hoc in a scratch folder) and `scan-server` kept running after the session ended.
+- Now Chrome never has more than **2 pages** open (`LC_MAX_PAGES`), counting every kind: shared, isolated, throttled. A page waits for a free slot, and idle pages are closed to make room. A check holds the page it's reading, so it's never closed under it. One browser check runs at a time (`LC_BROWSER_CHECKS`). Chrome stays headless.
+- While the crawl and the site reader only read pages (text, links, markup), images, fonts and video aren't loaded, and they aren't counted as broken. Pages the checks look at are still complete: broken images, fonts, mixed content, layout and the report's screenshots depend on them.
+- Chrome is closed in `finally`, including on errors, and also on Ctrl-C, kill or a closed terminal (`engine/src/lib/stop.js`). The same goes for an app started with `--target local`.
+- `scan-server`: reuses a running one instead of starting a second, `scan-server --stop` stops it, and it stops by itself after 30 idle minutes or when the terminal or session that started it goes away.
+- `npm run e2e` (in `engine/`) is the committed version of the end-to-end test: it always ends (when the scan is done or fails, on a signal, after 15 minutes, when its parent goes away) and takes Chrome and its servers with it.
+- Measured on fixtures/broken-landing (2 pages), same findings check by check: average CPU 275% → 82%, peak 560% → 277%, open pages 11+ → 2. **Slower:** 21 s → 105 s, and a 9-page site takes about 7 minutes (was 1:09). The real fix for both speed and CPU is to load each page once and run every check on it, instead of every check loading every page (ALL-32).
+- Tests: `engine/test/limits.test.js` (page limit, waiting, reuse, blocking without false "broken", server ping/stop/idle).
+- Not done yet: the public server with abuse protection (stage 2), tuning on real sites (stage 3). Some fix texts still speak as Sofia in a chat ("Tell me what the site collects").
+
 ## Known limits of the mechanical checks
 - The HTTP crawl doesn't run JavaScript: pages that build their content in the browser look empty to it. The M2 browser crawl covers those.
 - `env.missing-vars` can't see the host's settings; it flags variables the code needs that aren't defined in *any* env file or host config in the project.

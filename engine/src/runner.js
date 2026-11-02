@@ -1,6 +1,6 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { copyFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { BrowserMissing, launchBrowser } from "./browser.js";
+import { BrowserMissing, launchBrowser, PAGE_LIMIT } from "./browser.js";
 import { CheckBug, makeContext } from "./context.js";
 import { BLOCKED_FIX, BLOCKED_TITLE, isChallenge, UNAVAILABLE, UNAVAILABLE_FIX, UNAVAILABLE_TITLE } from "./lib/blocked.js";
 import { createCrawler } from "./crawl.js";
@@ -15,6 +15,7 @@ import { mergeRun, readState, STATE_DIR, writeState } from "./state.js";
 import { lastScan, refreshCurrent } from "./summary.js";
 import { fingerprint, PAGES_FILE, reviewSources, writePagesText } from "./judgment.js";
 import { commitAll, isGitRepo, revertCommit } from "./git.js";
+import { addSiteFiles, mailFact, NEEDS_CODE, NO_CODE_REASON, runsEarly, siteScanSkip, toAddresses } from "./site-scan.js";
 import { mkdir } from "node:fs/promises";
 
 export class UsageError extends Error {}
@@ -48,6 +49,11 @@ export function parseTarget(target) {
 
 /** Which layers each mode runs. Judgment checks are never run by the engine (docs/02). */
 const MODE_LAYERS = { quick: new Set(["mechanical"]), full: new Set(["mechanical", "browser", "judgment"]) };
+// one browser check at a time: a check uses up to two Chrome pages (a shared one and one of its own),
+// which is the whole page budget (PAGE_LIMIT). More of them at once froze a Mac. LC_BROWSER_CHECKS overrides.
+const BROWSER_LIMIT = Math.max(1, Number(process.env.LC_BROWSER_CHECKS) || 1);
+// every running check must be able to get its two pages, or they'd wait on each other for ever
+const MAX_PAGES_OPEN = Math.max(PAGE_LIMIT, BROWSER_LIMIT + 1);
 const CHECK_TIMEOUT_MS = { mechanical: 60_000, browser: 240_000 };
 
 /** --only "seo,sec.client-secrets" → the selected check ids. */
@@ -62,9 +68,10 @@ export function selectChecks(implemented, only, catalog) {
 }
 
 /** Prepare everything a run or `detect` needs. */
-async function prepare({ root, target, maxPages = 30 }) {
+async function prepare({ root, target, maxPages = 30, siteOnly = false }) {
   let url = parseTarget(target);
-  const project = await loadProject(root);
+  if (siteOnly && url === "local") throw new UsageError("A site scan needs a web address, like https://my-app.com");
+  const project = await loadProject(root, { noCode: siteOnly });
   let local = null;
   if (url === "local") {
     local = await startLocal(project);
@@ -114,6 +121,7 @@ async function runOne(c, ctx) {
   try {
     return await runOneTimed(c, ctx);
   } finally {
+    ctx.done?.();
     // LC_TIMINGS=1: how long each check took, for finding the slow ones
     if (process.env.LC_TIMINGS) process.stderr.write(`${String(Date.now() - started).padStart(6)} ms  ${c.id}\n`);
   }
@@ -233,11 +241,12 @@ async function saveShots(root, state, results) {
 /** A finding fixed this run that had a before.png gets an after.png from the same page and width. */
 async function saveAfterShots(root, state, fixedIds, browser, base) {
   if (!browser) return;
+  const pages = browser.lease();
   for (const id of fixedIds) {
     const f = state.findings[id];
     if (!f.shots?.before || !f.location?.url) continue;
     try {
-      const p = await browser.open(new URL(f.location.url, base).href, { width: f.location.viewport ?? 1280 });
+      const p = await pages.open(new URL(f.location.url, base).href, { width: f.location.viewport ?? 1280 });
       const rel = `shots/${id}/after.png`;
       await mkdir(path.join(root, STATE_DIR, "shots", id), { recursive: true });
       await writeFile(path.join(root, STATE_DIR, rel), await p.screenshot());
@@ -246,6 +255,7 @@ async function saveAfterShots(root, state, fixedIds, browser, base) {
       // no after shot is better than a failed run
     }
   }
+  pages.release();
 }
 
 /**
@@ -274,17 +284,23 @@ function verifiablePaths(pages, visited, limitReached) {
  * @param {{ root: string, target: string, mode: "full"|"quick", only?: string, consent?: string[], staging?: boolean, maxPages?: number,
  *   catalog: any, checks: { implemented: any[], notImplemented: string[] }, now?: () => Date, onProgress?: (msg: string) => void }} opts
  */
-export async function run({ root, target, mode, only, consent = [], staging = false, maxPages = 30, kind = "scan", catalog, checks, now = () => new Date(), onProgress = () => {} }) {
-  const selected = selectChecks(checks.implemented, only, catalog).filter((c) => MODE_LAYERS[mode].has(c.entry.layer));
+export async function run({ root, target, mode, only, consent = [], staging = false, maxPages = 30, kind = "scan", siteOnly = false, catalog, checks, now = () => new Date(), onProgress = () => {}, onCheck = () => {} }) {
+  const chosen = selectChecks(checks.implemented, only, catalog).filter((c) => MODE_LAYERS[mode].has(c.entry.layer));
   const startedAt = now();
-  const { url, http, project, crawl, pages, detected, local } = await prepare({ root, target, maxPages });
+  const prepared = await prepare({ root, target, maxPages, siteOnly });
+  const { url, http, project, crawl, pages, local } = prepared;
+  let { detected } = prepared;
   if (local) onProgress(`Started the app locally (${local.how}) at ${url}`);
+  // no code to read: those checks would pass with nothing to look at, so they say so instead
+  const notRun = (c) => (siteOnly ? siteScanSkip(c.entry) : !project.shippedSource().length && !project.pkg && NEEDS_CODE.has(c.id) ? NO_CODE_REASON : null);
+  const selected = chosen.filter((c) => !notRun(c));
 
   let browser = null;
+  let siteSources = null;
   try {
     const applicable = (c) => c.entry.appliesWhen === "always" || detected[c.entry.appliesWhen]?.value;
-    if (selected.some((c) => c.entry.layer === "browser" && applicable(c))) {
-      browser = await launchBrowser();
+    if (siteOnly || selected.some((c) => c.entry.layer === "browser" && applicable(c))) {
+      browser = await launchBrowser({ maxOpen: MAX_PAGES_OPEN });
       crawl.attachBrowser(browser);
       onProgress(`Using your installed Chrome (${browser.version})`);
     }
@@ -303,29 +319,48 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     // checks that request addresses like /.env or /admin can make a host's firewall start blocking
     // this machine: run them last, so a block can't spoil the rest of the scan
     const isProbe = (c) => Boolean(c.check?.probe);
+    let finished = 0;
     const runSet = (list, limit) =>
       mapLimit(list, limit, async (c) => {
         const fact = c.entry.appliesWhen;
+        let result;
         if (fact !== "always" && !detected[fact]?.value) {
-          return { entry: c.entry, status: "skip", reason: detected[fact]?.why ?? `not relevant (${fact})`, items: [] };
+          result = { entry: c.entry, status: "skip", reason: detected[fact]?.why ?? `not relevant (${fact})`, items: [] };
+        } else {
+          const ctx = makeContext({ entry: c.entry, project, crawl, http, browser, target: url, detected, now: startedAt, consent, staging, siteOnly });
+          result = await runOne(c, ctx);
         }
-        const ctx = makeContext({ entry: c.entry, project, crawl, http, browser, target: url, detected, now: startedAt, consent, staging });
-        return runOne(c, ctx);
+        const failed = result.items.find((i) => i.status === "fail");
+        onCheck({ id: c.id, title: c.entry.title, done: ++finished, total: selected.length, result, ...(failed ? { found: { title: failed.title, severity: c.entry.severity } } : {}) });
+        return result;
       });
-    const layer = (l) => selected.filter((c) => c.entry.layer === l && !isProbe(c));
+    // a site scan: what plain requests can answer comes back while Chrome reads the pages
+    const early = siteOnly ? selected.filter(runsEarly) : [];
+    const earlyResults = runSet(early, 8);
+    if (siteOnly) {
+      onProgress("Reading the pages in Chrome");
+      siteSources = await addSiteFiles({ project, crawl, browser, http, origin: crawl.origin, onPage: (n) => onProgress(`Reading the pages in Chrome: ${n} so far`) });
+      detected = await detect(project);
+      detected.mail = await mailFact(new URL(url).hostname);
+      onProgress("Read the pages");
+    }
+    const layer = (l) => selected.filter((c) => c.entry.layer === l && !isProbe(c) && !early.includes(c));
     // judgment checks: prepare review tasks for the reviewer; nothing is judged here
-    const reviews = await prepareReviews({ root, project, state, runId, detected, pages: browser ? await crawl.browserPagesWithText() : pages, checks: layer("judgment") });
+    const reviews = await prepareReviews({ root, project, state, runId, detected, pages: browser && layer("judgment").length ? await crawl.browserPagesWithText() : pages, checks: layer("judgment") });
     const results = [
+      ...chosen.filter(notRun).map((c) => ({ entry: c.entry, status: "skip", reason: notRun(c), items: [] })),
       ...reviews.results,
+      ...(await earlyResults),
       ...(await runSet(layer("mechanical"), 8)),
       // without Chrome (quick mode) browser checks don't run, but the ones that don't apply are still recorded as such
-      ...(browser ? await runSet(layer("browser"), 3) : await runSet(layer("browser").filter((c) => !applicable(c)), 3)),
+      ...(browser ? await runSet(layer("browser"), BROWSER_LIMIT) : await runSet(layer("browser").filter((c) => !applicable(c)), 3)),
       ...(await runSet(selected.filter((c) => isProbe(c) && (c.entry.layer !== "browser" || browser)), 1)),
     ];
     // keep catalog order so state and report don't depend on which check finished first
     const order = new Map(catalog.checks.map((c, i) => [c.id, i]));
     results.sort((a, b) => order.get(a.entry.id) - order.get(b.entry.id));
 
+    if (siteSources) toAddresses(results, siteSources);
     state.project.detected = detected;
     await saveShots(root, state, results);
     const at = now().toISOString();
@@ -338,6 +373,7 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
       id: runId,
       kind,
       mode,
+      ...(siteOnly ? { siteOnly } : {}),
       target: url,
       // how to reach the same target again for a recheck ("local" means: start it again)
       targetSpec: target === "local" ? "local" : url,
@@ -376,6 +412,14 @@ export async function run({ root, target, mode, only, consent = [], staging = fa
     await browser?.close();
     await local?.stop();
   }
+}
+
+/** A scan from a web address alone. Its report is one file, next to the results. */
+export async function scanSite({ root, ...options }) {
+  const result = await run({ root, mode: "full", siteOnly: true, ...options });
+  const report = path.join(root, "report.html");
+  await copyFile(path.join(root, STATE_DIR, "report.html"), report);
+  return { ...result, report };
 }
 
 /**

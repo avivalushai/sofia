@@ -27,15 +27,18 @@ const MAX_FILE = 2 * 1024 * 1024;
  * Everything the checks need to know about the project folder.
  * Files respect .gitignore when the project is a git repo.
  * @param {string} root
+ * @param {{ noCode?: boolean }} [o] noCode: a scan from a web address, whatever folder it writes to
  */
-export async function loadProject(root) {
-  const isGit = await gitRoot(root);
-  const files = (isGit ? await gitFiles(root) : await walk(root, "")).filter((f) => !f.split("/").some((part) => ALWAYS_IGNORED.has(part))).sort();
+export async function loadProject(root, { noCode = false } = {}) {
+  const isGit = noCode ? null : await gitRoot(root);
+  const files = noCode ? [] : (isGit ? await gitFiles(root) : await walk(root, "")).filter((f) => !f.split("/").some((part) => ALWAYS_IGNORED.has(part))).sort();
   const cache = new Map();
   let pkg = null;
-  try {
-    pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
-  } catch {}
+  if (!noCode) {
+    try {
+      pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
+    } catch {}
+  }
 
   const project = {
     root,
@@ -50,6 +53,11 @@ export async function loadProject(root) {
     },
     has(rel) {
       return files.includes(rel);
+    },
+    /** A file that isn't on disk: what a scan from a web address reads instead of source. */
+    addFile(rel, text) {
+      files.push(rel);
+      cache.set(rel, Promise.resolve(text));
     },
     /** Source files that end up in the shipped app: no tests, configs, scripts or docs. */
     shippedSource() {

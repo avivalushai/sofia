@@ -17,7 +17,9 @@ const VERDICT_COLOR = { "Not ready": "var(--notready)", Almost: "var(--almost)",
 const ui = { tab: "findings", severity: null, group: "severity", search: "", open: null };
 let data = null;
 const EMBEDDED = document.getElementById("sofia-data");
-const shotSrc = (src) => (EMBEDDED ? data.shots?.[src] ?? "" : `/${src}`);
+// a scan from a web address alone: no code, and no Sofia in a chat to fix things
+let siteOnly = false;
+const shotSrc = (src) => (EMBEDDED ? data.shots?.[src] ?? "" : src);
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -56,6 +58,9 @@ function render() {
   if (!data) return;
   const { state, summary, project } = data;
   const run = state.runs.at(-1);
+  if (data.scan) renderScan();
+  siteOnly = Boolean(run?.siteOnly);
+  if (siteOnly) Object.assign(FIXER, { claude: "A change in the code" });
   $("#project").textContent = project ? `· ${project}` : "";
   document.title = `Sofia report · ${project}`;
 
@@ -66,7 +71,7 @@ function render() {
     $("#since").textContent = "Ask Sofia to check the app — this page fills in as she works.";
     return;
   }
-  $("#meta").innerHTML = `${esc(run.target)} · ${run.mode} scan · ${esc(ago(run.finishedAt))}`;
+  $("#meta").innerHTML = `${esc(run.target)} · ${siteOnly ? "checked from the address alone" : `${run.mode} scan`} · ${esc(ago(run.finishedAt))}`;
 
   // status pill
   const fixing = Object.values(state.findings).filter((f) => f.status === "fixing").length;
@@ -76,18 +81,26 @@ function render() {
   const reviewing = state.reviewTasks.filter((r) => r.status === "pending").length;
   pill.textContent = EMBEDDED ? `Saved ${ago(data.savedAt)}` : fixing ? `Sofia is fixing ${fixing} item${fixing > 1 ? "s" : ""}` : reviewing ? `Code review · ${reviewing} waiting` : approved ? `Approved to fix · ${approved}` : "Idle";
   pill.className = "pill" + (!EMBEDDED && (fixing || reviewing) ? " busy" : "");
+  if (data.scan) {
+    pill.textContent = scanning() ? `Checking · ${data.scan.done} of ${data.scan.total || 110}` : "Done";
+    pill.className = "pill" + (scanning() ? " busy" : "");
+  }
 
   // score
-  const score = summary.score;
+  const score = scanning() ? null : summary.score;
   $("#score").textContent = score ?? "—";
   const dial = $("#dial-value");
   dial.style.strokeDashoffset = String(326.7 * (1 - (score ?? 0) / 100));
-  dial.style.stroke = VERDICT_COLOR[summary.verdict] ?? "var(--muted)";
+  dial.style.stroke = scanning() ? "var(--muted)" : VERDICT_COLOR[summary.verdict] ?? "var(--muted)";
   const verdict = $("#verdict");
-  verdict.textContent = summary.verdict === "Not ready" ? "Not ready yet" : summary.verdict === "Ready" ? "Ready to launch" : summary.verdict;
-  verdict.style.color = VERDICT_COLOR[summary.verdict] ?? "";
+  verdict.textContent = scanning() ? "Still checking" : summary.verdict === "Not ready" ? "Not ready yet" : summary.verdict === "Ready" ? (siteOnly ? "No big problems from the outside" : "Ready to launch") : summary.verdict;
+  verdict.style.color = scanning() ? "" : VERDICT_COLOR[summary.verdict] ?? "";
   const sl = summary.sinceLast;
-  $("#since").innerHTML = sl.firstRun
+  $("#since").innerHTML = scanning()
+    ? "Findings appear here as each check finishes. The score comes at the end."
+    : siteOnly
+    ? "This scan sees what any visitor sees. What needs the code, a login or sending a form wasn't checked: see Skipped."
+    : sl.firstRun
     ? "First run — next time you'll see what changed."
     : `${summary.previousScore ?? "—"} → ${score ?? "—"} · ${sl.fixed.length} fixed · ${sl.new.length} new${sl.reopened.length ? ` · ${sl.reopened.length} back again` : ""}`;
 
@@ -110,6 +123,7 @@ function render() {
     : "";
 
   // fixer cards
+  $("#fixers").hidden = siteOnly;
   $("#fixers").innerHTML = ["claude", "choice", "user"]
     .map((k) => `<div class="card fixer fixer-${k}"><div class="num">${summary.buckets[k].length}</div><div><h3>${FIXER_CARD[k][0]}</h3><p class="muted small">${FIXER_CARD[k][1]}</p></div></div>`)
     .join("");
@@ -238,9 +252,9 @@ function openDetail(checkId, focus = true) {
     <p class="impact">${t(it.impact)}</p>
     ${catalogEntry(it.checkId)?.layer === "judgment" ? `<p class="note small">Found by a separate reviewer that read the code against a written checklist, without seeing your conversation. It's a judgment — the quotes below show exactly what it relied on.</p>` : ""}
     <div class="part"><h3>Where and what was found</h3>${instances}</div>
-    <div class="part"><h3>${it.fixer === "user" ? "What to do" : "How it gets fixed"}</h3>${steps(first.fix)}</div>
+    <div class="part"><h3>${it.fixer === "user" ? "What to do" : siteOnly ? "How to fix it" : "How it gets fixed"}</h3>${steps(first.fix)}</div>
     ${options}
-    <p class="muted small" style="margin-top:20px">To fix it, tell Sofia in the chat — nothing changes until you approve and say go.</p>
+    <p class="muted small" style="margin-top:20px">${siteOnly ? "Sofia for Claude Code also reads the code and fixes things with you." : "To fix it, tell Sofia in the chat — nothing changes until you approve and say go."}</p>
     <div class="checkid mono muted">${esc(it.checkId)}</div>`;
   $("#drawer").hidden = false;
   $("#scrim").hidden = false;
@@ -296,13 +310,13 @@ function setTab(name) {
 
 // --- data, live ---
 async function load() {
-  const res = await fetch("/api/state", { cache: "no-store" });
+  const res = await fetch("api/state", { cache: "no-store" });
   data = await res.json();
   render();
 }
 
 function connect() {
-  const es = new EventSource("/api/events");
+  const es = new EventSource("api/events");
   es.addEventListener("state", () => {
     const before = data?.state.runs.at(-1)?.id;
     load().then(() => {
@@ -330,6 +344,95 @@ if (EMBEDDED) {
   $(".foot").textContent = "A saved copy of the report, written after Sofia's last scan · ask Sofia in the chat to check again";
   render();
 } else {
-  load().catch(() => ($("#verdict").textContent = "Couldn't load the report"));
-  connect();
+  load()
+    .then(() => (data.scan ? followScan() : connect()))
+    .catch(() => ($("#verdict").textContent = "Couldn't load the report"));
+}
+
+// --- a scan from the landing page: a loading screen first, then the report filling in ---
+const SCAN_POLL_MS = 1500;
+const SCAN_STEP = {
+  waiting: "Another site is being checked first. Yours starts right after.",
+  opening: "Opening your site the way a visitor would, and finding its pages.",
+  reading: "Reading your pages in Chrome. The quick checks are already done.",
+};
+
+function followScan() {
+  let misses = 0;
+  const poll = async () => {
+    const res = await fetch("api/state", { cache: "no-store" });
+    if (!res.ok) throw new Error(String(res.status));
+    data = await res.json();
+    misses = 0;
+    render();
+  };
+  const tick = () => {
+    if (["done", "failed"].includes(data.scan.status)) return;
+    setTimeout(() => poll().then(tick, () => {
+      // the scanner stopped (or restarted and forgot this check): say so instead of freezing on the last number
+      if (++misses < 4) return tick();
+      data.scan = { ...data.scan, status: "failed", error: "Lost touch with the scanner, so this check stopped. Start it again from the home page." };
+      ui.peek = false;
+      render();
+    }), SCAN_POLL_MS);
+  };
+  tick();
+}
+
+const scanning = () => data.scan && data.scan.status !== "done";
+
+const pagesRead = (s) => (s.pagesRead ? `${s.pagesRead} page${s.pagesRead === 1 ? "" : "s"} read so far` : "Opening the first pages");
+
+function renderScan() {
+  const s = data.scan;
+  const screen = $("#scanning");
+  $(".foot").textContent = "Checked from the address alone · nothing here changes your site";
+  if (s.status === "done" && ui.waitedFor) {
+    ui.waitedFor = false;
+    flash(`All ${s.total} checks done`);
+  }
+  const show = scanning() && (!ui.peek || s.status === "failed");
+  screen.hidden = !show;
+  $("#app").hidden = show;
+  const banner = $("#banner");
+  if (scanning() && ui.peek && s.status !== "failed") {
+    banner.className = "banner live";
+    banner.innerHTML = `<span>Still checking · ${s.done} of ${s.total || 110}</span><span class="banner-now">${esc(s.phase === "reading" ? pagesRead(s) : s.current ?? "")}</span><i style="width:${s.total ? Math.round((100 * s.done) / s.total) : 0}%"></i>`;
+    banner.hidden = false;
+  } else if (banner.classList.contains("live")) {
+    banner.className = "banner";
+    banner.hidden = true;
+  }
+  if (!show) return;
+  ui.waitedFor = true;
+  if (s.status === "failed") {
+    screen.innerHTML = `<p class="eyebrow">${esc(s.host)}</p><h2>The check stopped</h2><p class="scan-what">${t(s.error)}</p><a class="btn-primary" href="/">Try again</a>`;
+    return;
+  }
+  // built once and then updated in place: rebuilding it every poll would swallow a click on the button
+  if (!screen.querySelector("#scan-what")) {
+    screen.innerHTML = `
+      <p class="eyebrow">Checking</p>
+      <h2 dir="ltr">${esc(s.host)}</h2>
+      <p class="scan-what" id="scan-what"></p>
+      <div class="scan-progress" id="scan-progress"><i></i></div>
+      <div class="scan-meta"><span id="scan-count"></span><span class="scan-now" id="scan-now" dir="auto"></span></div>
+      <div class="scan-found"><p id="scan-found"></p><button class="btn-primary" id="peek" type="button" hidden>See what's found so far</button></div>
+      <p class="muted small">This usually takes a few minutes. You can read the report while the rest runs.</p>`;
+    $("#peek").addEventListener("click", () => {
+      ui.peek = true;
+      ui.waitedFor = true;
+      render();
+    });
+  }
+  const area = s.currentId ? catalogEntry(s.currentId)?.categoryTitle : null;
+  $("#scan-what").textContent = SCAN_STEP[s.status === "waiting" ? "waiting" : s.phase] ?? `Now: ${area ? `${area.toLowerCase()}. ` : ""}Each check looks at your pages in Chrome, on phone, tablet and desktop sizes.`;
+  const progress = $("#scan-progress");
+  progress.classList.toggle("waiting", !s.total);
+  progress.firstElementChild.style.width = `${s.total ? Math.round((100 * s.done) / s.total) : 30}%`;
+  $("#scan-count").textContent = s.total ? `${s.done} of ${s.total} checks` : "Getting ready";
+  $("#scan-now").textContent = s.phase === "reading" ? pagesRead(s) : s.current ?? "";
+  const n = s.found.length;
+  $("#scan-found").innerHTML = n ? `<b>${n}</b> thing${n === 1 ? "" : "s"} to look at so far` : `<span class="muted">Findings show up here as soon as there are some.</span>`;
+  $("#peek").hidden = !n;
 }

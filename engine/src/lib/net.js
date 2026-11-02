@@ -12,6 +12,9 @@ export function isLocalHost(hostname) {
   return false;
 }
 
+/** Addresses hosting companies hand out. */
+export const PLATFORM_HOST = /\.vercel\.app$|\.netlify\.app$|\.pages\.dev$|\.onrender\.com$|\.fly\.dev$|\.up\.railway\.app$|\.herokuapp\.com$|\.web\.app$|\.firebaseapp\.com$|\.github\.io$|\.wixsite\.com$|\.lovable\.app$|\.replit\.app$|\.repl\.co$|\.bolt\.new$|\.glitch\.me$|\.surge\.sh$|\.amplifyapp\.com$/i;
+
 /** "www.shop.example.co.il" → "example.co.il". Good enough for DNS lookups; not a full public-suffix list. */
 export function registrableDomain(hostname) {
   const parts = hostname.toLowerCase().split(".");

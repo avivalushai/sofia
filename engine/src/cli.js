@@ -1,14 +1,16 @@
 import { parseArgs } from "node:util";
 import { ActionError, decide, markFixing, queue } from "./actions.js";
 import { CatalogError, loadCatalog, loadChecks, RUBRICS_DIR } from "./catalog.js";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { ReviewError, verifyReview } from "./judgment.js";
 import { detect, liveUrlCandidates } from "./detect.js";
 import { checkpoint, commitAll, dirtyFiles, isGitRepo } from "./git.js";
 import { loadProject } from "./project.js";
 import { writeReport } from "./report.js";
-import { BrowserMissing, detectOnly, recheck, revert, run, UsageError } from "./runner.js";
+import { BrowserMissing, detectOnly, parseTarget, recheck, revert, run, scanSite, UsageError } from "./runner.js";
+import { findScanServer, startScanServer, stopScanServer } from "./scan-server.js";
+import { onStop, stopNow, stopWithParent } from "./lib/stop.js";
 import { mergeRun, readState, statePath, writeState } from "./state.js";
 import { ensureServer, runServer } from "./server.js";
 import { buildSummary, refreshCurrent, showItem } from "./summary.js";
@@ -19,6 +21,10 @@ Commands:
   detect [--target <url|local>]           what the app does, how to start it, where it's published
   run --target <url|local> [--mode full|quick] [--only <ids|categories>]
       [--consent submit-forms,test-accounts] [--staging] [--max-pages 30]
+  scan <url> [--out <folder>] [--max-pages 30]
+                                          check a site from its address alone: no code, no login, nothing sent; writes report.html
+  scan-server [--stop]                    the landing page with its scan form, on this machine (one at a time;
+                                          stops after 30 idle minutes or when the terminal or session that started it ends)
   summary                                 score, blockers, the three fixer groups, since last run
   show <checkId|findingId>                every detail of one item
   queue add|remove|clear|list [checkId|findingId...]
@@ -43,7 +49,7 @@ Options:
   --json           machine-readable output`;
 
 const LATER = new Set(["export"]);
-const COMMANDS = new Set(["detect", "run", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide", "serve", "review-tasks", "add-findings"]);
+const COMMANDS = new Set(["detect", "run", "scan", "scan-server", "summary", "show", "queue", "fixing", "checkpoint", "recheck", "revert", "decide", "serve", "review-tasks", "add-findings"]);
 const LAYER_TITLE = { mechanical: "Mechanical checks", browser: "Browser checks", judgment: "Judgment checks" };
 
 /**
@@ -58,6 +64,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
       allowPositionals: true,
       options: {
         target: { type: "string" },
+        out: { type: "string" },
         mode: { type: "string", default: "full" },
         only: { type: "string" },
         consent: { type: "string" },
@@ -69,6 +76,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
         reason: { type: "string", default: "" },
         json: { type: "boolean", default: false },
         foreground: { type: "boolean", default: false },
+        stop: { type: "boolean", default: false },
         help: { type: "boolean", short: "h", default: false },
       },
     });
@@ -155,6 +163,36 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
           out(`Saved ${statePath(cwd)}`);
         }
         return result.errors.length ? 1 : 0;
+      }
+
+      case "scan": {
+        const target = parseTarget(rest[0]);
+        if (target === "local") throw new UsageError("A site scan needs a web address, like https://my-app.com");
+        const root = path.resolve(cwd, opts.out ?? path.join("sofia-scans", new URL(target).hostname));
+        await mkdir(root, { recursive: true });
+        const result = await scanSite({ root, target, maxPages, catalog, checks, onProgress: progress });
+        for (const e of result.errors) err(`! ${e}`);
+        const { report, run: r } = result;
+        print({ report, run: r, ran: result.ran, errors: result.errors }, `✓ ${r.pages} pages scanned\n${r.score ?? "—"} / 100 · blockers ${r.counts.blocker} · important ${r.counts.important} · polish ${r.counts.polish} · passed ${r.counts.passed} · not checked ${r.counts.skipped}\nReport: ${report}`);
+        return result.errors.length ? 1 : 0;
+      }
+
+      case "scan-server": {
+        if (opts.stop) {
+          const pid = await stopScanServer();
+          print({ stopped: pid }, pid ? `✓ Stopped the scan server (process ${pid})` : "No scan server was running");
+          return 0;
+        }
+        const already = await findScanServer();
+        if (already) {
+          print({ url: already.url, pid: already.pid, started: false }, `✓ Already running at ${already.url} (process ${already.pid}). Stop it with: launch-check scan-server --stop`);
+          return 0;
+        }
+        const server = await startScanServer({ catalog, checks, maxPages, onIdle: () => stopNow(0) });
+        onStop(server.close);
+        stopWithParent();
+        out(`Landing page with the scan form at ${server.url} (process ${process.pid}). Ctrl-C or launch-check scan-server --stop to stop it.`);
+        return await new Promise(() => {}); // keeps serving until stopped, idle, or its parent is gone
       }
 
       case "summary": {

@@ -1,4 +1,4 @@
-const PLATFORM = /\.vercel\.app$|\.netlify\.app$|\.pages\.dev$|\.onrender\.com$|\.fly\.dev$|\.up\.railway\.app$|\.herokuapp\.com$|\.web\.app$|\.firebaseapp\.com$|\.github\.io$|\.wixsite\.com$|\.lovable\.app$|\.replit\.app$|\.repl\.co$|\.bolt\.new$|\.glitch\.me$|\.surge\.sh$|\.amplifyapp\.com$/i;
+import { PLATFORM_HOST } from "../../lib/net.js";
 
 /** @type {import("../../types.js").Check} */
 export default {
@@ -6,7 +6,7 @@ export default {
   layer: "mechanical",
   async run(ctx) {
     if (ctx.isLocalTarget) return [ctx.skip("scanning a local address — check this on the live site")];
-    if (!PLATFORM.test(ctx.targetUrl.hostname)) return [ctx.pass()];
+    if (!PLATFORM_HOST.test(ctx.targetUrl.hostname)) return [ctx.pass()];
     return [ctx.fail({
       key: "site",
       title: "The site lives on the hosting company's address",

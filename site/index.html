@@ -1,3 +1,4 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sofia</title>
 <meta name="description" content="Sofia checks what you built before launch, explains what's broken in plain words, and fixes only what you approve.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -264,7 +265,30 @@ h1,h2{font-weight:700;letter-spacing:-.04em}
 .chat{box-shadow:0 0 0 1px var(--line),0 30px 60px -24px rgba(0,0,0,.9)}
 .wa-img:not(.empty){background:linear-gradient(135deg,#3a2414,#14301f)}
 
+.dswitch{position:sticky;top:0;z-index:50;display:flex;height:auto;justify-content:flex-start;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 16px;background:#101014;font:500 13px system-ui,sans-serif}
+.dswitch span{color:#9a9aa6;margin-right:6px}
+.dswitch a{color:#f2f2f5;text-decoration:none;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 11px}
+.dswitch a[aria-current="page"]{background:#f2f2f5;color:#101014}
+
+/* scan a site from the hero */
+.scan{margin-top:30px;max-width:560px}
+.scan label{display:block;font:500 14px var(--sans);color:var(--muted);margin-bottom:10px}
+.scan-row{display:flex;gap:8px;padding:5px;background:var(--surface);border:1px solid var(--line);border-radius:var(--pill)}
+.scan-row:focus-within{border-color:var(--accent)}
+.scan input{flex:1;min-width:0;height:44px;padding-inline:12px;background:none;border:0;outline:0;color:var(--ink);font:400 16px var(--mono)}
+.scan input::placeholder{color:var(--muted)}
+.scan button{flex-shrink:0;height:44px;padding-inline:18px;border:0;border-radius:calc(var(--pill) - 2px);background:var(--accent);color:var(--accent-ink);font:600 15px var(--sans);cursor:pointer}
+.scan button:active{transform:scale(.98)}
+.scan-error{margin-top:10px;font-size:14.5px;color:var(--bad)}
+@media (max-width:479px){.scan-row{flex-direction:column}.scan button{width:100%}}
 </style>
+
+<nav class="dswitch" aria-label="Compare designs">
+  <span>Designs</span>
+  <a href="index.html" aria-current="page">Night shift</a>
+  <a href="variants/v1.html">Swiss</a>
+  <a href="variants/v4.html">Poster</a>
+</nav>
 
 <div class="page">
 <div class="wrap">
@@ -284,6 +308,14 @@ h1,h2{font-weight:700;letter-spacing:-.04em}
     <p class="eyebrow">A plugin for Claude Code</p>
     <h1>Your app works. <span>Is it ready?</span></h1>
     <p class="lead">Sofia checks what you built before launch, explains what's broken in plain words, and fixes only what you approve.</p>
+    <form class="scan" id="scan-form" novalidate hidden>
+      <label for="scan-url">Or check your site right now, nothing to install</label>
+      <div class="scan-row">
+        <input id="scan-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="my-site.com" aria-describedby="scan-error">
+        <button type="submit">Check my site</button>
+      </div>
+      <p class="scan-error" id="scan-error" role="alert" hidden></p>
+    </form>
     <div class="cta">
       <div class="cmd"><code id="c-hero">/plugin marketplace add avivalushai/sofia</code><button class="copy" type="button" data-copy="c-hero">Copy</button></div>
       <a class="btn" href="#how">How it works</a>
@@ -519,4 +551,24 @@ document.querySelectorAll('[data-copy]').forEach(function(btn){
     try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
   });
 });
+
+// the scan form shows only where a scan server answers; the static site stays as it is
+(function(){
+  var form=document.getElementById('scan-form'),input=document.getElementById('scan-url'),error=document.getElementById('scan-error'),button=form.querySelector('button');
+  fetch('/api/scan').then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.ready)form.hidden=false},function(){});
+  function fail(message){
+    button.disabled=false;button.textContent='Check my site';
+    error.hidden=false;error.textContent=message;input.focus();
+  }
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var value=input.value.trim();
+    if(!value)return fail('Type your site\'s address first');
+    error.hidden=true;button.disabled=true;button.textContent='Starting…';
+    fetch('/api/scan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:value})}).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})}).then(function(x){
+      if(!x.ok)return fail(x.d.error);
+      location.href='/reports/'+x.d.id+'/';
+    },function(){fail('Couldn\'t start the check. Try again.')});
+  });
+})();
 </script>

@@ -3,11 +3,31 @@ import { scanSource } from "../../lib/code.js";
 const ANIMATES = /@keyframes\s|animation(-name)?\s*:\s*(?!none)[a-z]|\banimate-(spin|ping|pulse|bounce|[a-z-]+)\b|from\s+["'](framer-motion|motion\/react|gsap|animejs|aos|lottie-web|lottie-react|@lottiefiles\/[a-z-]+|react-spring|@react-spring\/web|swiper|embla-carousel[a-z-]*)["']|\bAOS\.init\(|data-aos=/g;
 const RESPECTS = /prefers-reduced-motion|useReducedMotion|reducedMotion\s*[:=]|MotionConfig|motion-safe:|motion-reduce:/;
 
+/** Without code: load each page with the device setting on, and see what still moves. */
+async function liveMotion(ctx) {
+  for (const page of await ctx.crawl.browserPages()) {
+    const moving = await ctx.browser.fresh(page.url, { width: 1280, context: { reducedMotion: "reduce" } }, (p) =>
+      p.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").map((a) => a.animationName ?? "transition")),
+    );
+    if (!moving.length) continue;
+    return [ctx.fail({
+      key: "site",
+      title: "Animations keep playing for people who asked their device to reduce motion",
+      impact: "For people with vestibular disorders, migraines or motion sensitivity, moving and sliding content can cause dizziness or nausea; their device setting asks sites to tone it down",
+      location: { url: page.path, viewport: 1280 },
+      evidence: `${moving.length} animation(s) still running with reduced motion on (${[...new Set(moving)].slice(0, 4).join(", ")})`,
+      fix: "Add a reduced-motion rule: @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } } (or MotionConfig reducedMotion=\"user\" with Framer Motion)",
+    })];
+  }
+  return [ctx.pass()];
+}
+
 /** @type {import("../../types.js").Check} */
 export default {
   id: "a11y.motion",
   layer: "mechanical",
   async run(ctx) {
+    if (ctx.siteOnly) return liveMotion(ctx);
     const files = ctx.project.files.filter((f) => /\.(css|scss|sass|less|jsx?|tsx?|mjs|vue|svelte|astro|html?)$/.test(f) && !/\.(test|spec|stories)\.|(^|\/)(tests?|docs?|scripts)\//.test(f));
     const hits = await scanSource(ctx.project, ANIMATES, { files, skipComments: true });
     if (!hits.length) return [ctx.pass()];

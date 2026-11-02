@@ -2,3 +2,4 @@ node_modules/
 .launch-check/
 .DS_Store
 engine/test/.cache/
+sofia-scans/

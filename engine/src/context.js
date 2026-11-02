@@ -49,7 +49,7 @@ export const dns = {
  * The object every check's run(ctx) receives (docs/03).
  * @param {{ entry: any, project: any, crawl: any, http: any, target: string, detected: any, now: Date }} o
  */
-export function makeContext({ entry, project, crawl, http, browser = null, target, detected, now, consent = [], staging = false }) {
+export function makeContext({ entry, project, crawl, http, browser = null, target, detected, now, consent = [], staging = false, siteOnly = false }) {
   const targetUrl = new URL(target);
   const local = isLocalHost(targetUrl.hostname);
   // everything this check saw that the host's bot protection had answered instead of the site
@@ -65,9 +65,11 @@ export function makeContext({ entry, project, crawl, http, browser = null, targe
     if (p.log?.pageBlocked) for (const u of p.log.blocked) blocked.set(u, browser.blocked.get(u));
     return p;
   };
+  // this check's hold on the shared page it's reading; released when the check ends (done())
+  const pages = browser?.lease();
   const watchedBrowser = browser && {
     ...browser,
-    open: (u, o) => browser.open(u, o).then(note),
+    open: (u, o) => pages.open(u, o).then(note),
     fresh: (u, o, fn) => browser.fresh(u, o, (p) => fn(note(p)).finally(() => note(p))),
   };
   const base = { checkId: entry.id };
@@ -79,6 +81,8 @@ export function makeContext({ entry, project, crawl, http, browser = null, targe
   };
 
   return {
+    /** The check is over: its shared page may be closed now. */
+    done: () => pages?.release(),
     entry,
     project,
     crawl,
@@ -89,6 +93,8 @@ export function makeContext({ entry, project, crawl, http, browser = null, targe
     targetUrl,
     /** true when the scanned address only exists on this machine or a private network */
     isLocalTarget: local,
+    /** a scan from a web address alone: the project holds rendered pages, not source */
+    siteOnly,
     /** the user's Chrome (null in quick mode) */
     browser: watchedBrowser,
     detected,

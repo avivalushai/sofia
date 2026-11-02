@@ -11,7 +11,8 @@
     "node": ">=20.1"
   },
   "scripts": {
-    "test": "node test/helpers/seed-dictionary.js && SOFIA_CACHE_DIR=\"$PWD/test/.cache\" node --test --test-concurrency=3 test/*.test.js"
+    "test": "node test/helpers/seed-dictionary.js && SOFIA_CACHE_DIR=\"$PWD/test/.cache\" node --test --test-concurrency=3 test/*.test.js",
+    "e2e": "node test/e2e.mjs"
   },
   "dependencies": {
     "axe-core": "^4.14.0",

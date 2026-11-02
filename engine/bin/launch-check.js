@@ -5,5 +5,6 @@ if (major < 20 || (major === 20 && minor < 1)) {
   process.exit(3);
 }
 const { main } = await import("../src/cli.js");
+(await import("../src/lib/stop.js")).stopOnSignals();
 
 process.exitCode = await main(process.argv.slice(2));

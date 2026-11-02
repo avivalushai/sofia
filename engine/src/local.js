@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { createServer as createNetServer } from "node:net";
 import path from "node:path";
+import { onStop } from "./lib/stop.js";
 
 const SCRIPTS = ["dev", "start", "serve", "preview"];
 /** frameworks that accept --port, and the flag they use */
@@ -102,7 +103,9 @@ export async function startLocal(project) {
   child.stderr.on("data", onData);
   child.on("exit", () => (dead = true));
 
+  let forget = () => {};
   const stop = async () => {
+    forget();
     if (dead) return;
     try {
       if (process.platform === "win32") child.kill();
@@ -110,6 +113,7 @@ export async function startLocal(project) {
     } catch {}
   };
 
+  forget = onStop(stop);
   const until = Date.now() + 90_000;
   let url = null;
   while (!url && Date.now() < until && !dead) {

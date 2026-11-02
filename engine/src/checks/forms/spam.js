@@ -26,7 +26,7 @@ export default {
           title: "Nothing stops bots from filling in this form",
           impact: "Spam bots find open forms within days: your inbox or sheet fills with junk, real messages get buried, and if the form sends email your sending address can get blocked",
           location: { file, line: form.line },
-          evidence: `the form at line ${form.line} has no hidden trap field and no challenge (reCAPTCHA, Turnstile, hCaptcha)`,
+          evidence: "this form has no hidden trap field and no challenge (reCAPTCHA, Turnstile, hCaptcha)",
           fix: "Add spam protection to the form",
           options: [
             { label: "Hidden trap field (recommended)", detail: "Invisible to people, bots fill it and get ignored. Free, no effect on visitors. Stops most simple bots" },
