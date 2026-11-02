@@ -8,7 +8,7 @@
     "granularity": "normal"
   },
   "nextNum": 35,
-  "nextNoteNum": 43,
+  "nextNoteNum": 44,
   "features": [
     {
       "key": "ALL-1",
@@ -1511,7 +1511,7 @@
       "title": "Scanner can't freeze the Mac: 2 Chrome pages max, cleans up when stopped",
       "type": "bug",
       "status": "review",
-      "note": "Start a scan from the landing page and watch Activity Monitor: at most 2 scan pages, ~1 core. Then decide: M2's 'full mode under 2 minutes' now fails (131 s), accept slower or do ALL-34 first",
+      "note": "Watch Activity Monitor during a scan: at most 2 scan pages, ~1 core. The M2 speed test passes again since ALL-34",
       "doneWhen": [
         "Chrome never has more than 2 pages open during a scan",
         "No scan-server, e2e or Chrome process survives a stop, a signal or a closed session"
@@ -1527,7 +1527,7 @@
       "links": [],
       "area": "Engine",
       "createdAt": "2026-11-02T15:31:49Z",
-      "updatedAt": "2026-11-02T15:32:22Z",
+      "updatedAt": "2026-11-02T16:23:24Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -1544,6 +1544,11 @@
           "at": "2026-11-02T15:32:22Z",
           "by": "claude",
           "text": "Moved to review — Start a scan from the landing page and watch Activity Monitor: at most 2 scan pages, ~1 core. Then decide: M2's 'full mode under 2 minutes' now fails (131 s), accept slower or do ALL-34 first"
+        },
+        {
+          "at": "2026-11-02T16:23:24Z",
+          "by": "claude",
+          "text": "Note: Watch Activity Monitor during a scan: at most 2 scan pages, ~1 core. The M2 speed test passes again since ALL-34"
         }
       ]
     },
@@ -1551,15 +1556,15 @@
       "key": "ALL-34",
       "title": "Load each page once and run every browser check on it (scans are ~5x slower since the 2-page limit)",
       "type": "feature",
-      "status": "idea",
-      "note": "",
+      "status": "review",
+      "note": "Scan a site from the landing page: same findings as before, about twice as fast (9-page test 561 s → 253 s), never more than 2 Chrome pages",
       "doneWhen": [],
       "steps": [],
       "files": [],
       "links": [],
       "area": "Engine",
       "createdAt": "2026-11-02T15:31:49Z",
-      "updatedAt": "2026-11-02T15:31:49Z",
+      "updatedAt": "2026-11-02T16:23:24Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -1571,6 +1576,16 @@
           "at": "2026-11-02T15:31:49Z",
           "by": "claude",
           "text": "Area: Engine"
+        },
+        {
+          "at": "2026-11-02T15:55:41Z",
+          "by": "claude",
+          "text": "Started — Shared-page checks run together and share page loads; isolated ones after"
+        },
+        {
+          "at": "2026-11-02T16:23:24Z",
+          "by": "claude",
+          "text": "Moved to review — Scan a site from the landing page: same findings as before, about twice as fast (9-page test 561 s → 253 s), never more than 2 Chrome pages"
         }
       ]
     }
@@ -2368,6 +2383,24 @@
       "steps": [],
       "createdAt": "2026-11-02T15:31:49Z",
       "updatedAt": "2026-11-02T15:31:49Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N43",
+      "kind": "decision",
+      "title": "Checks that open their own pages are marked isolated: true and run alone, after the shared-page checks",
+      "body": "Lets every other browser check share one load per page within the 2-page limit without deadlock, and keeps timing checks off a busy machine. A test enforces the mark.",
+      "considered": "Detect isolated checks from source at load time: implicit, harder to read. Run 2 isolated checks at once: can deadlock with 2 slots.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-34"
+      ],
+      "steps": [],
+      "createdAt": "2026-11-02T16:23:24Z",
+      "updatedAt": "2026-11-02T16:23:24Z",
       "updatedBy": "claude"
     }
   ],
