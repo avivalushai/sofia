@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sofia</title>
+<meta name="description" content="Sofia is a plugin for Claude Code. It checks your app before launch, explains what's broken in plain words, and fixes only what you approve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/*
+  Variant 4: Poster.
+  A vertical stack of full-width color blocks, each one poster with one message, like a gig poster series.
+  This is a deliberate "color block story": the one allowed exception to the single-theme rule.
+  Single look by choice (no light/dark switch): body background and every color are set explicitly below.
+  Each block pairs two palette colors; lime is only ever a highlight.
+  Contrast (WCAG AA): paper on cobalt 7.1:1, ink on tomato 5.9:1, tomato on ink 5.9:1,
+  cobalt on paper 7.1:1, ink on paper 17:1, ink on lime 15:1, cobalt on lime 6.1:1.
+  Tomato text is never placed on paper (fails), and paper text is never placed on tomato (fails).
+*/
+:root{
+  --cobalt:#1f3fd1;
+  --tomato:#ff5436;
+  --paper:#f4f4f0;
+  --ink:#121212;
+  --lime:#d4f05a;
+  --poster:"Anton",Impact,"Arial Narrow",sans-serif;
+  --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  --gut:clamp(16px,5vw,72px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-snap-type:y proximity;scroll-padding-top:46px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--ink);color:var(--paper);font:400 15px/1.6 var(--mono);-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:inherit}
+p{margin:0}
+h1,h2,h3{margin:0;font-family:var(--poster);font-weight:400;text-transform:uppercase;line-height:.96;letter-spacing:.005em}
+
+/* design switcher (shared across variants, styled exactly as specified) */
+.dswitch{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 16px;background:#101014;font:500 13px system-ui,sans-serif}
+.dswitch span{color:#9a9aa6;margin-right:6px}
+.dswitch a{color:#f2f2f5;text-decoration:none;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 11px}
+.dswitch a[aria-current="page"]{background:#f2f2f5;color:#101014}
+
+/* posters */
+.poster{position:relative;scroll-snap-align:start;padding:clamp(48px,8vh,96px) var(--gut);display:flex;flex-direction:column;justify-content:center;gap:clamp(24px,4vh,48px);overflow:clip}
+.poster > *{min-width:0}
+@media (min-width:768px){.poster{min-height:84vh}}
+.pc-cobalt{background:var(--cobalt);color:var(--paper)}
+.pc-ink{background:var(--ink);color:var(--paper)}
+.pc-tomato{background:var(--tomato);color:var(--ink)}
+.pc-paper{background:var(--paper);color:var(--ink)}
+.pc-ink-tomato{background:var(--ink);color:var(--tomato)}
+.pc-paper-cobalt{background:var(--paper);color:var(--cobalt)}
+
+.mega{font-size:clamp(3.4rem,12.5vw,12rem)}
+.big{font-size:clamp(2.6rem,8.5vw,7.5rem)}
+.mid{font-size:clamp(1.9rem,4.6vw,3.6rem)}
+.hl{display:inline-block;line-height:1;margin-top:.04em;background:var(--lime);color:var(--ink);padding:.02em .08em 0;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.pc-paper-cobalt .hl{color:var(--cobalt)}
+.lead{max-width:40ch;font-size:clamp(15px,1.4vw,18px)}
+.fine{font-size:13px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.poster-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;font-size:12px;border-top:2px solid currentColor;padding-top:12px}
+
+/* commands and copy buttons */
+.cmd{display:flex;align-items:stretch;gap:0;max-width:640px;border:2px solid currentColor}
+.cmd code{flex:1;min-width:0;padding:14px 16px;font:700 clamp(14px,1.5vw,17px)/1.45 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd-copy{flex:none;border:0;border-left:2px solid currentColor;background:var(--lime);color:var(--ink);font:700 13px var(--mono);text-transform:uppercase;letter-spacing:.08em;padding:0 18px;cursor:pointer;min-width:92px}
+.cmd-copy:hover{text-decoration:underline}
+.cmd-copy:focus-visible,.pn a:focus-visible,.btn-gh:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.pc-cobalt .cmd{background:var(--paper);color:var(--cobalt);border-color:var(--paper)}
+.pc-cobalt .cmd-copy{border-left-color:var(--cobalt)}
+.pc-tomato .cmd{background:var(--ink);color:var(--tomato);border-color:var(--ink)}
+.pc-tomato .cmd-copy{border-left-color:var(--ink)}
+.cmd-label{font-size:13px;margin-bottom:8px}
+
+/* poster 1: hero */
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+.hero-meta{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.hero-meta{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:end}}
+
+/* poster 2: word cloud */
+.count-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 28px}
+.count-head .big{font-size:clamp(4rem,16vw,15rem)}
+.cloud{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:.15em .5em;font-family:var(--poster);text-transform:uppercase;line-height:1}
+.cloud li{font-size:calc(.78rem + var(--n) * .1rem);min-width:0;overflow-wrap:anywhere}
+.cloud li sup{font:700 11px var(--mono);margin-left:3px;vertical-align:super;letter-spacing:0}
+@media (min-width:768px){.cloud li{font-size:calc(.7rem + var(--n) * .19rem)}}
+.cloud li:nth-child(3n+2){opacity:.78}
+
+/* poster 3: four verbs */
+.verbs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);border-top:3px solid var(--ink)}
+.verbs li{display:grid;grid-template-columns:minmax(0,1fr);gap:6px 32px;padding:14px 0;border-bottom:3px solid var(--ink);align-items:baseline}
+.verbs h3{font-size:clamp(2rem,5.4vw,4.6rem)}
+.verbs p{max-width:52ch;font-size:14px}
+@media (min-width:860px){.verbs li{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+.verbs-wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:32px}
+@media (min-width:1100px){.verbs-wrap{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);align-items:start}}
+.chatmock{background:var(--ink);color:var(--tomato);padding:20px;font-size:13px;display:grid;gap:12px}
+.chatmock .you{border:2px solid var(--tomato);padding:10px 12px}
+.chatmock .score{font:400 clamp(2.6rem,5vw,3.6rem)/1 var(--poster)}
+.chatmock ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.chatmock li::before{content:"\2716  "}
+
+/* posters 4 and 5: findings */
+.finds{display:grid;grid-template-columns:minmax(0,1fr);gap:40px}
+@media (min-width:960px){.finds{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.find{display:grid;gap:16px;align-content:start}
+.find h3{font-size:clamp(2rem,4vw,3.4rem)}
+.find p{max-width:46ch;font-size:14px}
+.find .cid{font-size:12px;opacity:.85}
+.ba{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.ba > div{min-width:0;display:grid;gap:8px;align-content:start}
+.tag{justify-self:start;font:700 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;color:var(--ink)}
+.tag-before{background:var(--tomato)}
+.tag-after{background:var(--lime)}
+.mock{border:3px solid currentColor;padding:12px;font-size:12px;line-height:1.4;min-height:150px;display:grid;gap:8px;align-content:start;overflow:hidden}
+.pc-paper .mock{background:var(--paper);color:var(--ink)}
+.pc-cobalt .mock{background:var(--cobalt);color:var(--paper)}
+.bubble{border:2px solid currentColor;padding:8px;display:grid;gap:6px}
+.og-empty{height:46px;border:2px dashed currentColor}
+.og-full{height:46px;background:var(--ink);position:relative;overflow:hidden}
+.og-full::after{content:"";position:absolute;left:10%;right:10%;bottom:-20px;height:54px;border-radius:50% 50% 0 0;background:var(--lime)}
+.og-title{font-weight:700}
+.strike{text-decoration:line-through}
+.mono-s{font-size:11px}
+.ok-row{background:var(--lime);color:var(--ink);padding:3px 6px;justify-self:start;font-weight:700}
+.bad-row{background:var(--tomato);color:var(--ink);padding:3px 6px;justify-self:start;font-weight:700}
+.phone{width:86px;height:136px;border:3px solid currentColor;border-radius:14px;padding:12px 6px;position:relative;justify-self:center}
+.phone-table{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;height:52px}
+.phone-table i{border:2px solid currentColor}
+.phone-before .phone-table{width:150%}
+.phone-before{overflow:visible}
+.overflow-arrow{font-size:20px;text-align:center}
+.code-line{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px}
+.code-line b{font-weight:700}
+
+/* poster 6: who fixes what */
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:end}
+@media (min-width:900px){.split{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr)}}
+.split > div{min-width:0;border-top:3px solid var(--tomato);padding-top:14px;display:grid;gap:8px}
+.split .num{font:400 clamp(5rem,16vw,15rem)/.85 var(--poster)}
+.split .num-sm{font-size:clamp(4rem,9vw,8rem)}
+.split h3{font-size:clamp(1.5rem,2.6vw,2.2rem)}
+.split p{font-size:14px;max-width:34ch}
+.slash-head{font-size:clamp(3rem,10vw,9rem)}
+
+/* poster 7: promises */
+.promises{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:0 48px}
+@media (min-width:900px){.promises{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.promises li{min-width:0;border-top:3px solid var(--cobalt);padding:14px 0 18px;display:grid;gap:6px}
+.promises h3{font-size:clamp(1.8rem,3.4vw,3rem)}
+.promises p{font-size:14px;max-width:46ch;color:var(--ink)}
+
+/* poster 8: install */
+.steps-install{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;max-width:760px}
+.btn-gh{display:inline-block;justify-self:start;border:3px solid var(--ink);padding:10px 18px;font:700 14px var(--mono);text-decoration:none;text-transform:uppercase;letter-spacing:.08em}
+.btn-gh:hover{background:var(--ink);color:var(--tomato)}
+.req{font-size:14px;max-width:60ch}
+.req strong{font-weight:700}
+code.inl{font:700 1em var(--mono);border-bottom:2px solid currentColor;overflow-wrap:anywhere}
+
+/* side progress indicator: which poster you're on (hidden on phones) */
+.pn{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:40;display:none;background:var(--ink);padding:8px 6px;border:2px solid var(--paper)}
+.pn ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.pn a{display:block;font:700 11px/1 var(--mono);color:var(--paper);text-decoration:none;padding:6px 6px;text-align:center}
+.pn a[aria-current="true"]{background:var(--lime);color:var(--ink)}
+@media (min-width:900px){.pn{display:block}.poster{padding-right:calc(var(--gut) + 48px)}}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<nav class="dswitch" aria-label="Compare designs">
+  <span>Designs</span>
+  <a href="../index.html">Night shift</a>
+  <a href="v1.html">Swiss</a>
+  <a href="v4.html" aria-current="page">Poster</a>
+</nav>
+
+<nav class="pn" aria-label="Posters">
+  <ol>
+    <li><a href="#p1" aria-label="Your app works">01</a></li>
+    <li><a href="#p2" aria-label="167 checks">02</a></li>
+    <li><a href="#p3" aria-label="She checks, you decide">03</a></li>
+    <li><a href="#p4" aria-label="Findings, part one">04</a></li>
+    <li><a href="#p5" aria-label="Findings, part two">05</a></li>
+    <li><a href="#p6" aria-label="Who fixes what">06</a></li>
+    <li><a href="#p7" aria-label="Promises">07</a></li>
+    <li><a href="#p8" aria-label="Install">08</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- 01 -->
+<section class="poster pc-cobalt" id="p1" aria-labelledby="h1">
+  <p class="kicker">Sofia &middot; a plugin for Claude Code</p>
+  <h1 id="h1" class="mega">Your app works.<br><span class="hl">Is it ready?</span></h1>
+  <div class="hero-meta">
+    <p class="lead">Sofia checks what you built before launch, explains what's broken in plain words, and fixes only what you approve. For people who build with Claude or Cursor and aren't developers.</p>
+    <div>
+      <p class="cmd-label">In Claude Code:</p>
+      <div class="cmd"><code id="c-hero">/plugin marketplace add avivalushai/sofia</code><button class="cmd-copy" type="button" data-copy="c-hero">Copy</button></div>
+    </div>
+  </div>
+  <div class="poster-foot"><span>Then: /plugin install sofia@sofia</span><span>Then say &ldquo;Sofia, check my app&rdquo;</span></div>
+</section>
+
+<!-- 02 -->
+<section class="poster pc-ink" id="p2" aria-labelledby="h2">
+  <div class="count-head">
+    <h2 id="h2" class="big"><span class="hl">167</span> checks</h2>
+    <p class="lead">Across 24 areas. The things you didn't think to check, checked the same way every time.</p>
+  </div>
+  <ul class="cloud" aria-label="The 24 areas and how many checks each has">
+    <li style="--n:16">Security<sup>16</sup></li>
+    <li style="--n:13">Broken buttons, links and errors<sup>13</sup></li>
+    <li style="--n:12">Design consistency<sup>12</sup></li>
+    <li style="--n:10">Speed<sup>10</sup></li>
+    <li style="--n:10">Phones and tablets<sup>10</sup></li>
+    <li style="--n:10">Accessibility<sup>10</sup></li>
+    <li style="--n:10">Sharing and Google<sup>10</sup></li>
+    <li style="--n:10">Hebrew and right-to-left<sup>10</sup></li>
+    <li style="--n:9">Copy and typos<sup>9</sup></li>
+    <li style="--n:9">Forms<sup>9</sup></li>
+    <li style="--n:8">Domain and launch<sup>8</sup></li>
+    <li style="--n:8">Privacy and legal<sup>8</sup></li>
+    <li style="--n:7">Ready for AI agents<sup>7</sup></li>
+    <li style="--n:5">Analytics<sup>5</sup></li>
+    <li style="--n:5">Real-world behavior<sup>5</sup></li>
+    <li style="--n:4">Email<sup>4</sup></li>
+    <li style="--n:4">Leftovers from Claude<sup>4</sup></li>
+    <li style="--n:3">Monitoring<sup>3</sup></li>
+    <li style="--n:3">Payments<sup>3</sup></li>
+    <li style="--n:3">AI inside your app<sup>3</sup></li>
+    <li style="--n:2">Saving data<sup>2</sup></li>
+    <li style="--n:2">Local vs live<sup>2</sup></li>
+    <li style="--n:2">Costs<sup>2</sup></li>
+    <li style="--n:2">Dependencies<sup>2</sup></li>
+  </ul>
+  <div class="poster-foot"><span>Checks that don't apply to your app are skipped, and she tells you why.</span></div>
+</section>
+
+<!-- 03 -->
+<section class="poster pc-tomato" id="p3" aria-labelledby="h3">
+  <h2 id="h3" class="big">She checks.<br>You decide.</h2>
+  <div class="verbs-wrap">
+    <ol class="verbs">
+      <li><h3>Ask</h3><p>In your app's folder, tell Claude in your own words: &ldquo;Sofia, check my app.&rdquo;</p></li>
+      <li><h3>Check</h3><p>She opens the app in your own Chrome, clicks the buttons, fills the forms and reads the code. What doesn't apply is skipped, with the reason.</p></li>
+      <li><h3>Talk it through</h3><p>A score, the blockers by name, the rest by urgency. Ask why, push back, mute something. She offers one compromise and respects a no.</p></li>
+      <li><h3>Fix what you approved</h3><p>A checkpoint, the fix, then the check runs again. Only a passing re-check counts as fixed. Every fix can be undone on its own.</p></li>
+    </ol>
+    <div class="chatmock" aria-label="Example conversation">
+      <p class="you">Sofia, check my app before I launch</p>
+      <p class="score">58 / 100</p>
+      <p>Not ready yet. Three things will lose you sign-ups.</p>
+      <ul>
+        <li>The sign-up form doesn't save anything</li>
+        <li>Confirmation emails will land in spam</li>
+        <li>The page scrolls sideways on iPhone</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="poster pc-paper" id="p4" aria-labelledby="h4">
+  <h2 id="h4" class="big">What breaks,<br>said plainly.</h2>
+  <div class="finds">
+    <article class="find">
+      <h3>The WhatsApp link looks empty</h3>
+      <div class="ba">
+        <div><span class="tag tag-before">Before</span>
+          <div class="mock" aria-hidden="true"><div class="bubble"><div class="og-empty"></div><span class="mono-s">noa-pilates.vercel.app</span></div></div>
+        </div>
+        <div><span class="tag tag-after">After</span>
+          <div class="mock" aria-hidden="true"><div class="bubble"><div class="og-full"></div><span class="og-title">Noa Pilates: first class free</span><span class="mono-s">noa-pilates.vercel.app</span></div></div>
+        </div>
+      </div>
+      <p>Anyone who sends your site to a friend gets a gray box with no title. Sofia adds an image, a title and a description.</p>
+      <p class="cid">seo.share-image</p>
+    </article>
+    <article class="find">
+      <h3>The form says thanks and saves nothing</h3>
+      <div class="ba">
+        <div><span class="tag tag-before">Before</span>
+          <div class="mock" aria-hidden="true"><span class="og-title">Thanks! We'll be in touch</span><span class="bad-row mono-s">POST &rarr; (nowhere)</span></div>
+        </div>
+        <div><span class="tag tag-after">After</span>
+          <div class="mock" aria-hidden="true"><span class="og-title">You're in. Check your inbox</span><span class="ok-row mono-s">&#10003; row added to sheet</span></div>
+        </div>
+      </div>
+      <p>People sign up, see a success message, and the sign-up is gone. Sofia asks where sign-ups should go and connects it.</p>
+      <p class="cid">forms.submission-lands</p>
+    </article>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="poster pc-cobalt" id="p5" aria-labelledby="h5">
+  <h2 id="h5" class="big">What happens,<br>not what's missing.</h2>
+  <div class="finds">
+    <article class="find">
+      <h3>On iPhone the page slides sideways</h3>
+      <div class="ba">
+        <div><span class="tag tag-before">Before</span>
+          <div class="mock" aria-hidden="true"><div class="phone phone-before"><div class="phone-table"><i></i><i></i><i></i></div></div><span class="overflow-arrow">&larr; &rarr;</span></div>
+        </div>
+        <div><span class="tag tag-after">After</span>
+          <div class="mock" aria-hidden="true"><div class="phone"><div class="phone-table"><i></i><i></i><i></i></div></div><span class="overflow-arrow">&#10003;</span></div>
+        </div>
+      </div>
+      <p>The pricing table is wider than the screen, so the whole page drags left and right. Sofia checks at real phone sizes and fixes it.</p>
+      <p class="cid">resp.no-horizontal-scroll</p>
+    </article>
+    <article class="find">
+      <h3>A secret key anyone can see</h3>
+      <div class="ba">
+        <div><span class="tag tag-before">Before</span>
+          <div class="mock" aria-hidden="true"><span class="code-line">// app.js, visible to everyone</span><span class="code-line"><b>const key = "sk_live_51H&hellip;"</b></span></div>
+        </div>
+        <div><span class="tag tag-after">After</span>
+          <div class="mock" aria-hidden="true"><span class="code-line">// api/pay.js, server only</span><span class="code-line"><b>const key = process.env.PAY_KEY</b></span></div>
+        </div>
+      </div>
+      <p>Every visitor can read it and use it on your account. Sofia moves it to the server and walks you through replacing it.</p>
+      <p class="cid">sec.secrets-in-bundle</p>
+    </article>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="poster pc-ink-tomato" id="p6" aria-labelledby="h6">
+  <h2 id="h6" class="slash-head">Who fixes what</h2>
+  <div class="split">
+    <div><span class="num">106</span><h3>Sofia fixes it</h3><p>After you say yes. Each fix is its own saved change, so you can undo one without losing the rest.</p></div>
+    <div><span class="num num-sm">40</span><h3>Your choice</h3><p>Two or three options, the recommended one first.</p></div>
+    <div><span class="num num-sm">21</span><h3>Only you can do it</h3><p>Outside the code, like DNS records. She tells you exactly where to click.</p></div>
+  </div>
+  <div class="poster-foot"><span>Across all 167 checks Sofia runs today.</span><span>Example report: 71, almost ready. 1 blocker, 3 important, 2 polish.</span></div>
+</section>
+
+<!-- 07 -->
+<section class="poster pc-paper-cobalt" id="p7" aria-labelledby="h7">
+  <h2 id="h7" class="big">Nothing changes<br>without a <span class="hl">yes</span>.</h2>
+  <ul class="promises">
+    <li><h3>No fix without a yes</h3><p>She shows, explains and recommends. She changes only what you approved, when you say go.</p></li>
+    <li><h3>Fixed means re-checked</h3><p>Fixed only after its check runs again and passes, not because the code changed.</p></li>
+    <li><h3>A real second opinion</h3><p>Judgment calls go to a separate reviewer that hasn't seen your chat and must quote the exact line.</p></li>
+    <li><h3>No surprises</h3><p>No real form submissions, email or purchases without asking first.</p></li>
+    <li><h3>Same app, same report</h3><p>Every check that can be a script is a script, so results don't drift between runs.</p></li>
+    <li><h3>Stays on your computer</h3><p>Your code and results go nowhere. No accounts, no paid services.</p></li>
+  </ul>
+</section>
+
+<!-- 08 -->
+<section class="poster pc-tomato" id="p8" aria-labelledby="h8">
+  <h2 id="h8" class="mega">Two lines.<br>Then launch.</h2>
+  <div class="steps-install">
+    <div>
+      <p class="cmd-label">Add Sofia to Claude Code</p>
+      <div class="cmd"><code id="c-add">/plugin marketplace add avivalushai/sofia</code><button class="cmd-copy" type="button" data-copy="c-add">Copy</button></div>
+    </div>
+    <div>
+      <p class="cmd-label">Install her</p>
+      <div class="cmd"><code id="c-inst">/plugin install sofia@sofia</code><button class="cmd-copy" type="button" data-copy="c-inst">Copy</button></div>
+    </div>
+    <p class="req">Then say &ldquo;Sofia, check my app&rdquo; or type <code class="inl">/sofia:check</code>. For a check that takes seconds, <code class="inl">/sofia:check quick</code>.</p>
+    <p class="req">You need <strong>Claude Code</strong>, <strong>Google Chrome</strong> and <strong>Node.js 20 or newer</strong>.</p>
+    <a class="btn-gh" href="https://github.com/avivalushai/sofia">View on GitHub</a>
+  </div>
+  <footer class="poster-foot">
+    <span>Sofia, MIT license. Made by Aviv Alush.</span>
+    <span>Not a replacement for a professional security audit or real user testing.</span>
+  </footer>
+</section>
+
+</main>
+
+<script>
+(function(){
+  // copy buttons
+  document.querySelectorAll('.cmd-copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.dataset.copy);
+      var text = el.textContent.trim();
+      function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1800); }
+      function fallback(){
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        try { if (document.execCommand('copy')) { done(); } } catch(e) {}
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+    });
+  });
+
+  // side progress indicator: IntersectionObserver only, no scroll listeners
+  if (!('IntersectionObserver' in window)) return;
+  var links = {};
+  document.querySelectorAll('.pn a').forEach(function(a){ links[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (!en.isIntersecting) return;
+      Object.keys(links).forEach(function(k){ links[k].removeAttribute('aria-current'); });
+      var a = links[en.target.id];
+      if (a) a.setAttribute('aria-current', 'true');
+    });
+  }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+  document.querySelectorAll('.poster').forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

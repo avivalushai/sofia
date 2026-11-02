@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sofia</title>
+<meta name="description" content="Sofia checks what you built before launch, explains what's broken in plain words, and fixes only what you approve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/*
+  Variant 1, Swiss. International Typographic Style.
+  Light only, by choice: body background and every color are set explicitly, no dark mode.
+  Strict 12 column grid in the content column, flush-left ragged-right, hairline rules,
+  radius 0, no shadows. One accent (signal red). Semantic red/green tints only in the before/after table.
+  The design switcher bar keeps the literal colors the shared brief prescribes.
+*/
+:root{
+  --paper:#f7f7f5;
+  --ink:#111111;
+  --muted:#5c5c58;
+  --rule:#111111;
+  --hair:#d6d6d0;
+  --accent:#e2231a;
+  --accent-text:#c01a12;
+  --on-accent:#ffffff;
+  --bad:#a3160f;
+  --bad-bg:#fbe3e1;
+  --good:#17633a;
+  --good-bg:#dff1e5;
+  --field:#ffffff;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --top:46px;
+  color-scheme:light;
+}
+
+.dswitch{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 16px;background:#101014;font:500 13px system-ui,sans-serif}
+.dswitch span{color:#9a9aa6;margin-right:6px}
+.dswitch a{color:#f2f2f5;text-decoration:none;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 11px}
+.dswitch a[aria-current="page"]{background:#f2f2f5;color:#101014}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--top) + 16px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+code,.mono{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* shell: sidebar + content */
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr)}
+.side{position:sticky;top:var(--top);height:calc(100vh - var(--top));overflow:auto;border-right:1px solid var(--rule);padding:32px 24px 28px;display:flex;flex-direction:column;gap:36px}
+.mark{font-size:44px;font-weight:700;letter-spacing:-.045em;line-height:.9;text-decoration:none;display:block}
+.mark-sub{margin-top:10px;font-size:14px;color:var(--muted);line-height:1.35}
+.toc ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.toc li{border-bottom:1px solid var(--hair)}
+.toc a{display:grid;grid-template-columns:32px minmax(0,1fr);padding:9px 0;text-decoration:none;font-size:15px;font-weight:500}
+.toc a span{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:2px}
+.toc a:hover,.toc a.on{color:var(--accent-text)}
+.toc a.on span{color:var(--accent-text)}
+.side-install{margin-top:auto;display:grid;gap:10px}
+.side-install h2{font-size:13px;font-weight:600;color:var(--muted)}
+.side-install p{font-size:13px;color:var(--muted)}
+
+/* command + copy */
+.cmd{display:grid;grid-template-columns:minmax(0,1fr) auto;border:1px solid var(--rule);background:var(--field)}
+.cmd code{padding:10px 12px;font-size:13px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+.copy{appearance:none;border:0;border-left:1px solid var(--rule);background:var(--ink);color:var(--paper);font:600 13px var(--sans);padding:0 14px;cursor:pointer;border-radius:0}
+.copy:hover{background:var(--accent);color:var(--on-accent)}
+
+/* content column */
+.main{min-width:0;padding:0 56px}
+.sec{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;padding:72px 0 88px;border-top:1px solid var(--rule)}
+.sec:first-child{border-top:0}
+.num{grid-column:1 / span 2;font-family:var(--mono);font-size:14px;color:var(--accent-text);padding-top:14px}
+.sec h2{grid-column:3 / span 10;font-size:clamp(40px,5.2vw,76px);font-weight:700;letter-spacing:-.04em;line-height:.98;max-width:14ch}
+.intro{grid-column:3 / span 7;margin-top:24px;font-size:20px;line-height:1.45;color:var(--ink);max-width:40ch}
+.body{grid-column:3 / span 10;margin-top:56px;min-width:0}
+.body-full{grid-column:1 / -1;margin-top:56px;min-width:0}
+
+/* overview */
+.hero h1{grid-column:1 / -1;font-size:clamp(56px,8.6vw,132px);font-weight:700;letter-spacing:-.055em;line-height:.9}
+.hero h1 em{font-style:normal;color:var(--accent);display:block}
+.hero .intro{grid-column:1 / span 6;margin-top:36px}
+.hero .facts{grid-column:8 / span 5;margin-top:36px;border-top:1px solid var(--rule)}
+.facts div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--hair);font-size:15px}
+.facts b{font-weight:600;font-size:22px;letter-spacing:-.02em;line-height:1.1}
+.facts span{color:var(--muted);padding-top:2px}
+
+.chat{grid-column:1 / span 7;margin-top:64px;border:1px solid var(--rule);background:var(--field);min-width:0}
+.chat-head{display:flex;justify-content:space-between;gap:12px;padding:8px 14px;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.chat-body{padding:20px 20px 22px;display:grid;gap:18px}
+.you{justify-self:end;max-width:80%;background:var(--ink);color:var(--paper);padding:9px 13px;font-size:15px}
+.ran{font-family:var(--mono);font-size:12.5px;color:var(--muted);display:grid;gap:3px}
+.score{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:end;border-top:1px solid var(--hair);padding-top:16px}
+.score strong{font-size:56px;font-weight:700;letter-spacing:-.05em;line-height:.85}
+.score span{font-size:16px;font-weight:500;max-width:30ch}
+.blk{list-style:none;margin:0;padding:0;border-top:1px solid var(--hair)}
+.blk li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--hair);font-size:15px}
+.blk li::before{content:"Blocker";font-size:12px;font-weight:600;color:var(--accent-text);padding-top:2px}
+.opts{display:flex;flex-wrap:wrap;gap:0}
+.opts span{border:1px solid var(--rule);margin:0 -1px -1px 0;padding:6px 12px;font-size:13px;font-weight:500}
+.opts span:first-child{background:var(--ink);color:var(--paper)}
+
+.rep{grid-column:9 / span 4;margin-top:64px;align-self:start;border-top:6px solid var(--accent);padding-top:14px;min-width:0}
+.rep .big{font-size:120px;font-weight:700;letter-spacing:-.06em;line-height:.82}
+.rep h3{margin-top:10px;font-size:22px;font-weight:600;letter-spacing:-.02em}
+.rep dl{margin:16px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);border-top:1px solid var(--rule)}
+.rep dt,.rep dd{margin:0;padding:7px 0;border-bottom:1px solid var(--hair);font-size:15px}
+.rep dt{font-weight:600;padding-right:16px}
+.rep p{margin-top:12px;font-size:14px;color:var(--muted)}
+
+/* areas index */
+.areas-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--rule);padding-bottom:10px}
+.areas-head b{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.areas-head span{font-size:14px;color:var(--muted)}
+.areas{list-style:none;margin:0;padding:0;columns:3;column-gap:24px}
+.areas li{break-inside:avoid;display:grid;grid-template-columns:36px minmax(0,1fr);padding:7px 0;border-bottom:1px solid var(--hair);font-size:15px;line-height:1.3}
+.areas li b{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--accent-text);padding-top:1px}
+
+/* before/after table */
+.ba{margin-top:72px}
+.ba-cap{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:10px}
+.ba-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr);border-bottom:1px solid var(--hair)}
+.ba-row > *{min-width:0;padding:18px 16px 18px 0}
+.ba-row > * + *{padding-left:16px}
+.ba-th{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.ba-th > *{padding-top:8px;padding-bottom:8px;font-size:13px;font-weight:600;color:var(--muted)}
+.ba-row h3{font-size:19px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+.ba-row p{margin-top:8px;font-size:14.5px;color:var(--muted);max-width:36ch}
+.cell-b{background:var(--bad-bg)}
+.cell-a{background:var(--good-bg)}
+.lbl{display:none;font-size:12px;font-weight:600;margin-bottom:8px}
+.cell-b .lbl{color:var(--bad)}
+.cell-a .lbl{color:var(--good)}
+.cid code{font-size:12.5px;overflow-wrap:anywhere;color:var(--ink)}
+
+/* mini visuals inside before/after cells */
+.wa{display:grid;grid-template-columns:44px minmax(0,1fr);background:var(--field);border:1px solid var(--hair)}
+.wa i{display:block;background:var(--hair)}
+.wa.filled i{background:var(--accent)}
+.wa div{padding:6px 8px;min-width:0}
+.wa b{display:block;font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
+.wa small{display:block;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.fm{display:grid;gap:5px}
+.fm i{display:block;height:18px;background:var(--field);border:1px solid var(--hair)}
+.fm .msg{font-size:12.5px;font-weight:500;padding:4px 0}
+.fm .note{font-family:var(--mono);font-size:12px;overflow-wrap:anywhere}
+.cell-b .note{color:var(--bad)}
+.cell-a .note{color:var(--good)}
+.ph{width:86px;border:1px solid var(--ink);background:var(--field);padding:10px 8px;overflow:hidden}
+.ph span{display:block;height:7px;background:var(--hair);margin-bottom:5px}
+.ph span:last-child{margin-bottom:0}
+.ph .over{width:150%;background:var(--bad);opacity:.55}
+.cd{font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.cell-b .cd{color:var(--bad)}
+.cell-a .cd{color:var(--good)}
+
+/* how it works */
+.verbs{border-top:1px solid var(--rule)}
+.verb{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:24px;padding:24px 0 26px;border-bottom:1px solid var(--hair)}
+.verb h3{font-size:clamp(26px,2.6vw,36px);font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.verb p{font-size:17px;max-width:46ch}
+.verb .say{margin-top:12px;font-family:var(--mono);font-size:14px;color:var(--accent-text)}
+
+/* who fixes what */
+.split{display:flex;height:56px;border:1px solid var(--rule)}
+.split span{display:block;min-width:0}
+.split .s1{flex:106;background:var(--accent)}
+.split .s2{flex:40;background:var(--ink);border-left:1px solid var(--paper)}
+.split .s3{flex:21;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 6px);border-left:1px solid var(--rule)}
+.who{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,3.5fr) minmax(0,3.5fr);gap:24px;margin-top:20px}
+.who div{min-width:0}
+.who .n{font-size:clamp(56px,7vw,104px);font-weight:700;letter-spacing:-.06em;line-height:.85}
+.who div:first-child .n{color:var(--accent)}
+.who h3{margin-top:12px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.who p{margin-top:6px;font-size:15px;color:var(--muted);max-width:36ch}
+.who-note{margin-top:28px;font-size:14px;color:var(--muted)}
+
+/* promises */
+.plist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;border-top:1px solid var(--rule)}
+.plist div{padding:20px 0 22px;border-bottom:1px solid var(--hair);min-width:0}
+.plist h3{font-size:20px;font-weight:600;letter-spacing:-.015em}
+.plist p{margin-top:6px;font-size:15.5px;color:var(--muted);max-width:42ch}
+
+/* install */
+.steps{border-top:1px solid var(--rule)}
+.st{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:24px;padding:20px 0;border-bottom:1px solid var(--hair);align-items:start}
+.st h3{font-size:18px;font-weight:600}
+.st .ask{font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.st .req{margin-top:8px;font-size:15px;color:var(--muted)}
+.st .req code{font-size:13.5px;color:var(--ink)}
+.need{margin-top:28px;font-size:15px;color:var(--muted);max-width:60ch}
+.need a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
+.gh{display:inline-block;margin-top:28px;border:1px solid var(--rule);padding:10px 16px;font-weight:600;font-size:15px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--paper)}
+
+footer{border-top:1px solid var(--rule);padding:24px 0 40px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;font-size:14px;color:var(--muted)}
+footer span{min-width:0}
+
+@media (max-width:1180px){
+  .main{padding:0 36px}
+  .hero .intro{grid-column:1 / span 7}
+  .hero .facts{grid-column:1 / span 7}
+  .chat{grid-column:1 / span 8}
+  .rep{grid-column:1 / span 6}
+  .areas{columns:2}
+  .ba-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
+  .ba-row .fnd{grid-column:1 / -1;padding-bottom:12px}
+  .ba-row .cid{grid-column:1 / -1;padding:10px 0 18px}
+  .ba-th{display:none}
+  .lbl{display:block}
+  .ba-row .cell-b{padding-left:12px}
+  .ba-row .cell-a{grid-column:span 2;padding-left:12px}
+  .ba-row{border-bottom:1px solid var(--rule)}
+}
+@media (max-width:900px){
+  :root{--top:80px}
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;height:auto;overflow:visible;border-right:0;border-bottom:1px solid var(--rule);padding:24px 16px;gap:20px}
+  .side-top{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+  .toc ol{display:flex;flex-wrap:wrap;gap:0 16px;border-top:0}
+  .toc li{border:0}
+  .toc a{display:block;padding:2px 0;font-size:14px}
+  .toc a span{display:none}
+  .side-install{margin-top:0}
+  .main{padding:0 16px}
+  .sec{padding:48px 0 60px;grid-template-columns:minmax(0,1fr)}
+  .sec > *{grid-column:1 / -1 !important}
+  .num{padding-top:0;margin-bottom:12px}
+  .intro{margin-top:18px;font-size:18px}
+  .body,.body-full{margin-top:36px}
+  .chat,.rep{margin-top:40px}
+  .verb,.st{grid-template-columns:minmax(0,1fr);gap:8px}
+  .plist{grid-template-columns:minmax(0,1fr)}
+  footer{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  .toc{display:none}
+  .areas{columns:1}
+  .ba-row{grid-template-columns:minmax(0,1fr)}
+  .ba-row > *{padding-left:0;padding-right:0}
+  .ba-row .cell-b,.ba-row .cell-a{grid-column:auto;padding:14px 12px}
+  .ba-row .cell-b{margin-bottom:6px}
+  .who{grid-template-columns:minmax(0,1fr);gap:20px}
+  .score strong{font-size:44px}
+  .rep .big{font-size:96px}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<nav class="dswitch" aria-label="Compare designs">
+  <span>Designs</span>
+  <a href="../index.html">Night shift</a>
+  <a href="v1.html" aria-current="page">Swiss</a>
+  <a href="v4.html">Poster</a>
+</nav>
+
+<div class="shell">
+
+<aside class="side">
+  <div class="side-top">
+    <div>
+      <a class="mark" href="#overview">Sofia</a>
+      <p class="mark-sub">A plugin for Claude Code that checks your app before launch.</p>
+    </div>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <ol>
+      <li><a href="#overview"><span>01</span>Overview</a></li>
+      <li><a href="#finds"><span>02</span>What she finds</a></li>
+      <li><a href="#how"><span>03</span>How it works</a></li>
+      <li><a href="#who"><span>04</span>Who fixes what</a></li>
+      <li><a href="#promises"><span>05</span>Promises</a></li>
+      <li><a href="#install"><span>06</span>Install</a></li>
+    </ol>
+  </nav>
+  <div class="side-install">
+    <h2>Install, in Claude Code</h2>
+    <div class="cmd"><code id="s1">/plugin marketplace add avivalushai/sofia</code><button class="copy" type="button" data-copy="s1">Copy</button></div>
+    <div class="cmd"><code id="s2">/plugin install sofia@sofia</code><button class="copy" type="button" data-copy="s2">Copy</button></div>
+    <p>Then say &ldquo;Sofia, check my app&rdquo;.</p>
+  </div>
+</aside>
+
+<main class="main">
+
+<section class="sec hero" id="overview">
+  <h1>Your app works. <em>Is it ready?</em></h1>
+  <p class="intro">Sofia checks what you built before launch, explains what&rsquo;s broken in plain words, talks it through with you, and fixes only what you approve. Made for people who build apps with Claude or Cursor and aren&rsquo;t developers.</p>
+  <div class="facts">
+    <div><b>167</b><span>checks, the same way every time</span></div>
+    <div><b>24</b><span>areas, from security to typos</span></div>
+    <div><b>0</b><span>accounts or paid services. It runs on your computer.</span></div>
+  </div>
+
+  <div class="chat" aria-label="Example conversation with Sofia">
+    <div class="chat-head"><span>Claude Code</span><span>noa-pilates</span></div>
+    <div class="chat-body">
+      <div class="you">Sofia, check my app before I launch</div>
+      <div class="ran">
+        <span>&#10003; Using your installed Chrome</span>
+        <span>&#10003; Mechanical checks, 31</span>
+        <span>&#10003; Browser checks, 47</span>
+        <span>&#10003; Report open in your browser</span>
+      </div>
+      <div class="score"><strong>58/100</strong><span>Not ready yet. Three things will lose you sign-ups.</span></div>
+      <ul class="blk">
+        <li>The sign-up form doesn&rsquo;t save anything</li>
+        <li>Confirmation emails will land in spam</li>
+        <li>The page scrolls sideways on iPhone</li>
+      </ul>
+      <div class="opts"><span>Fix your 5</span><span>Blockers only</span><span>Not now</span></div>
+    </div>
+  </div>
+
+  <div class="rep" aria-label="Example report summary">
+    <div class="big">71</div>
+    <h3>Almost ready</h3>
+    <dl>
+      <dt>1</dt><dd>blocker left</dd>
+      <dt>3</dt><dd>important</dd>
+      <dt>2</dt><dd>polish</dd>
+    </dl>
+    <p>The full report opens on your own computer and updates while things get fixed.</p>
+  </div>
+</section>
+
+<section class="sec" id="finds">
+  <span class="num">02</span>
+  <h2>The things you didn&rsquo;t think to check.</h2>
+  <p class="intro">Claude builds fast. It&rsquo;s less good at remembering to check. Sofia goes through 167 checks in 24 areas and skips the ones that don&rsquo;t apply to your app.</p>
+
+  <div class="body-full">
+    <div class="areas-head"><b>The 24 areas</b><span>Number of checks in each</span></div>
+    <ul class="areas">
+      <li><b>16</b>Security</li>
+      <li><b>13</b>Broken buttons, links and errors</li>
+      <li><b>12</b>Design consistency</li>
+      <li><b>10</b>Speed</li>
+      <li><b>10</b>Phones and tablets</li>
+      <li><b>10</b>Accessibility</li>
+      <li><b>10</b>Sharing and Google</li>
+      <li><b>10</b>Hebrew and right-to-left</li>
+      <li><b>9</b>Copy and typos</li>
+      <li><b>9</b>Forms</li>
+      <li><b>8</b>Domain and launch</li>
+      <li><b>8</b>Privacy and legal</li>
+      <li><b>7</b>Ready for AI agents</li>
+      <li><b>5</b>Analytics</li>
+      <li><b>5</b>Real-world behavior</li>
+      <li><b>4</b>Email</li>
+      <li><b>4</b>Leftovers from Claude</li>
+      <li><b>3</b>Monitoring</li>
+      <li><b>3</b>Payments</li>
+      <li><b>3</b>AI inside your app</li>
+      <li><b>2</b>Saving data</li>
+      <li><b>2</b>Local vs live</li>
+      <li><b>2</b>Costs</li>
+      <li><b>2</b>Dependencies</li>
+    </ul>
+
+    <div class="ba">
+      <p class="ba-cap">Typical findings, worded the way Sofia words them</p>
+      <div class="ba-row ba-th" aria-hidden="true"><span>Finding</span><span>Before</span><span>After</span><span>Check id</span></div>
+
+      <div class="ba-row">
+        <div class="fnd"><h3>A link shared on WhatsApp looks empty</h3><p>Anyone who sends your site to a friend gets a gray box with no title. Sofia adds an image, a title and a description.</p></div>
+        <div class="cell-b"><span class="lbl">Before</span><div class="wa"><i></i><div><b>noa-pilates.vercel.app</b><small>noa-pilates.vercel.app</small></div></div></div>
+        <div class="cell-a"><span class="lbl">After</span><div class="wa filled"><i></i><div><b>Noa Pilates: first class free</b><small>noa-pilates.vercel.app</small></div></div></div>
+        <div class="cid"><code>seo.share-image</code></div>
+      </div>
+
+      <div class="ba-row">
+        <div class="fnd"><h3>The form says thanks and saves nothing</h3><p>People sign up, see a success message, and the sign-up is gone. Sofia asks where sign-ups should go and connects it.</p></div>
+        <div class="cell-b"><span class="lbl">Before</span><div class="fm"><i></i><i></i><span class="msg">Thanks! We&rsquo;ll be in touch</span><span class="note">sent to: nowhere</span></div></div>
+        <div class="cell-a"><span class="lbl">After</span><div class="fm"><i></i><i></i><span class="msg">You&rsquo;re in. Check your inbox</span><span class="note">&#10003; row added to sheet</span></div></div>
+        <div class="cid"><code>forms.submission-lands</code></div>
+      </div>
+
+      <div class="ba-row">
+        <div class="fnd"><h3>On iPhone the page slides sideways</h3><p>The pricing table is wider than the screen, so the whole page drags left and right. Sofia checks at real phone sizes and fixes it.</p></div>
+        <div class="cell-b"><span class="lbl">Before</span><div class="ph" aria-hidden="true"><span></span><span class="over"></span><span></span><span class="over"></span><span></span></div></div>
+        <div class="cell-a"><span class="lbl">After</span><div class="ph" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div></div>
+        <div class="cid"><code>resp.no-horizontal-scroll</code></div>
+      </div>
+
+      <div class="ba-row">
+        <div class="fnd"><h3>A secret key anyone can see</h3><p>Every visitor can read it and use it on your account. Sofia moves it to the server and walks you through replacing it.</p></div>
+        <div class="cell-b"><span class="lbl">Before</span><div class="cd">// app.js, visible to everyone
+const key = "sk_live_51H&hellip;"</div></div>
+        <div class="cell-a"><span class="lbl">After</span><div class="cd">// api/pay.js, server only
+const key = process.env.PAY_KEY</div></div>
+        <div class="cid"><code>sec.secrets-in-bundle</code></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="how">
+  <span class="num">03</span>
+  <h2>She checks. You decide.</h2>
+  <p class="intro">Sofia never changes anything on her own. First a report, then a conversation, then a fix of only what you approved.</p>
+  <div class="body">
+    <div class="verbs">
+      <div class="verb"><h3>Ask</h3><div><p>In your app&rsquo;s folder, tell Claude in your own words.</p><p class="say">&ldquo;Sofia, check my app&rdquo;</p></div></div>
+      <div class="verb"><h3>Check</h3><p>She opens your app in your own Chrome, clicks the buttons, fills the forms and reads the code. Checks that don&rsquo;t apply, like payments on a site without payments, are skipped, and she tells you why.</p></div>
+      <div class="verb"><h3>Talk it through</h3><p>A score, the blockers by name, and the rest sorted by urgency. Ask why, push back, or mute something. She offers one compromise and respects a no.</p></div>
+      <div class="verb"><h3>Fix what you approved</h3><p>She saves a checkpoint, fixes, and runs the check again. Only a check that passes counts as fixed, and every fix can be undone on its own.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="who">
+  <span class="num">04</span>
+  <h2>Every finding says who handles it.</h2>
+  <p class="intro">Across all 167 checks Sofia runs today, split by who does the fixing.</p>
+  <div class="body">
+    <div class="split" role="img" aria-label="106 Sofia fixes, 40 your choice, 21 only you"><span class="s1"></span><span class="s2"></span><span class="s3"></span></div>
+    <div class="who">
+      <div><div class="n">106</div><h3>Sofia fixes it</h3><p>After you say yes. Each fix is its own saved change, so you can undo one without losing the rest.</p></div>
+      <div><div class="n">40</div><h3>Your choice</h3><p>Two or three options, the recommended one first.</p></div>
+      <div><div class="n">21</div><h3>Only you can do it</h3><p>Outside the code, like DNS records. She tells you exactly where to click.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="promises">
+  <span class="num">05</span>
+  <h2>Nothing changes without your OK.</h2>
+  <div class="body">
+    <div class="plist">
+      <div><h3>No fix without a yes</h3><p>She shows, explains and recommends. She changes only what you approved, when you say go.</p></div>
+      <div><h3>Fixed means re-checked</h3><p>Something is fixed only after its check runs again and passes, not because the code changed.</p></div>
+      <div><h3>A real second opinion</h3><p>Anything that needs judgment goes to a separate reviewer that hasn&rsquo;t seen your chat and must quote the exact line.</p></div>
+      <div><h3>No surprises</h3><p>She won&rsquo;t submit real forms, send email or make purchases without asking first.</p></div>
+      <div><h3>Same app, same report</h3><p>Every check that can be a script is a script, so results don&rsquo;t drift between runs.</p></div>
+      <div><h3>Stays on your computer</h3><p>Your code and results go nowhere. No accounts, no paid services.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="install">
+  <span class="num">06</span>
+  <h2>Two lines to install.</h2>
+  <div class="body">
+    <div class="steps">
+      <div class="st"><h3>Add Sofia to Claude Code</h3><div class="cmd"><code id="c1">/plugin marketplace add avivalushai/sofia</code><button class="copy" type="button" data-copy="c1">Copy</button></div></div>
+      <div class="st"><h3>Install her</h3><div class="cmd"><code id="c2">/plugin install sofia@sofia</code><button class="copy" type="button" data-copy="c2">Copy</button></div></div>
+      <div class="st"><h3>Then ask</h3><div><p class="ask">&ldquo;Sofia, check my app&rdquo;</p><p class="req">Or type <code>/sofia:check</code>. For a check that takes seconds, <code>/sofia:check quick</code>.</p></div></div>
+    </div>
+    <p class="need">You need <a href="https://claude.com/claude-code">Claude Code</a>, <a href="https://www.google.com/chrome">Google Chrome</a> and <a href="https://nodejs.org">Node.js</a> 20 or newer. If you&rsquo;ve ever run your app on your own computer, you most likely have Node already.</p>
+    <a class="gh" href="https://github.com/avivalushai/sofia">View on GitHub &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <span>Sofia, MIT license. Made by Aviv Alush.</span>
+  <span>Not a replacement for a professional security audit or real user testing.</span>
+</footer>
+
+</main>
+</div>
+
+<script>
+document.querySelectorAll('[data-copy]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var el=document.getElementById(btn.dataset.copy);
+    var text=el.textContent.trim();
+    var done=function(){btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy'},1600)};
+    var fallback=function(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r)};
+    try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
+  });
+});
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  if(!('IntersectionObserver' in window)||!links.length)return;
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id)});
+      }
+    });
+  },{rootMargin:'-30% 0px -60% 0px'});
+  document.querySelectorAll('.sec[id]').forEach(function(s){io.observe(s)});
+})();
+</script>
+</body>
+</html>
