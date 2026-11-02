@@ -7,8 +7,8 @@
   "settings": {
     "granularity": "normal"
   },
-  "nextNum": 27,
-  "nextNoteNum": 37,
+  "nextNum": 35,
+  "nextNoteNum": 43,
   "features": [
     {
       "key": "ALL-1",
@@ -594,7 +594,14 @@
       "steps": [],
       "files": [
         "engine/src/server.js",
-        "engine/src/report-html.js"
+        "engine/src/report-html.js",
+        "engine/src/site-scan.js",
+        "engine/src/project.js",
+        "engine/src/runner.js",
+        "engine/src/checks/forms/spam.js",
+        "engine/src/checks/a11y/motion.js",
+        "engine/src/scan-server.js",
+        "engine/src/lib/stop.js"
       ],
       "links": [
         "http://127.0.0.1:4319",
@@ -604,11 +611,18 @@
         "http://localhost:4330/#b",
         "http://localhost:4330/#c",
         "http://localhost:4330/#d",
-        "http://localhost:4330/#e"
+        "http://localhost:4330/#e",
+        "http://localhost:4330/variants/v1.html",
+        "http://localhost:4330/variants/v2.html",
+        "http://localhost:4330/variants/v3.html",
+        "http://localhost:4330/variants/v4.html",
+        "http://localhost:4330/variants/v5.html",
+        "http://127.0.0.1:4331",
+        "http://127.0.0.1:4331/"
       ],
       "area": "",
       "createdAt": "2026-10-19T14:23:14Z",
-      "updatedAt": "2026-10-29T13:33:15Z",
+      "updatedAt": "2026-11-02T15:32:35Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -635,6 +649,21 @@
           "at": "2026-10-29T13:33:15Z",
           "by": "claude",
           "text": "Proof: http://localhost:4330/#a, http://localhost:4330/#b, http://localhost:4330/#c, http://localhost:4330/#d, http://localhost:4330/#e"
+        },
+        {
+          "at": "2026-10-29T17:19:10Z",
+          "by": "claude",
+          "text": "Proof: http://localhost:4330/variants/v1.html, http://localhost:4330/variants/v2.html, http://localhost:4330/variants/v3.html, http://localhost:4330/variants/v4.html, http://localhost:4330/variants/v5.html"
+        },
+        {
+          "at": "2026-11-01T12:41:59Z",
+          "by": "claude",
+          "text": "Proof: http://127.0.0.1:4331"
+        },
+        {
+          "at": "2026-11-02T15:32:35Z",
+          "by": "claude",
+          "text": "Proof: http://127.0.0.1:4331/"
         }
       ]
     },
@@ -862,12 +891,13 @@
       "title": "Landing page for Sofia",
       "type": "feature",
       "status": "review",
-      "note": "Owner reviews the Night shift page with current numbers",
+      "note": "Owner picks between Night shift, Swiss and Poster",
       "doneWhen": [],
       "steps": [],
       "files": [
         "site/index.html",
-        ".claude/launch.json"
+        ".claude/launch.json",
+        "site/variants"
       ],
       "links": [
         "https://claude.ai/artifact/XACqkYT4x5eL9AcDhS1ysM",
@@ -876,7 +906,7 @@
       ],
       "area": "",
       "createdAt": "2026-10-29T09:24:57Z",
-      "updatedAt": "2026-10-29T14:03:36Z",
+      "updatedAt": "2026-10-29T17:29:59Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -968,6 +998,26 @@
           "at": "2026-10-29T14:03:36Z",
           "by": "claude",
           "text": "Note: Owner reviews the Night shift page with current numbers"
+        },
+        {
+          "at": "2026-10-29T17:16:12Z",
+          "by": "claude",
+          "text": "Started — Five structural design variants being built in site/variants/v1-v5.html (Swiss, Story, Tour, Poster, Checklist); switcher bar added to index.html; then review each at desktop and 375px"
+        },
+        {
+          "at": "2026-10-29T17:16:12Z",
+          "by": "claude",
+          "text": "Files: site/variants"
+        },
+        {
+          "at": "2026-10-29T17:18:56Z",
+          "by": "claude",
+          "text": "Moved to review — Owner compares Night shift with 5 structural variants (1 Swiss docs sidebar, 2 Story long-read, 3 Tour tabs, 4 Poster blocks, 5 Checklist sheet) via the switcher bar"
+        },
+        {
+          "at": "2026-10-29T17:29:59Z",
+          "by": "claude",
+          "text": "Note: Owner picks between Night shift, Swiss and Poster"
         }
       ]
     },
@@ -1220,6 +1270,307 @@
           "at": "2026-10-29T14:04:24Z",
           "by": "claude",
           "text": "Proof: 6baca3d"
+        }
+      ]
+    },
+    {
+      "key": "ALL-27",
+      "title": "How many of Sofia's checks could run on a website from just a URL?",
+      "type": "question",
+      "status": "review",
+      "note": "Of 167 active checks, 112 need no login or AI, only a URL. 2 of those (sec.env-files, sec.exposed-paths) probe the site, so run them on your own site only. A code search suggests 6 read only project files today and need rewriting for URL use (content.file-names, a11y.motion, forms.spam, forms.autocomplete, forms.input-types, forms.enterkey), and 19 use both code and site. Nothing has been run on a URL-only setup.",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-11-01T11:07:24Z",
+      "updatedAt": "2026-11-01T11:44:12Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-01T11:07:24Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-11-01T11:07:24Z",
+          "by": "claude",
+          "text": "Moved to review — Of 167 active checks: 112 work from a URL with read-only looks (2 of them, env-files and exposed-paths, probe the site, so need proof of ownership); 13 more need ownership proof because they click, submit or log in; 6 need paid AI reading the page; 36 need the code or hosting access. Classified by reading the catalog, not by running it. Recommendation: free site with the 110 harmless checks, as a funnel to the plugin. Server Chrome is new: the plugin today uses the user's own Chrome, and file checks assume a project folder."
+        },
+        {
+          "at": "2026-11-01T11:44:12Z",
+          "by": "claude",
+          "text": "Updated — Of 167 active checks, 112 need no login or AI, only a URL. 2 of those (sec.env-files, sec.exposed-paths) probe the site, so run them on your own site only. A code search suggests 6 read only project files today and need rewriting for URL use (content.file-names, a11y.motion, forms.spam, forms.autocomplete, forms.input-types, forms.enterkey), and 19 use both code and site. Nothing has been run on a URL-only setup."
+        }
+      ]
+    },
+    {
+      "key": "ALL-28",
+      "title": "Can a friend who builds sites run Sofia on their own URLs?",
+      "type": "question",
+      "status": "review",
+      "note": "Yes, through the plugin, one URL per folder. Correction: https://superclaude.netlify.app is NOT the owner's site, it is the third-party SuperClaude Framework. I wrongly called it their landing page and scanned it. The first scan included the two probing checks. Numbers from it say nothing about the owner's site.",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-11-01T12:08:31Z",
+      "updatedAt": "2026-11-01T12:40:51Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-01T12:08:31Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-11-01T12:08:31Z",
+          "by": "claude",
+          "text": "Moved to review — Yes, as the plugin, one URL per folder. Tested from an empty folder on https://superclaude.netlify.app: 4 pages in 2.5 minutes, 69/100. Without code, at least 13 checks that need code report pass, so best run inside the project folder."
+        },
+        {
+          "at": "2026-11-01T12:40:51Z",
+          "by": "claude",
+          "text": "Updated — Yes, through the plugin, one URL per folder. Correction: https://superclaude.netlify.app is NOT the owner's site, it is the third-party SuperClaude Framework. I wrongly called it their landing page and scanned it. The first scan included the two probing checks. Numbers from it say nothing about the owner's site."
+        }
+      ]
+    },
+    {
+      "key": "ALL-29",
+      "title": "Checks that need code report pass when the folder is empty",
+      "type": "bug",
+      "status": "done",
+      "note": "",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "Engine",
+      "createdAt": "2026-11-01T12:08:31Z",
+      "updatedAt": "2026-11-01T12:28:34Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-01T12:08:31Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-11-01T12:08:31Z",
+          "by": "claude",
+          "text": "Area: Engine"
+        },
+        {
+          "at": "2026-11-01T12:28:34Z",
+          "by": "claude",
+          "text": "Done"
+        }
+      ]
+    },
+    {
+      "key": "ALL-30",
+      "title": "Scan a site from the landing page: 110 checks and a report",
+      "type": "feature",
+      "status": "review",
+      "note": "Owner rescans rightwave.co.il on the detached scanner (no longer stops with the browser pane)",
+      "doneWhen": [],
+      "steps": [],
+      "files": [
+        "engine/src/site-scan.js",
+        "engine/test/site-scan.test.js"
+      ],
+      "links": [
+        "http://127.0.0.1:4319",
+        "http://127.0.0.1:4331"
+      ],
+      "area": "Landing page",
+      "createdAt": "2026-11-01T12:12:32Z",
+      "updatedAt": "2026-11-02T13:51:55Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-01T12:12:32Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-11-01T12:12:32Z",
+          "by": "claude",
+          "text": "Area: Landing page"
+        },
+        {
+          "at": "2026-11-01T12:28:33Z",
+          "by": "claude",
+          "text": "Files: engine/src/site-scan.js, engine/test/site-scan.test.js"
+        },
+        {
+          "at": "2026-11-01T12:28:33Z",
+          "by": "claude",
+          "text": "Note: Owner tests stage 1 locally; then the server and the landing page form"
+        },
+        {
+          "at": "2026-11-01T12:28:33Z",
+          "by": "claude",
+          "text": "Moved to review — Run: node engine/bin/launch-check.js scan https://your-site.com, then open the report.html it prints"
+        },
+        {
+          "at": "2026-11-01T12:31:01Z",
+          "by": "claude",
+          "text": "Proof: http://127.0.0.1:4319"
+        },
+        {
+          "at": "2026-11-01T12:40:51Z",
+          "by": "claude",
+          "text": "Proof: http://127.0.0.1:4331"
+        },
+        {
+          "at": "2026-11-01T12:40:51Z",
+          "by": "claude",
+          "text": "Note: Owner tries the form at http://127.0.0.1:4331 on their own site"
+        },
+        {
+          "at": "2026-11-01T14:06:39Z",
+          "by": "claude",
+          "text": "Note: Owner tries the faster form with live findings on their own site"
+        },
+        {
+          "at": "2026-11-02T11:23:08Z",
+          "by": "claude",
+          "text": "Note: Owner tries the new flow at http://127.0.0.1:4331: form → loading screen → partial report"
+        },
+        {
+          "at": "2026-11-02T13:08:09Z",
+          "by": "claude",
+          "text": "Note: Owner rescans rightwave.co.il: page reading now 4 at a time, capped, with a live page count"
+        },
+        {
+          "at": "2026-11-02T13:51:55Z",
+          "by": "claude",
+          "text": "Note: Owner rescans rightwave.co.il on the detached scanner (no longer stops with the browser pane)"
+        }
+      ]
+    },
+    {
+      "key": "ALL-31",
+      "title": "Remove the wrong superclaude.netlify.app proof link from the marketplace card",
+      "type": "chore",
+      "status": "idea",
+      "note": "",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-11-01T12:40:51Z",
+      "updatedAt": "2026-11-01T12:40:51Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-01T12:40:51Z",
+          "by": "claude",
+          "text": "Created"
+        }
+      ]
+    },
+    {
+      "key": "ALL-32",
+      "title": "Why does a site scan take minutes?",
+      "type": "question",
+      "status": "review",
+      "note": "Real Chrome loads each page again for every check at several widths. Since 2026-11-02 only 2 pages may be open at once (the earlier 10–40 froze the owner's Mac), so nothing is reused and a 9-page site takes ~7 min (2-page fixture: 21 s → 105 s). Fix: load each page once and run all checks on it.",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "",
+      "createdAt": "2026-11-01T12:59:00Z",
+      "updatedAt": "2026-11-02T15:31:49Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-01T12:59:00Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-11-01T12:59:00Z",
+          "by": "claude",
+          "text": "Moved to review — Real Chrome loads each page again at several screen widths, up to 30 pages, and only 3 browser checks run at once. Local 9-page test: 137 seconds total, 345 seconds of check time; slowest qa.console-errors 40s, resp.no-horizontal-scroll 30s, resp.tablet 21s. Recommendation: show findings as they appear, then raise parallelism and share page loads."
+        },
+        {
+          "at": "2026-11-02T15:31:49Z",
+          "by": "claude",
+          "text": "Updated — Real Chrome loads each page again for every check at several widths. Since 2026-11-02 only 2 pages may be open at once (the earlier 10–40 froze the owner's Mac), so nothing is reused and a 9-page site takes ~7 min (2-page fixture: 21 s → 105 s). Fix: load each page once and run all checks on it."
+        }
+      ]
+    },
+    {
+      "key": "ALL-33",
+      "title": "Scanner can't freeze the Mac: 2 Chrome pages max, cleans up when stopped",
+      "type": "bug",
+      "status": "review",
+      "note": "Start a scan from the landing page and watch Activity Monitor: at most 2 scan pages, ~1 core. Then decide: M2's 'full mode under 2 minutes' now fails (131 s), accept slower or do ALL-34 first",
+      "doneWhen": [
+        "Chrome never has more than 2 pages open during a scan",
+        "No scan-server, e2e or Chrome process survives a stop, a signal or a closed session"
+      ],
+      "steps": [],
+      "files": [
+        "engine/src/browser.js",
+        "engine/src/lib/stop.js",
+        "engine/src/scan-server.js",
+        "engine/test/e2e.mjs",
+        "engine/test/limits.test.js"
+      ],
+      "links": [],
+      "area": "Engine",
+      "createdAt": "2026-11-02T15:31:49Z",
+      "updatedAt": "2026-11-02T15:32:22Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-02T15:31:49Z",
+          "by": "claude",
+          "text": "Created — active"
+        },
+        {
+          "at": "2026-11-02T15:31:49Z",
+          "by": "claude",
+          "text": "Area: Engine"
+        },
+        {
+          "at": "2026-11-02T15:32:22Z",
+          "by": "claude",
+          "text": "Moved to review — Start a scan from the landing page and watch Activity Monitor: at most 2 scan pages, ~1 core. Then decide: M2's 'full mode under 2 minutes' now fails (131 s), accept slower or do ALL-34 first"
+        }
+      ]
+    },
+    {
+      "key": "ALL-34",
+      "title": "Load each page once and run every browser check on it (scans are ~5x slower since the 2-page limit)",
+      "type": "feature",
+      "status": "idea",
+      "note": "",
+      "doneWhen": [],
+      "steps": [],
+      "files": [],
+      "links": [],
+      "area": "Engine",
+      "createdAt": "2026-11-02T15:31:49Z",
+      "updatedAt": "2026-11-02T15:31:49Z",
+      "updatedBy": "claude",
+      "log": [
+        {
+          "at": "2026-11-02T15:31:49Z",
+          "by": "claude",
+          "text": "Created"
+        },
+        {
+          "at": "2026-11-02T15:31:49Z",
+          "by": "claude",
+          "text": "Area: Engine"
         }
       ]
     }
@@ -1916,11 +2267,117 @@
       "createdAt": "2026-10-29T13:59:55Z",
       "updatedAt": "2026-10-29T13:59:55Z",
       "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N37",
+      "kind": "decision",
+      "title": "Sofia landing page: three designs left to compare, Night shift (index), Swiss docs-sidebar (variants/v1.html) and Poster color blocks (variants/v4.html)",
+      "body": "Owner dropped Story, Tour and Checklist; copies kept in the session scratchpad.",
+      "considered": "2 Story long-read, 3 Tour tabs, 5 Checklist sheet",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-19"
+      ],
+      "steps": [],
+      "createdAt": "2026-10-29T17:29:59Z",
+      "updatedAt": "2026-10-29T17:29:59Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N38",
+      "kind": "decision",
+      "title": "The landing page scan gives all 110 URL-only checks, not a small sample",
+      "body": "The owner doesn't want to hold information back from users. The 2 checks that probe a site for weaknesses stay out.",
+      "considered": "About 20 fast checks: Claude's proposal, faster but withholds findings.",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-11-01T12:12:32Z",
+      "updatedAt": "2026-11-01T12:12:32Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N39",
+      "kind": "decision",
+      "title": "A site scan reads rendered pages in place of source",
+      "body": "Rendered pages, stylesheets and file names act as project files, so existing checks need almost no rewrite. Scripts are left out because bundles hold library code. Reason: fewer changes and one set of check logic.",
+      "considered": "Rewriting each file-based check for the browser: more code, two versions of each check.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-30"
+      ],
+      "steps": [],
+      "createdAt": "2026-11-01T12:28:34Z",
+      "updatedAt": "2026-11-01T12:28:34Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N40",
+      "kind": "decision",
+      "title": "Speed the scan up by reusing page loads and limiting parallel checks by machine",
+      "body": "Half the cores (3 to 6) for browser checks, and open pages by memory (10 to 40). Reloads dropped from 139 to about 46 on the 9-page test, with identical findings. Pages take about 300 MB each, so a small machine stays slower.",
+      "considered": "Fixed 8 parallel, 40 pages: fastest here, but risky on small laptops.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [
+        "ALL-30"
+      ],
+      "steps": [],
+      "createdAt": "2026-11-01T14:06:39Z",
+      "updatedAt": "2026-11-01T14:06:39Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N41",
+      "kind": "decision",
+      "title": "The scanner keeps at most 2 Chrome pages open and runs one browser check at a time",
+      "body": "The owner's Mac froze with 12+ scan tabs; the owner asked for 1–2 pages at a time. Costs speed (~5x slower) until pages are shared between checks.",
+      "considered": "Memory-based 10–40 pages with 3–6 checks: froze the Mac. 4 pages with 2 checks: peak 4 pages, faster, but over the owner's limit.",
+      "decidedBy": "user",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-11-02T15:31:49Z",
+      "updatedAt": "2026-11-02T15:31:49Z",
+      "updatedBy": "claude"
+    },
+    {
+      "id": "ALL-N42",
+      "kind": "decision",
+      "title": "Images, fonts and video are blocked only while pages are read, not on pages the checks inspect",
+      "body": "About 10 checks (broken images/fonts, font choice, mixed content, slow fonts, layout, report screenshots) need the full page; blocking there would change findings.",
+      "considered": "Block everywhere as asked: wrong findings.",
+      "decidedBy": "claude",
+      "confirmedAt": "",
+      "url": "",
+      "file": "",
+      "cards": [],
+      "steps": [],
+      "createdAt": "2026-11-02T15:31:49Z",
+      "updatedAt": "2026-11-02T15:31:49Z",
+      "updatedBy": "claude"
     }
   ],
   "areas": [
     {
       "name": "Engine",
+      "paths": []
+    },
+    {
+      "name": "Landing page",
       "paths": []
     }
   ]
