@@ -1374,7 +1374,7 @@
       "title": "Scan a site from the landing page: 110 checks and a report",
       "type": "feature",
       "status": "review",
-      "note": "Owner rescans rightwave.co.il on the detached scanner (no longer stops with the browser pane)",
+      "note": "Owner scans rightwave.co.il with 'Just this page' and 'Up to 10 pages'",
       "doneWhen": [],
       "steps": [],
       "files": [
@@ -1387,7 +1387,7 @@
       ],
       "area": "Landing page",
       "createdAt": "2026-11-01T12:12:32Z",
-      "updatedAt": "2026-11-02T13:51:55Z",
+      "updatedAt": "2026-11-04T13:20:38Z",
       "updatedBy": "claude",
       "log": [
         {
@@ -1449,6 +1449,21 @@
           "at": "2026-11-02T13:51:55Z",
           "by": "claude",
           "text": "Note: Owner rescans rightwave.co.il on the detached scanner (no longer stops with the browser pane)"
+        },
+        {
+          "at": "2026-11-04T12:36:47Z",
+          "by": "claude",
+          "text": "Note: Owner rescans rightwave.co.il; open question: fewer pages for a site scan (30 → 10?) since 2 Chrome pages makes 30 slow"
+        },
+        {
+          "at": "2026-11-04T13:16:19Z",
+          "by": "claude",
+          "text": "Note: Owner scans rightwave.co.il with 'Just this page' (~1 min) and 'Up to 10 pages'"
+        },
+        {
+          "at": "2026-11-04T13:20:38Z",
+          "by": "claude",
+          "text": "Note: Owner scans rightwave.co.il with 'Just this page' and 'Up to 10 pages'"
         }
       ]
     },
