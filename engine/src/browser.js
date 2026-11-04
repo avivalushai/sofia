@@ -10,6 +10,7 @@ export class BrowserMissing extends Error {}
 
 const HEIGHTS = { 375: 812, 390: 844, 768: 1024, 1280: 800 };
 const SETTLE_MS = 400;
+const READ_ONLY_IDLE_MS = 1000;
 const NAV_TIMEOUT = 30_000;
 
 /**
@@ -146,7 +147,8 @@ export async function launchBrowser({ maxOpen = PAGE_LIMIT } = {}) {
       e.code = "ETIMEOUT";
       throw e;
     }
-    if (idle) await page.waitForLoadState("networkidle", { timeout: 3000 }).catch(() => {});
+    // sites with chat widgets or analytics never go quiet; a page read for its text and links waits less for it
+    if (idle) await page.waitForLoadState("networkidle", { timeout: readOnly ? READ_ONLY_IDLE_MS : 3000 }).catch(() => {});
     await page.waitForTimeout(settleMs);
     return wrap(page, log, status);
   }

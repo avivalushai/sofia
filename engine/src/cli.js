@@ -188,7 +188,7 @@ export async function main(argv, { cwd = process.cwd(), out = console.log, err =
           print({ url: already.url, pid: already.pid, started: false }, `✓ Already running at ${already.url} (process ${already.pid}). Stop it with: launch-check scan-server --stop`);
           return 0;
         }
-        const server = await startScanServer({ catalog, checks, maxPages, onIdle: () => stopNow(0) });
+        const server = await startScanServer({ catalog, checks, onIdle: () => stopNow(0) });
         onStop(server.close);
         stopWithParent();
         out(`Landing page with the scan form at ${server.url} (process ${process.pid}). Ctrl-C or launch-check scan-server --stop to stop it.`);

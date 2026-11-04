@@ -69,24 +69,28 @@ export async function addSiteFiles({ project, crawl, browser, http, origin, onPa
   const reader = browser.lease();
   try {
     for (const p of await crawl.browserPages({ onPage })) {
-      let loaded;
-      try {
-        loaded = await reader.open(p.url, { width: 1280, readOnly: true });
-      } catch {
-        continue; // a page that won't load is qa.failed-requests' business
+      // the crawl already read each page; loading it again only if it didn't keep it
+      let page = crawl.snapshot(p.url);
+      if (!page) {
+        try {
+          const loaded = await reader.open(p.url, { width: 1280, readOnly: true });
+          page = await loaded.evaluate(() => ({
+            html: `<!DOCTYPE html>\n${document.documentElement.outerHTML}`,
+            css: [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.href),
+            media: [...document.querySelectorAll("img[src], a[href], source[src], video[src]")].map((el) => el.src || el.href),
+          }));
+        } catch {
+          continue; // a page that won't load is qa.failed-requests' business
+        }
       }
       const pathname = p.path.split("?")[0];
       const name = pathname === "/" ? "index.html" : pathname.endsWith("/") ? `${pathname.slice(1)}index.html` : /\.html?$/.test(pathname) ? pathname.slice(1) : `${pathname.slice(1)}.html`;
       if (!sources.has(name)) {
-        project.addFile(name, await loaded.page.content());
+        project.addFile(name, page.html);
         sources.set(name, p.path);
       }
-      const found = await loaded.evaluate(() => ({
-        css: [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.href),
-        media: [...document.querySelectorAll("img[src], a[href], source[src], video[src]")].map((el) => el.src || el.href),
-      }));
-      for (const u of found.css) css.add(u);
-      for (const u of found.media) media.add(u);
+      for (const u of page.css) css.add(u);
+      for (const u of page.media) media.add(u);
     }
   } finally {
     reader.release();

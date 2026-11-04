@@ -26,6 +26,8 @@ export function createCrawler({ target, http, limit = 30 }) {
   let result;
   let rendered;
   let readSoFar = 0;
+  /** @type {Map<string, { html: string, css: string[], media: string[] }>} each rendered page as the crawl read it */
+  const snapshots = new Map();
   /** @type {((count: number) => void) | null} */
   let onRendered = null;
   let browser = null;
@@ -73,6 +75,7 @@ export function createCrawler({ target, http, limit = 30 }) {
   /** Breadth-first crawl in Chrome at desktop width: finds pages that only exist once JavaScript runs. */
   async function renderedCrawl() {
     const pages = [];
+    snapshots.clear();
     const texts = new Set();
     const queue = [normalize(target)];
     const seen = new Set(queue);
@@ -90,6 +93,10 @@ export function createCrawler({ target, http, limit = 30 }) {
             text: window.__lc.visibleText(),
             links: [...document.querySelectorAll("a[href]")].map((a) => a.href),
             finalUrl: location.href,
+            // what a site scan keeps of the page, so it needn't be loaded again for it
+            html: document.documentElement.outerHTML,
+            css: [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.href),
+            media: [...document.querySelectorAll("img[src], a[href], source[src], video[src]")].map((el) => el.src || el.href),
           }));
         } catch {
           return null;
@@ -99,12 +106,13 @@ export function createCrawler({ target, http, limit = 30 }) {
       }));
       for (const found of opened) {
         if (!found || pages.length >= limit) continue;
-        const { text, links, finalUrl } = found;
+        const { text, links, finalUrl, html, css, media } = found;
         const fingerprint = createHash("sha1").update(text).digest("hex");
         if (texts.has(fingerprint)) continue;
         texts.add(fingerprint);
         const u = new URL(finalUrl);
         pages.push({ url: finalUrl, path: u.pathname + u.search, links });
+        snapshots.set(finalUrl, { html: `<!DOCTYPE html>\n${html}`, css, media });
         for (const href of links) {
           let next;
           try {
@@ -144,6 +152,8 @@ export function createCrawler({ target, http, limit = 30 }) {
       rendered ??= renderedCrawl();
       return rendered;
     },
+    /** The page's markup, stylesheets and file links as the rendered crawl read them, or null. */
+    snapshot: (url) => snapshots.get(url) ?? null,
     /** Rendered pages with their visible text, one line per block. */
     async browserPagesWithText() {
       const out = [];

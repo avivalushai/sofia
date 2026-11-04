@@ -280,6 +280,15 @@ h1,h2{font-weight:700;letter-spacing:-.04em}
 .scan button{flex-shrink:0;height:44px;padding-inline:18px;border:0;border-radius:calc(var(--pill) - 2px);background:var(--accent);color:var(--accent-ink);font:600 15px var(--sans);cursor:pointer}
 .scan button:active{transform:scale(.98)}
 .scan-error{margin-top:10px;font-size:14.5px;color:var(--bad)}
+.scan-scope{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;border:0}
+.scan-scope legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.scan-scope label{position:relative;margin:0;cursor:pointer}
+.scan-scope input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;padding:0;cursor:pointer}
+.scan-scope span{display:block;padding:7px 14px;border:1px solid var(--line);border-radius:var(--pill);font:500 14px var(--sans);color:var(--muted);transition:color .15s,border-color .15s,background-color .15s}
+.scan-scope label:hover span{color:var(--ink)}
+.scan-scope small{font-size:13px;opacity:.75}
+.scan-scope input:checked+span{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.scan-scope input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:479px){.scan-row{flex-direction:column}.scan button{width:100%}}
 </style>
 
@@ -314,6 +323,11 @@ h1,h2{font-weight:700;letter-spacing:-.04em}
         <input id="scan-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="my-site.com" aria-describedby="scan-error">
         <button type="submit">Check my site</button>
       </div>
+      <fieldset class="scan-scope">
+        <legend>How much to check</legend>
+        <label><input type="radio" name="pages" value="ten" checked><span>Up to 10 pages <small>· a few minutes</small></span></label>
+        <label><input type="radio" name="pages" value="one"><span>Just this page <small>· about a minute</small></span></label>
+      </fieldset>
       <p class="scan-error" id="scan-error" role="alert" hidden></p>
     </form>
     <div class="cta">
@@ -565,7 +579,7 @@ document.querySelectorAll('[data-copy]').forEach(function(btn){
     var value=input.value.trim();
     if(!value)return fail('Type your site\'s address first');
     error.hidden=true;button.disabled=true;button.textContent='Starting…';
-    fetch('/api/scan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:value})}).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})}).then(function(x){
+    fetch('/api/scan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:value,pages:(form.querySelector('input[name=pages]:checked')||{}).value})}).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})}).then(function(x){
       if(!x.ok)return fail(x.d.error);
       location.href='/reports/'+x.d.id+'/';
     },function(){fail('Couldn\'t start the check. Try again.')});

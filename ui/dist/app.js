@@ -381,7 +381,7 @@ function followScan() {
 
 const scanning = () => data.scan && data.scan.status !== "done";
 
-const pagesRead = (s) => (s.pagesRead ? `${s.pagesRead} page${s.pagesRead === 1 ? "" : "s"} read so far` : "Opening the first pages");
+const pagesRead = (s) => (s.maxPages === 1 ? "Reading your page" : s.pagesRead ? `${s.pagesRead} of up to ${s.maxPages ?? 10} pages read` : "Opening the first pages");
 
 function renderScan() {
   const s = data.scan;
@@ -418,7 +418,7 @@ function renderScan() {
       <div class="scan-progress" id="scan-progress"><i></i></div>
       <div class="scan-meta"><span id="scan-count"></span><span class="scan-now" id="scan-now" dir="auto"></span></div>
       <div class="scan-found"><p id="scan-found"></p><button class="btn-primary" id="peek" type="button" hidden>See what's found so far</button></div>
-      <p class="muted small">This usually takes a few minutes. You can read the report while the rest runs.</p>`;
+      <p class="muted small">${s.maxPages === 1 ? "One page usually takes about a minute." : "This usually takes a few minutes."} You can read the report while the rest runs.</p>`;
     $("#peek").addEventListener("click", () => {
       ui.peek = true;
       ui.waitedFor = true;

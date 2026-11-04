@@ -101,11 +101,11 @@ test("the scan server takes an address, reports progress and hands over the repo
   const release = new Promise((r) => (open = r));
   const server = await startScanServer({ catalog, checks: await loadChecks(catalog), port: 0, scan });
   const api = (p, o) => fetch(new URL(p, server.url), o);
-  const post = (url) => api("/api/scan", { method: "POST", body: JSON.stringify({ url }) });
+  const post = (url, pages) => api("/api/scan", { method: "POST", body: JSON.stringify({ url, pages }) });
   try {
     assert.equal((await post("localhost")).status, 400);
     const first = (await (await post("one.example.com")).json()).id;
-    const second = (await (await post("two.example.com")).json()).id;
+    const second = (await (await post("two.example.com", "one")).json()).id;
     const running = await (await api(`/api/scan/${first}`)).json();
     assert.deepEqual([running.status, running.phase, running.done, running.total, running.current], ["running", "checking", 1, 2, "A check"]);
     assert.deepEqual(running.found, [{ title: "A problem", severity: "important" }]);
@@ -117,6 +117,7 @@ test("the scan server takes an address, reports progress and hands over the repo
     assert.equal((await api(`/reports/${first}/..%2F..%2Fpackage.json`)).status, 404);
     const waiting = await (await api(`/api/scan/${second}`)).json();
     assert.deepEqual([waiting.status, waiting.ahead], ["waiting", 1]);
+    assert.deepEqual([running.maxPages, waiting.maxPages], [10, 1], "10 pages unless just the one page is asked for");
     open();
     let done;
     while ((done = await (await api(`/api/scan/${first}`)).json()).status !== "done") await new Promise((r) => setTimeout(r, 10));

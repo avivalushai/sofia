@@ -56,7 +56,7 @@ export function parseAddress(text, { allowLocal = false } = {}) {
  * onIdle is called after idleMs with no visits and no scan running or waiting.
  * @param {{ catalog: any, checks: any, port?: number, maxPages?: number, allowLocal?: boolean, scan?: typeof scanSite, idleMs?: number, onIdle?: () => void }} o
  */
-export async function startScanServer({ catalog, checks, port = SCAN_SERVER_PORT, maxPages = 30, allowLocal = false, scan = scanSite, idleMs = IDLE_MS, onIdle = null }) {
+export async function startScanServer({ catalog, checks, port = SCAN_SERVER_PORT, maxPages = 10, allowLocal = false, scan = scanSite, idleMs = IDLE_MS, onIdle = null }) {
   const jobs = new Map();
   const line = [];
   let running = false;
@@ -75,7 +75,7 @@ export async function startScanServer({ catalog, checks, port = SCAN_SERVER_PORT
       await mkdir(root);
       job.root = root;
       const result = await scan({
-        root, target: job.target, maxPages, catalog, checks,
+        root, target: job.target, maxPages: job.maxPages, catalog, checks,
         onProgress: (message) => {
           if (/^Reading/.test(message)) Object.assign(job, { phase: "reading", pagesRead: Number(message.match(/(\d+) so far/)?.[1] ?? 0) });
           else if (/^Read the/.test(message)) job.phase = "checking";
@@ -126,6 +126,7 @@ export async function startScanServer({ catalog, checks, port = SCAN_SERVER_PORT
     total: job.total ?? 0,
     found: job.found,
     pagesRead: job.pagesRead ?? 0,
+    maxPages: job.maxPages,
     ahead: job.status === "waiting" ? line.indexOf(job) + (running ? 1 : 0) : 0,
     report: `/reports/${job.id}/`,
     ...(job.status === "done" ? { pages: job.pages, counts: job.counts } : {}),
@@ -152,13 +153,16 @@ export async function startScanServer({ catalog, checks, port = SCAN_SERVER_PORT
         if (body.length > MAX_BODY) return json(413, { error: "That address is too long" });
       }
       let target;
+      let wanted;
       try {
-        target = parseAddress(JSON.parse(body).url, { allowLocal });
+        wanted = JSON.parse(body) ?? {};
+        target = parseAddress(wanted.url, { allowLocal });
       } catch (err) {
         return json(400, { error: err instanceof SyntaxError ? "Type your site's address first" : err.message });
       }
-      const id = randomBytes(12).toString("hex");
-      const job = { id, target, status: "waiting", found: [], results: [] };
+      // just the page typed in, or that page and the ones it links to, up to maxPages
+      const job = { id: randomBytes(12).toString("hex"), target, maxPages: wanted.pages === "one" ? 1 : maxPages, status: "waiting", found: [], results: [] };
+      const { id } = job;
       jobs.set(id, job);
       line.push(job);
       next();

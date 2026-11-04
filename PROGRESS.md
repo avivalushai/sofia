@@ -244,6 +244,8 @@
 - The "Chrome not found" message isn't covered by an automated test (it would need a machine without Chrome).
 
 ## Site scan from a web address (stage 1, 2026-11-01)
+
+- 2026-11-04: the form asks how much to check: up to 10 pages (default, was 30) or just the page typed in. Local test site: one page 49 s, 9 pages 300 s. Read-only page loads wait at most 1 s for the network to go quiet; the crawl keeps each page's markup so it isn't loaded twice.
 - `launch-check scan <url> [--out folder] [--max-pages 30]` runs the 110 checks that need only an address and writes `report.html`. List and reasons: `engine/src/site-scan.js`. The other 57 stay in the report as skipped, with why.
 - Rendered pages, own stylesheets and file names stand in for the source, so the existing checks read them unchanged. Findings point at addresses, not files.
 - A normal scan from a folder with no code now skips the checks that need code, instead of passing them.
